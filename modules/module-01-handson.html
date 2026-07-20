@@ -1,0 +1,1529 @@
+<style>
+:root {
+  --bg:      #F7F5F0;
+  --bg2:     #EFEDE7;
+  --bg3:     #E8E4DC;
+  --ink:     #1A1814;
+  --ink2:    #4A4640;
+  --ink3:    #8A8480;
+  --rule:    rgba(26,24,20,0.1);
+  --rule2:   rgba(26,24,20,0.06);
+  --accent:  #1A4FDB;
+  --accent2: #0E35A8;
+  --gold:    #C4860A;
+  --green:   #1A7A4A;
+  --red:     #C0392B;
+  --purple:  #6B3FA0;
+  --serif:   'Lora', Georgia, serif;
+  --sans:    'DM Sans', sans-serif;
+  --mono:    'JetBrains Mono', monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.7;}
+
+/* ── SHELL ── */
+.shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  background:var(--bg2);border-right:1px solid var(--rule);
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  padding:24px 0;
+}
+.sidebar::-webkit-scrollbar{width:2px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--rule);}
+
+.sidebar-header{padding:0 20px 20px;border-bottom:1px solid var(--rule);margin-bottom:16px;}
+.sidebar-back{
+  display:flex;align-items:center;gap:6px;
+  font-size:12px;font-family:var(--mono);color:var(--ink3);
+  cursor:pointer;margin-bottom:12px;transition:color .15s;
+}
+.sidebar-back:hover{color:var(--ink);}
+.sidebar-module-label{font-size:10px;font-family:var(--mono);color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
+.sidebar-module-title{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--ink);line-height:1.3;}
+
+.nb-section-label{
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink3);padding:10px 20px 4px;
+}
+.nb-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:8px 20px;cursor:pointer;
+  border-left:2px solid transparent;
+  transition:all .15s;
+}
+.nb-item:hover{background:rgba(26,24,20,.04);}
+.nb-item.active{background:rgba(26,79,219,.05);border-left-color:var(--accent);}
+.nb-item.done .nb-check{background:var(--green);border-color:var(--green);}
+.nb-check{
+  width:14px;height:14px;border-radius:50%;
+  border:1.5px solid var(--rule);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  margin-top:2px;transition:all .2s;
+}
+.nb-check svg{display:none;}
+.nb-item.done .nb-check svg{display:block;}
+.nb-meta{}
+.nb-num{font-size:10px;font-family:var(--mono);color:var(--ink3);}
+.nb-name{font-size:13px;font-weight:500;color:var(--ink2);line-height:1.3;margin-top:1px;}
+.nb-item.active .nb-name{color:var(--ink);}
+.nb-tag{
+  font-size:10px;font-family:var(--mono);
+  padding:1px 6px;border-radius:3px;margin-top:3px;
+  display:inline-block;
+}
+.nb-tag.classical{background:rgba(26,122,74,.1);color:var(--green);}
+.nb-tag.quantum{background:rgba(26,79,219,.1);color:var(--accent);}
+.nb-tag.compare{background:rgba(107,63,160,.1);color:var(--purple);}
+.nb-tag.setup{background:rgba(196,134,10,.1);color:var(--gold);}
+
+.sidebar-progress{
+  margin-top:auto;padding:16px 20px 0;
+  border-top:1px solid var(--rule);
+}
+.sp-label{font-size:11px;color:var(--ink3);margin-bottom:6px;}
+.sp-bar{height:3px;background:var(--rule);border-radius:999px;overflow:hidden;}
+.sp-fill{height:3px;background:var(--green);border-radius:999px;transition:width .4s;}
+.sp-count{font-size:11px;font-family:var(--mono);color:var(--green);margin-top:5px;}
+
+/* ── MAIN ── */
+.main{overflow-y:auto;background:var(--bg);}
+.reading-bar{position:fixed;top:0;left:260px;right:0;height:2px;background:var(--rule);z-index:100;}
+.reading-bar-fill{height:2px;background:var(--green);width:0%;transition:width .1s;}
+
+/* ── NOTEBOOK PAGE ── */
+.nb-page{display:none;max-width:760px;padding:44px 52px 60px;}
+.nb-page.active{display:block;}
+
+/* Notebook header */
+.nb-header{margin-bottom:36px;padding-bottom:28px;border-bottom:1px solid var(--rule2);}
+.nb-eyebrow{
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.nb-title{font-family:var(--serif);font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1.2;margin-bottom:10px;}
+.nb-desc{font-size:15px;color:var(--ink2);line-height:1.65;max-width:520px;margin-bottom:16px;}
+.nb-meta-row{display:flex;gap:16px;flex-wrap:wrap;}
+.nb-meta-item{
+  font-size:12px;font-family:var(--mono);color:var(--ink3);
+  display:flex;align-items:center;gap:5px;
+}
+
+/* Learning objective box */
+.obj-box{
+  background:rgba(26,79,219,.05);
+  border:1px solid rgba(26,79,219,.14);
+  border-radius:8px;padding:16px 18px;
+  margin-bottom:32px;
+}
+.obj-label{
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:8px;
+}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.obj-list li{
+  font-size:14px;color:var(--ink2);
+  display:flex;align-items:flex-start;gap:8px;
+}
+.obj-list li::before{
+  content:'→';font-family:var(--mono);
+  color:var(--accent);font-size:12px;margin-top:1px;flex-shrink:0;
+}
+
+/* Step divider */
+.step-divider{
+  display:flex;align-items:center;gap:12px;
+  margin:36px 0 20px;
+}
+.step-divider-num{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--ink);color:var(--bg);
+  font-family:var(--mono);font-size:12px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.step-divider-title{font-family:var(--sans);font-size:17px;font-weight:600;color:var(--ink);}
+
+/* Prose */
+.nb-prose p{
+  font-family:var(--sans);font-size:15px;
+  color:var(--ink2);line-height:1.75;margin-bottom:16px;
+}
+.nb-prose p strong{color:var(--ink);font-weight:600;}
+.nb-prose p em{font-style:italic;}
+.nb-prose p code{
+  font-family:var(--mono);font-size:13px;
+  background:var(--bg2);padding:1px 5px;border-radius:3px;
+  color:var(--ink);border:1px solid var(--rule);
+}
+
+/* Callout */
+.callout{border-radius:8px;padding:14px 16px;margin:20px 0;font-size:14px;line-height:1.65;}
+.callout-label{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.callout.tip{background:rgba(26,79,219,.05);border:1px solid rgba(26,79,219,.14);}
+.callout.tip .callout-label{color:var(--accent);}
+.callout.tip p{color:#0D2865;margin:0;font-family:var(--sans);font-size:14px;}
+.callout.note{background:rgba(196,134,10,.06);border:1px solid rgba(196,134,10,.2);}
+.callout.note .callout-label{color:var(--gold);}
+.callout.note p{color:#4A3008;margin:0;font-family:var(--sans);font-size:14px;}
+.callout.success{background:rgba(26,122,74,.05);border:1px solid rgba(26,122,74,.15);}
+.callout.success .callout-label{color:var(--green);}
+.callout.success p{color:#0A3320;margin:0;font-family:var(--sans);font-size:14px;}
+
+/* Terminal / bash block */
+.terminal-wrap{margin:20px 0;}
+.terminal-header{
+  background:#1C1C1C;padding:8px 14px;border-radius:8px 8px 0 0;
+  display:flex;align-items:center;gap:6px;
+}
+.terminal-dots{display:flex;gap:5px;}
+.terminal-dot{width:10px;height:10px;border-radius:50%;}
+.terminal-dot.red{background:#FF5F57;}
+.terminal-dot.yellow{background:#FFBD2E;}
+.terminal-dot.green{background:#28CA41;}
+.terminal-label{margin-left:auto;font-size:11px;font-family:var(--mono);color:#666;}
+.terminal-body{
+  background:#0D1117;padding:16px 18px;border-radius:0 0 8px 8px;
+  font-family:var(--mono);font-size:12px;line-height:2;
+  overflow-x:auto;
+}
+.terminal-body .prompt{color:#6E7681;}
+.terminal-body .cmd{color:#E6EDF3;}
+.terminal-body .comment{color:#484F58;}
+.terminal-body .out{color:#3FB950;}
+.terminal-body .warn{color:#D29922;}
+
+/* Code block */
+.code-wrap{margin:20px 0;}
+.code-header{
+  background:#1E1E2E;padding:8px 14px;border-radius:8px 8px 0 0;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.code-filename{font-family:var(--mono);font-size:11px;color:#7C7F93;display:flex;align-items:center;gap:6px;}
+.code-filename::before{content:'📄';font-size:12px;}
+.code-run-hint{font-size:11px;font-family:var(--mono);color:#6C7086;}
+.code-body{
+  background:#1E1E2E;padding:20px;border-radius:0 0 8px 8px;
+  font-family:var(--mono);font-size:12px;line-height:2;
+  overflow-x:auto;border:1px solid rgba(255,255,255,.05);
+  border-top:none;
+}
+.code-body .kw{color:#CBA6F7;}
+.code-body .fn{color:#89B4FA;}
+.code-body .st{color:#A6E3A1;}
+.code-body .cm{color:#585B70;}
+.code-body .nm{color:#FAB387;}
+.code-body .op{color:#89DCEB;}
+.code-body .var{color:#CDD6F4;}
+.code-body .cls{color:#F9E2AF;}
+
+/* What each line does */
+.line-explain{
+  background:var(--bg2);border:1px solid var(--rule);
+  border-radius:8px;padding:16px 18px;margin:8px 0 20px;
+}
+.line-explain-title{
+  font-size:11px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:10px;
+}
+.line-row{
+  display:flex;gap:12px;padding:6px 0;
+  border-bottom:1px solid var(--rule2);
+  font-size:13px;align-items:flex-start;
+}
+.line-row:last-child{border-bottom:none;}
+.line-code{
+  font-family:var(--mono);font-size:11px;color:var(--accent);
+  min-width:180px;flex-shrink:0;padding-top:1px;
+}
+.line-meaning{color:var(--ink2);line-height:1.5;}
+
+/* Output section */
+.output-section{margin:20px 0;}
+.output-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;
+}
+.output-label{
+  font-size:11px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);
+}
+.output-hint{font-size:11px;font-family:var(--sans);color:var(--ink3);font-style:italic;}
+
+/* Probability graph */
+.prob-graph{
+  background:var(--bg2);border:1px solid var(--rule);
+  border-radius:8px;padding:24px 28px;margin-bottom:8px;
+}
+.prob-graph-title{
+  font-size:13px;font-weight:600;color:var(--ink);
+  margin-bottom:18px;font-family:var(--sans);
+}
+.prob-bars{display:flex;align-items:flex-end;gap:16px;height:120px;margin-bottom:10px;}
+.prob-bar-group{display:flex;flex-direction:column;align-items:center;gap:0;flex:1;max-width:120px;}
+.prob-bar-container{
+  width:100%;display:flex;align-items:flex-end;
+  height:100px;position:relative;
+}
+.prob-bar{
+  width:100%;border-radius:4px 4px 0 0;
+  transition:height .6s cubic-bezier(.4,0,.2,1);
+  position:relative;
+}
+.prob-bar::after{
+  content:attr(data-pct);
+  position:absolute;top:-22px;left:50%;
+  transform:translateX(-50%);
+  font-family:var(--mono);font-size:12px;font-weight:600;
+  color:var(--ink);white-space:nowrap;
+}
+.prob-bar.zero{background:linear-gradient(180deg,rgba(26,79,219,.8),rgba(26,79,219,.5));}
+.prob-bar.one{background:linear-gradient(180deg,rgba(107,63,160,.8),rgba(107,63,160,.5));}
+.prob-bar.empty{background:var(--rule);opacity:.3;}
+.prob-bar-label{
+  font-family:var(--mono);font-size:13px;font-weight:600;
+  color:var(--ink2);margin-top:6px;
+}
+.prob-bar-state{
+  font-family:var(--mono);font-size:10px;color:var(--ink3);
+  margin-top:2px;
+}
+.prob-axis{
+  display:flex;justify-content:space-between;
+  font-family:var(--mono);font-size:10px;color:var(--ink3);
+  padding:0 2px;
+}
+.prob-interpret{
+  margin-top:12px;font-size:13px;color:var(--ink2);
+  line-height:1.6;padding-top:12px;border-top:1px solid var(--rule2);
+  font-family:var(--sans);
+}
+.prob-interpret strong{color:var(--ink);}
+
+/* Multi-run comparison */
+.multi-run{margin:20px 0;}
+.multi-run-title{
+  font-size:13px;font-weight:600;color:var(--ink);
+  margin-bottom:12px;font-family:var(--sans);
+}
+.run-row{
+  display:flex;align-items:center;gap:12px;
+  padding:8px 0;border-bottom:1px solid var(--rule2);
+}
+.run-row:last-child{border-bottom:none;}
+.run-label{font-family:var(--mono);font-size:11px;color:var(--ink3);min-width:50px;}
+.run-bars{flex:1;display:flex;gap:4px;align-items:center;}
+.run-bar-0{height:14px;border-radius:2px;background:rgba(26,79,219,.5);transition:width .4s;}
+.run-bar-1{height:14px;border-radius:2px;background:rgba(107,63,160,.5);transition:width .4s;}
+.run-counts{font-family:var(--mono);font-size:11px;color:var(--ink3);min-width:120px;text-align:right;}
+
+/* Insight box */
+.insight-box{
+  background:var(--bg2);border-left:3px solid var(--accent);
+  padding:16px 18px;margin:24px 0;border-radius:0 8px 8px 0;
+}
+.insight-box p{
+  font-family:var(--sans);font-size:14px;color:var(--ink2);
+  margin:0;line-height:1.65;
+}
+.insight-box p strong{color:var(--ink);}
+
+/* Bloch sphere interactive */
+.bloch-wrap{
+  background:var(--bg2);border:1px solid var(--rule);
+  border-radius:8px;padding:24px;margin:20px 0;
+  display:flex;gap:28px;align-items:flex-start;
+}
+.bloch-svg-wrap{flex-shrink:0;}
+.bloch-states{flex:1;}
+.bloch-states-title{
+  font-size:12px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:12px;
+}
+.bloch-state-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:6px;margin-bottom:6px;
+  cursor:pointer;transition:background .15s;border:1px solid transparent;
+}
+.bloch-state-row:hover{background:rgba(26,24,20,.04);}
+.bloch-state-row.selected{background:rgba(26,79,219,.06);border-color:rgba(26,79,219,.2);}
+.bloch-state-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.bloch-state-name{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink);min-width:40px;}
+.bloch-state-desc{font-size:12px;color:var(--ink2);}
+.bloch-state-prob{font-family:var(--mono);font-size:11px;color:var(--ink3);margin-left:auto;}
+
+/* Divider */
+.prose-divider{border:none;border-top:1px solid var(--rule2);margin:32px 0;}
+
+/* Quiz */
+.quiz-box{
+  background:var(--bg2);border:1px solid var(--rule);
+  border-radius:8px;padding:20px;margin:32px 0;
+}
+.quiz-label{
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:12px;
+}
+.quiz-q{font-family:var(--sans);font-size:15px;font-weight:500;color:var(--ink);margin-bottom:12px;}
+.quiz-opts{display:flex;flex-direction:column;gap:8px;}
+.quiz-opt{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:10px 12px;border-radius:6px;
+  border:1px solid var(--rule);background:var(--bg);
+  cursor:pointer;transition:all .15s;
+  font-family:var(--sans);font-size:14px;color:var(--ink2);
+}
+.quiz-opt:hover{border-color:var(--accent);color:var(--ink);}
+.quiz-opt.correct{background:rgba(26,122,74,.08);border-color:var(--green);color:var(--green);}
+.quiz-opt.wrong{background:rgba(192,57,43,.06);border-color:var(--red);color:var(--red);}
+.quiz-opt .ol{font-family:var(--mono);font-size:11px;color:var(--ink3);min-width:18px;margin-top:1px;}
+.quiz-fb{
+  margin-top:10px;padding:10px 12px;border-radius:6px;
+  font-family:var(--sans);font-size:13px;line-height:1.6;display:none;
+}
+.quiz-fb.show{display:block;}
+.quiz-fb.correct{background:rgba(26,122,74,.08);color:var(--green);}
+.quiz-fb.wrong{background:rgba(192,57,43,.06);color:var(--red);}
+
+/* What's next */
+.whats-next{
+  background:linear-gradient(135deg,rgba(26,79,219,.05),rgba(107,63,160,.05));
+  border:1px solid rgba(26,79,219,.14);
+  border-radius:8px;padding:22px;margin:36px 0 0;
+}
+.wn-label{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.wn-title{font-family:var(--serif);font-size:18px;font-weight:600;margin-bottom:6px;}
+.wn-desc{font-family:var(--sans);font-size:14px;color:var(--ink2);line-height:1.6;}
+
+/* Notebook footer */
+.nb-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 0 0;margin-top:40px;border-top:1px solid var(--rule2);
+}
+.foot-btn{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--sans);font-size:14px;font-weight:500;
+  padding:10px 20px;border-radius:6px;cursor:pointer;
+  border:1px solid var(--rule);background:var(--bg2);
+  color:var(--ink2);transition:all .15s;
+}
+.foot-btn:hover{border-color:var(--ink3);color:var(--ink);}
+.foot-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.foot-btn.primary:hover{background:var(--accent2);}
+.foot-btn:disabled{opacity:.3;cursor:default;}
+</style>
+<style>
+.ql-adapted{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100%;}
+.ql-adapted .sidebar,.ql-adapted .reading-bar{display:none!important;}
+.ql-adapted .main{background:var(--bg);overflow:visible;}
+.ql-adapted .lesson-footer,.ql-adapted .theory-footer,.ql-adapted .nb-footer{display:none!important;}
+.ql-adapted .lesson,.ql-adapted .mod-section{display:block;}
+.ql-adapted .lesson:not(.active){display:none;}
+.ql-adapted .mod-section:not(.active){display:none;}
+.ql-adapted .code-wrap{margin:18px 0;border:1px solid #D7D0C6;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 10px 28px rgba(26,24,20,.06);}
+.ql-adapted .code-header,.ql-adapted .code-hdr{background:#F3F4F6!important;padding:8px 14px!important;border-radius:0!important;border-bottom:1px solid #D7D0C6;display:flex;align-items:center;justify-content:space-between;}
+.ql-adapted .code-lang,.ql-adapted .code-title,.ql-adapted .code-fn,.ql-adapted .code-filename,.ql-adapted .code-hint,.ql-adapted .code-run-hint{color:#4A4640!important;font-family:var(--mono);}
+.ql-adapted .code-fn::before,.ql-adapted .code-filename::before{content:'PY'!important;font-size:10px;color:#1A4FDB;font-weight:600;}
+.ql-adapted .code-block,.ql-adapted .code-body{background:#fff!important;color:#1F2937!important;border:0!important;border-left:3px solid #E8F0FF!important;border-radius:0!important;padding:18px 18px 18px 78px!important;font-family:var(--mono);font-size:12px;line-height:2;overflow-x:auto;white-space:pre;position:relative;}
+.ql-adapted .code-block::before,.ql-adapted .code-body::before{content:'In [ ]:';position:absolute;left:14px;top:18px;font-family:var(--mono);font-size:10px;color:#1A4FDB;}
+.ql-adapted .code-block .kw,.ql-adapted .code-body .kw{color:#7C3AED!important;}
+.ql-adapted .code-block .fn,.ql-adapted .code-body .fn{color:#1A4FDB!important;}
+.ql-adapted .code-block .st,.ql-adapted .code-body .st{color:#1A7A4A!important;}
+.ql-adapted .code-block .cm,.ql-adapted .code-body .cm{color:#6B625B!important;}
+.ql-adapted .code-block .nm,.ql-adapted .code-body .nm{color:#C0392B!important;}
+.ql-adapted .code-block .cls,.ql-adapted .code-body .cls{color:#C4860A!important;}
+.ql-adapted .code-block .var,.ql-adapted .code-body .var{color:#1A1814!important;}
+.ql-adapted .output-box{background:#FBFBFB!important;border:1px solid #E3DED6!important;color:#1A1814!important;}
+.ql-adapted .terminal-header,.ql-adapted .term-hdr{background:#F3F4F6!important;border:1px solid #D7D0C6;border-bottom:0;}
+.ql-adapted .terminal-body,.ql-adapted .term-body{background:#fff!important;color:#1A1814!important;border:1px solid #D7D0C6;border-left:3px solid #E8F0FF;}
+.ql-adapted .terminal-body .cmd,.ql-adapted .term-body .cmd{color:#1A1814!important;}
+.ql-adapted .terminal-body .prompt,.ql-adapted .term-body .pr{color:#1A4FDB!important;}
+.ql-adapted.module-01-handson .nb-page{display:block!important;max-width:760px;padding:44px 52px 48px;border-top:1px solid var(--rule2);}
+.ql-adapted.module-01-handson .nb-page:first-child{border-top:0;}
+.ql-adapted.module-01-handson .nb-page:not(.active){display:block!important;}
+.ql-adapted.module-01-handson .nb-header{margin-bottom:28px;}
+.ql-adapted.module-01-handson .quiz-fb{display:block;}
+</style>
+<div class="ql-adapted module-01-handson">
+
+    <!-- ══════════════════════════
+         NB 00  SETUP
+    ══════════════════════════ -->
+    <div class="nb-page active" id="nb-0">
+      <div class="nb-header">
+        <div class="nb-eyebrow">NB 00 · Setup</div>
+        <div class="nb-title">Set up your environment</div>
+        <div class="nb-desc">Before writing any quantum code you need the right tools installed. This takes about 5 minutes. Do this once and you are ready for all modules in the course.</div>
+        <div class="nb-meta-row">
+          <span class="nb-meta-item">⏱ ~5 minutes</span>
+          <span class="nb-meta-item">🖥 Terminal required</span>
+        </div>
+      </div>
+
+      <div class="obj-box">
+        <div class="obj-label">By the end of this notebook</div>
+        <ul class="obj-list">
+          <li>Python and pip installed and working</li>
+          <li>Qiskit and Qiskit Aer installed in a clean virtual environment</li>
+          <li>A test script runs without errors</li>
+        </ul>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-num">1</div>
+        <div class="step-divider-title">Check your Python version</div>
+      </div>
+
+      <div class="nb-prose">
+        <p>Open your terminal (Mac: Terminal app, Windows: Command Prompt or PowerShell, VS Code: built-in terminal) and run:</p>
+      </div>
+
+      <div class="terminal-wrap">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+          </div>
+          <span class="terminal-label">Terminal</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="prompt">$ </span><span class="cmd">python --version</span></div>
+          <div><span class="out">Python 3.9.7</span>  <span class="comment"># any 3.8+ is fine</span></div>
+        </div>
+      </div>
+
+      <div class="callout note">
+        <div class="callout-label">📌 Note</div>
+        <p>You need Python 3.8 or higher. If you see Python 2.x or get "command not found", install Python from python.org first before continuing.</p>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-num">2</div>
+        <div class="step-divider-title">Create a virtual environment</div>
+      </div>
+
+      <div class="nb-prose">
+        <p>A virtual environment keeps your quantum packages separate from other Python projects. This prevents version conflicts and keeps things clean. Always use one.</p>
+      </div>
+
+      <div class="terminal-wrap">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+          </div>
+          <span class="terminal-label">Terminal  Mac / Linux</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="comment"># Create a folder for this course</span></div>
+          <div><span class="prompt">$ </span><span class="cmd">mkdir quantum-course &amp;&amp; cd quantum-course</span></div>
+          <div>&nbsp;</div>
+          <div><span class="comment"># Create the virtual environment</span></div>
+          <div><span class="prompt">$ </span><span class="cmd">python -m venv quantum-env</span></div>
+          <div>&nbsp;</div>
+          <div><span class="comment"># Activate it  you must do this every time you open a new terminal</span></div>
+          <div><span class="prompt">$ </span><span class="cmd">source quantum-env/bin/activate</span></div>
+          <div>&nbsp;</div>
+          <div><span class="comment"># Your prompt now shows (quantum-env)  that means it's active</span></div>
+          <div><span class="out">(quantum-env) $ </span></div>
+        </div>
+      </div>
+
+      <div class="terminal-wrap">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+          </div>
+          <span class="terminal-label">Terminal  Windows</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="prompt">&gt; </span><span class="cmd">mkdir quantum-course &amp;&amp; cd quantum-course</span></div>
+          <div><span class="prompt">&gt; </span><span class="cmd">python -m venv quantum-env</span></div>
+          <div><span class="prompt">&gt; </span><span class="cmd">quantum-env\Scripts\activate</span></div>
+          <div><span class="out">(quantum-env) &gt; </span></div>
+        </div>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-num">3</div>
+        <div class="step-divider-title">Install all packages for this course</div>
+      </div>
+
+      <div class="terminal-wrap">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+          </div>
+          <span class="terminal-label">Terminal  run inside (quantum-env)</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="comment"># Install everything you need for this entire course</span></div>
+          <div><span class="prompt">(quantum-env) $ </span><span class="cmd">pip install qiskit qiskit-aer matplotlib numpy jupyter</span></div>
+          <div>&nbsp;</div>
+          <div><span class="comment"># This takes 1-3 minutes. You'll see lots of output  that's normal.</span></div>
+          <div><span class="warn">Downloading qiskit-1.x.x...</span></div>
+          <div><span class="out">Successfully installed qiskit-1.x.x qiskit-aer-0.x.x ...</span></div>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">💡 What each package does</div>
+        <p><code style="font-family:var(--mono);font-size:12px">qiskit</code>  the main quantum computing library. <code style="font-family:var(--mono);font-size:12px">qiskit-aer</code>  the simulator (runs circuits on your computer without needing real hardware). <code style="font-family:var(--mono);font-size:12px">matplotlib</code>  for probability graphs. <code style="font-family:var(--mono);font-size:12px">numpy</code>  for math. <code style="font-family:var(--mono);font-size:12px">jupyter</code>  for interactive notebooks.</p>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-num">4</div>
+        <div class="step-divider-title">Test that everything works</div>
+      </div>
+
+      <div class="nb-prose">
+        <p>Create a file called <code>test_setup.py</code> and paste this code:</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-filename">test_setup.py</span>
+          <span class="code-run-hint">python test_setup.py</span>
+        </div>
+        <div class="code-body">
+<span class="kw">import</span> <span class="var">qiskit</span>
+<span class="kw">import</span> <span class="var">qiskit_aer</span>
+<span class="kw">import</span> <span class="var">matplotlib</span>
+<span class="kw">import</span> <span class="var">numpy</span>
+
+<span class="fn">print</span>(<span class="st">"✓ Qiskit version:"</span>, qiskit.__version__)
+<span class="fn">print</span>(<span class="st">"✓ Qiskit Aer version:"</span>, qiskit_aer.__version__)
+<span class="fn">print</span>(<span class="st">"✓ Matplotlib version:"</span>, matplotlib.__version__)
+<span class="fn">print</span>(<span class="st">"✓ NumPy version:"</span>, numpy.__version__)
+<span class="fn">print</span>(<span class="st">"\n🎉 Setup complete! You are ready to write quantum code."</span>)
+        </div>
+      </div>
+
+      <div class="terminal-wrap">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+          </div>
+          <span class="terminal-label">Expected output</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="out">✓ Qiskit version: 1.x.x</span></div>
+          <div><span class="out">✓ Qiskit Aer version: 0.x.x</span></div>
+          <div><span class="out">✓ Matplotlib version: 3.x.x</span></div>
+          <div><span class="out">✓ NumPy version: 1.x.x</span></div>
+          <div>&nbsp;</div>
+          <div><span class="out">🎉 Setup complete! You are ready to write quantum code.</span></div>
+        </div>
+      </div>
+
+      <div class="callout success">
+        <div class="callout-label">✓ If you see this output</div>
+        <p>You are set up correctly. Every notebook in this module will work. Move to NB 01.</p>
+      </div>
+
+      <div class="nb-footer">
+        <button class="foot-btn" disabled="">← Previous</button>
+        <button class="foot-btn primary" onclick="completeNb(0)">Complete &amp; next →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         NB 01  CLASSICAL BIT
+    ══════════════════════════ -->
+    <div class="nb-page" id="nb-1">
+      <div class="nb-header">
+        <div class="nb-eyebrow">NB 01 · Classical only</div>
+        <div class="nb-title">The classical bit  your baseline</div>
+        <div class="nb-desc">Before quantum, understand classical. You will simulate a classical bit in Python and observe its most important property: it always gives the same answer.</div>
+        <div class="nb-meta-row">
+          <span class="nb-meta-item">⏱ ~10 minutes</span>
+          <span class="nb-meta-item">🐍 Python only  no Qiskit yet</span>
+        </div>
+      </div>
+
+      <div class="obj-box">
+        <div class="obj-label">By the end of this notebook</div>
+        <ul class="obj-list">
+          <li>You have simulated a classical bit in Python</li>
+          <li>You have observed that reading a classical bit 1000 times gives the same answer every time</li>
+          <li>You understand what "deterministic" means and why it matters</li>
+        </ul>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-num">1</div>
+        <div class="step-divider-title">Simulate a classical bit</div>
+      </div>
+
+      <div class="nb-prose">
+        <p>A classical bit is just a variable that can be 0 or 1. Let's write one and read it 1000 times.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-filename">nb01_classical_bit.py</span>
+          <span class="code-run-hint">python nb01_classical_bit.py</span>
+        </div>
+        <div class="code-body">
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="cm"># A classical bit  just a variable</span>
+<span class="var">classical_bit</span> = <span class="nm">0</span>  <span class="cm"># could also be 1</span>
+
+<span class="cm"># "Read" it 1000 times  simulating 1000 measurements</span>
+<span class="var">results</span> = []
+<span class="kw">for</span> <span class="var">_</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1000</span>):
+    <span class="var">results</span>.append(<span class="var">classical_bit</span>)
+
+<span class="cm"># Count how many 0s and 1s we got</span>
+<span class="var">count_0</span> = <span class="var">results</span>.count(<span class="nm">0</span>)
+<span class="var">count_1</span> = <span class="var">results</span>.count(<span class="nm">1</span>)
+
+<span class="fn">print</span>(<span class="st">f"Got 0: {count_0} times"</span>)
+<span class="fn">print</span>(<span class="st">f"Got 1: {count_1} times"</span>)
+
+<span class="cm"># Plot as a probability bar chart</span>
+<span class="var">fig</span>, <span class="var">ax</span> = plt.subplots(figsize=(<span class="nm">5</span>, <span class="nm">4</span>))
+<span class="var">ax</span>.bar([<span class="st">'|0⟩'</span>, <span class="st">'|1⟩'</span>],
+       [<span class="var">count_0</span>/<span class="nm">1000</span>, <span class="var">count_1</span>/<span class="nm">1000</span>],
+       color=[<span class="st">'#1A4FDB'</span>, <span class="st">'#6B3FA0'</span>],
+       alpha=<span class="nm">0.7</span>, width=<span class="nm">0.5</span>)
+<span class="var">ax</span>.set_ylim(<span class="nm">0</span>, <span class="nm">1.1</span>)
+<span class="var">ax</span>.set_ylabel(<span class="st">'Probability'</span>)
+<span class="var">ax</span>.set_title(<span class="st">'Classical bit = 0  1000 measurements'</span>)
+<span class="var">ax</span>.axhline(<span class="nm">0.5</span>, color=<span class="st">'gray'</span>, linestyle=<span class="st">'--'</span>, alpha=<span class="nm">0.4</span>, label=<span class="st">'50% line'</span>)
+plt.tight_layout()
+plt.savefig(<span class="st">'nb01_output.png'</span>)
+plt.show()
+        </div>
+      </div>
+
+      <div class="line-explain">
+        <div class="line-explain-title">What each part does</div>
+        <div class="line-row">
+          <span class="line-code">classical_bit = 0</span>
+          <span class="line-meaning">Create a bit with value 0. This represents the physical bit in your computer  a capacitor that is uncharged.</span>
+        </div>
+        <div class="line-row">
+          <span class="line-code">for _ in range(1000):</span>
+          <span class="line-meaning">Simulate reading the bit 1000 times. In a real computer, this would be 1000 memory reads.</span>
+        </div>
+        <div class="line-row">
+          <span class="line-code">results.append(classical_bit)</span>
+          <span class="line-meaning">Record the result of each read. Since the bit never changes, we always get 0.</span>
+        </div>
+        <div class="line-row">
+          <span class="line-code">ax.bar([...], [...])</span>
+          <span class="line-meaning">Plot the probability of getting 0 vs 1 as a bar chart. This is the format we will use for all results in this course.</span>
+        </div>
+      </div>
+
+      <div class="output-section">
+        <div class="output-header">
+          <span class="output-label">Expected output  probability graph</span>
+        </div>
+        <div class="prob-graph">
+          <div class="prob-graph-title">Classical bit = 0  1000 measurements</div>
+          <div class="prob-bars">
+            <div class="prob-bar-group">
+              <div class="prob-bar-container">
+                <div class="prob-bar zero" style="height:100%" data-pct="100%"></div>
+              </div>
+              <div class="prob-bar-label">|0⟩</div>
+              <div class="prob-bar-state">value = 0</div>
+            </div>
+            <div class="prob-bar-group">
+              <div class="prob-bar-container">
+                <div class="prob-bar one empty" style="height:2%" data-pct="0%"></div>
+              </div>
+              <div class="prob-bar-label">|1⟩</div>
+              <div class="prob-bar-state">value = 1</div>
+            </div>
+          </div>
+          <div class="prob-axis">
+            <span>0%</span>
+            <span>50%</span>
+            <span>100%</span>
+          </div>
+          <div class="prob-interpret">
+            <strong>What you see:</strong> One bar at 100%, the other at 0%. The bit gave the same answer all 1000 times. This is what "deterministic" means  same input, same output, every time. <strong>Remember this graph.</strong> In NB 03, it will look completely different.
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-box">
+        <p>The key property here: <strong>reading a classical bit does not change it.</strong> You can read it a million times and it stays 0. This seems obvious  but a qubit behaves completely differently when measured. Keep this in mind.</p>
+      </div>
+
+      <div class="nb-footer">
+        <button class="foot-btn" onclick="showNb(0,document.getElementById('nb-nav-0'))">← NB 00</button>
+        <button class="foot-btn primary" onclick="completeNb(1)">Complete &amp; next →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         NB 02  FIRST QUBIT
+    ══════════════════════════ -->
+    <div class="nb-page" id="nb-2">
+      <div class="nb-header">
+        <div class="nb-eyebrow">NB 02 · Quantum</div>
+        <div class="nb-title">Create your first qubit</div>
+        <div class="nb-desc">You will create a qubit, leave it in its default state, measure it 1000 times, and observe that it behaves exactly like a classical bit  for now.</div>
+        <div class="nb-meta-row">
+          <span class="nb-meta-item">⏱ ~15 minutes</span>
+          <span class="nb-meta-item">⚛️ First Qiskit code</span>
+        </div>
+      </div>
+
+      <div class="obj-box">
+        <div class="obj-label">By the end of this notebook</div>
+        <ul class="obj-list">
+          <li>You have written your first Qiskit circuit</li>
+          <li>You understand what QuantumCircuit(1, 1) means</li>
+          <li>You have run a circuit on the Aer simulator</li>
+          <li>You understand why a qubit in |0⟩ gives 0 every time</li>
+        </ul>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-num">1</div>
+        <div class="step-divider-title">Create a qubit and measure it</div>
+      </div>
+
+      <div class="nb-prose">
+        <p>A qubit starts in the |0⟩ state by default  the quantum equivalent of a bit set to 0. Let's measure it 1000 times and see what happens.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-filename">nb02_first_qubit.py</span>
+          <span class="code-run-hint">python nb02_first_qubit.py</span>
+        </div>
+        <div class="code-body">
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>, <span class="fn">transpile</span>
+<span class="kw">from</span> <span class="var">qiskit_aer</span> <span class="kw">import</span> <span class="cls">AerSimulator</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="cm"># Step 1: Create a quantum circuit</span>
+<span class="cm"># QuantumCircuit(n_qubits, n_classical_bits)</span>
+<span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="nm">1</span>, <span class="nm">1</span>)
+
+<span class="cm"># Step 2: Measure the qubit into the classical bit</span>
+<span class="cm"># qc.measure(qubit_index, classical_bit_index)</span>
+<span class="var">qc</span>.measure(<span class="nm">0</span>, <span class="nm">0</span>)
+
+<span class="cm"># Step 3: Draw the circuit so we can see what we built</span>
+<span class="fn">print</span>(<span class="st">"Circuit:"</span>)
+<span class="fn">print</span>(<span class="var">qc</span>.draw())
+
+<span class="cm"># Step 4: Run on the Aer simulator, 1000 times</span>
+<span class="var">sim</span> = <span class="cls">AerSimulator</span>()
+<span class="var">job</span> = <span class="var">sim</span>.run(<span class="fn">transpile</span>(<span class="var">qc</span>, <span class="var">sim</span>), shots=<span class="nm">1000</span>)
+<span class="var">counts</span> = <span class="var">job</span>.result().get_counts()
+<span class="fn">print</span>(<span class="st">"\nRaw counts:"</span>, <span class="var">counts</span>)
+
+<span class="cm"># Step 5: Convert to probabilities and plot</span>
+<span class="var">prob_0</span> = <span class="var">counts</span>.get(<span class="st">'0'</span>, <span class="nm">0</span>) / <span class="nm">1000</span>
+<span class="var">prob_1</span> = <span class="var">counts</span>.get(<span class="st">'1'</span>, <span class="nm">0</span>) / <span class="nm">1000</span>
+
+<span class="var">fig</span>, <span class="var">ax</span> = plt.subplots(figsize=(<span class="nm">5</span>, <span class="nm">4</span>))
+<span class="var">ax</span>.bar([<span class="st">'|0⟩'</span>, <span class="st">'|1⟩'</span>], [<span class="var">prob_0</span>, <span class="var">prob_1</span>],
+       color=[<span class="st">'#1A4FDB'</span>, <span class="st">'#6B3FA0'</span>], alpha=<span class="nm">0.7</span>, width=<span class="nm">0.5</span>)
+<span class="var">ax</span>.set_ylim(<span class="nm">0</span>, <span class="nm">1.1</span>)
+<span class="var">ax</span>.set_ylabel(<span class="st">'Probability'</span>)
+<span class="var">ax</span>.set_title(<span class="st">'Qubit in |0⟩  1000 measurements'</span>)
+plt.tight_layout()
+plt.savefig(<span class="st">'nb02_output.png'</span>)
+plt.show()
+        </div>
+      </div>
+
+      <div class="line-explain">
+        <div class="line-explain-title">What each part does</div>
+        <div class="line-row">
+          <span class="line-code">QuantumCircuit(1, 1)</span>
+          <span class="line-meaning">Create a circuit with 1 qubit and 1 classical bit. The qubit holds the quantum state. The classical bit stores the measurement result.</span>
+        </div>
+        <div class="line-row">
+          <span class="line-code">qc.measure(0, 0)</span>
+          <span class="line-meaning">Measure qubit 0 and store the result in classical bit 0. This collapses the quantum state to 0 or 1.</span>
+        </div>
+        <div class="line-row">
+          <span class="line-code">AerSimulator()</span>
+          <span class="line-meaning">A classical simulation of quantum hardware running on your computer. Fast, noiseless, free. We use this for learning  real hardware later.</span>
+        </div>
+        <div class="line-row">
+          <span class="line-code">transpile(qc, sim)</span>
+          <span class="line-meaning">Converts the circuit into instructions the simulator understands. Always required before running.</span>
+        </div>
+        <div class="line-row">
+          <span class="line-code">shots=1000</span>
+          <span class="line-meaning">Run the circuit 1000 times. Each run is one measurement. We do many runs to build a probability distribution.</span>
+        </div>
+      </div>
+
+      <div class="output-section">
+        <div class="output-header">
+          <span class="output-label">Expected output  probability graph</span>
+        </div>
+        <div class="prob-graph">
+          <div class="prob-graph-title">Qubit in |0⟩  1000 measurements</div>
+          <div class="prob-bars">
+            <div class="prob-bar-group">
+              <div class="prob-bar-container">
+                <div class="prob-bar zero" style="height:100%" data-pct="100%"></div>
+              </div>
+              <div class="prob-bar-label">|0⟩</div>
+              <div class="prob-bar-state">measured 0</div>
+            </div>
+            <div class="prob-bar-group">
+              <div class="prob-bar-container">
+                <div class="prob-bar one empty" style="height:2%" data-pct="0%"></div>
+              </div>
+              <div class="prob-bar-label">|1⟩</div>
+              <div class="prob-bar-state">measured 1</div>
+            </div>
+          </div>
+          <div class="prob-axis"><span>0%</span><span>50%</span><span>100%</span></div>
+          <div class="prob-interpret">
+            <strong>Identical to the classical bit.</strong> A qubit in |0⟩ gives 0 every single time, just like a classical bit set to 0. This is not surprising  the quantum behaviour only appears when we put the qubit in <em>superposition</em>. That's the next notebook.
+          </div>
+        </div>
+      </div>
+
+      <div class="nb-footer">
+        <button class="foot-btn" onclick="showNb(1,document.getElementById('nb-nav-1'))">← NB 01</button>
+        <button class="foot-btn primary" onclick="completeNb(2)">Complete &amp; next →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         NB 03  HADAMARD / SUPERPOSITION
+    ══════════════════════════ -->
+    <div class="nb-page" id="nb-3">
+      <div class="nb-header">
+        <div class="nb-eyebrow">NB 03 · Quantum</div>
+        <div class="nb-title">Superposition  the Hadamard gate</div>
+        <div class="nb-desc">One gate changes everything. The Hadamard gate puts a qubit into superposition  and the probability graph transforms completely. This is where quantum starts to feel different.</div>
+        <div class="nb-meta-row">
+          <span class="nb-meta-item">⏱ ~20 minutes</span>
+          <span class="nb-meta-item">⚛️ First superposition</span>
+        </div>
+      </div>
+
+      <div class="obj-box">
+        <div class="obj-label">By the end of this notebook</div>
+        <ul class="obj-list">
+          <li>You understand what the Hadamard gate does mathematically</li>
+          <li>You have created a qubit in superposition and measured it</li>
+          <li>You can explain why the output is random  not because of uncertainty but because of physics</li>
+          <li>You have seen the probability graph split into two equal bars</li>
+        </ul>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-num">1</div>
+        <div class="step-divider-title">What does the Hadamard gate actually do?</div>
+      </div>
+
+      <div class="nb-prose">
+        <p>The Hadamard gate (written as <strong>H</strong>) transforms |0⟩ into an equal superposition of |0⟩ and |1⟩. Mathematically:</p>
+      </div>
+
+      <div class="prob-graph" style="margin:16px 0">
+        <div style="text-align:center;font-family:var(--mono);font-size:16px;color:var(--ink);padding:8px 0;">
+          H|0⟩ = <span style="color:var(--accent)">(|0⟩ + |1⟩)</span> / √2
+        </div>
+        <div style="text-align:center;font-size:13px;color:var(--ink3);margin-top:6px;font-family:var(--sans);">
+          This means: 50% probability of measuring 0, 50% probability of measuring 1
+        </div>
+      </div>
+
+      <div class="nb-prose">
+        <p>The √2 in the denominator is a normalisation factor  it ensures the probabilities sum to 1 (since (1/√2)² + (1/√2)² = 0.5 + 0.5 = 1). You do not need to memorise this  just understand that <strong>H creates a perfect 50/50 superposition.</strong></p>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-num">2</div>
+        <div class="step-divider-title">Apply the Hadamard gate and measure</div>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-filename">nb03_hadamard.py</span>
+          <span class="code-run-hint">python nb03_hadamard.py</span>
+        </div>
+        <div class="code-body">
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>, <span class="fn">transpile</span>
+<span class="kw">from</span> <span class="var">qiskit_aer</span> <span class="kw">import</span> <span class="cls">AerSimulator</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="nm">1</span>, <span class="nm">1</span>)
+
+<span class="cm"># Apply the Hadamard gate to qubit 0</span>
+<span class="cm"># This is the ONLY difference from NB 02  one line changes everything</span>
+<span class="var">qc</span>.h(<span class="nm">0</span>)
+
+<span class="cm"># Measure  collapse the superposition</span>
+<span class="var">qc</span>.measure(<span class="nm">0</span>, <span class="nm">0</span>)
+
+<span class="fn">print</span>(<span class="st">"Circuit:"</span>)
+<span class="fn">print</span>(<span class="var">qc</span>.draw())
+
+<span class="var">sim</span> = <span class="cls">AerSimulator</span>()
+<span class="var">counts</span> = <span class="var">sim</span>.run(
+    <span class="fn">transpile</span>(<span class="var">qc</span>, <span class="var">sim</span>), shots=<span class="nm">1000</span>
+).result().get_counts()
+
+<span class="fn">print</span>(<span class="st">"\nRaw counts:"</span>, <span class="var">counts</span>)
+
+<span class="var">prob_0</span> = <span class="var">counts</span>.get(<span class="st">'0'</span>, <span class="nm">0</span>) / <span class="nm">1000</span>
+<span class="var">prob_1</span> = <span class="var">counts</span>.get(<span class="st">'1'</span>, <span class="nm">0</span>) / <span class="nm">1000</span>
+
+<span class="var">fig</span>, <span class="var">ax</span> = plt.subplots(figsize=(<span class="nm">5</span>, <span class="nm">4</span>))
+<span class="var">bars</span> = <span class="var">ax</span>.bar([<span class="st">'|0⟩'</span>, <span class="st">'|1⟩'</span>], [<span class="var">prob_0</span>, <span class="var">prob_1</span>],
+              color=[<span class="st">'#1A4FDB'</span>, <span class="st">'#6B3FA0'</span>], alpha=<span class="nm">0.7</span>, width=<span class="nm">0.5</span>)
+<span class="var">ax</span>.set_ylim(<span class="nm">0</span>, <span class="nm">1.1</span>)
+<span class="var">ax</span>.set_ylabel(<span class="st">'Probability'</span>)
+<span class="var">ax</span>.set_title(<span class="st">'H|0⟩  Superposition  1000 measurements'</span>)
+<span class="var">ax</span>.axhline(<span class="nm">0.5</span>, color=<span class="st">'red'</span>, linestyle=<span class="st">'--'</span>,
+           alpha=<span class="nm">0.4</span>, label=<span class="st">'50% expected'</span>)
+<span class="var">ax</span>.legend()
+plt.tight_layout()
+plt.savefig(<span class="st">'nb03_output.png'</span>)
+plt.show()
+        </div>
+      </div>
+
+      <div class="output-section">
+        <div class="output-header">
+          <span class="output-label">Expected output  probability graph</span>
+          <span class="output-hint">Your exact numbers will differ  that's the point</span>
+        </div>
+        <div class="prob-graph">
+          <div class="prob-graph-title">H|0⟩  Superposition  1000 measurements</div>
+          <div class="prob-bars">
+            <div class="prob-bar-group">
+              <div class="prob-bar-container">
+                <div class="prob-bar zero" style="height:50.3%" data-pct="50.3%"></div>
+              </div>
+              <div class="prob-bar-label">|0⟩</div>
+              <div class="prob-bar-state">503 times</div>
+            </div>
+            <div class="prob-bar-group">
+              <div class="prob-bar-container">
+                <div class="prob-bar one" style="height:49.7%" data-pct="49.7%"></div>
+              </div>
+              <div class="prob-bar-label">|1⟩</div>
+              <div class="prob-bar-state">497 times</div>
+            </div>
+          </div>
+          <div class="prob-axis"><span>0%</span><span>50%</span><span>100%</span></div>
+          <div class="prob-interpret">
+            <strong>Two roughly equal bars.</strong> Adding one gate  <code style="font-family:var(--mono);font-size:12px">qc.h(0)</code>  completely changed the probability distribution. The qubit is now in superposition: genuinely both 0 and 1 simultaneously. Every run of your code will give slightly different numbers  but always near 50/50. <strong>This randomness is not a bug. It is physics.</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout note">
+        <div class="callout-label">📌 Run your code multiple times</div>
+        <p>Run nb03_hadamard.py three times in a row. Notice the counts change every time  503/497, then 489/511, then 512/488. The classical bit code from NB 01 never does this. That difference is the entire lesson.</p>
+      </div>
+
+      <div class="nb-footer">
+        <button class="foot-btn" onclick="showNb(2,document.getElementById('nb-nav-2'))">← NB 02</button>
+        <button class="foot-btn primary" onclick="completeNb(3)">Complete &amp; next →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         NB 04  1000 MEASUREMENTS
+    ══════════════════════════ -->
+    <div class="nb-page" id="nb-4">
+      <div class="nb-header">
+        <div class="nb-eyebrow">NB 04 · Quantum</div>
+        <div class="nb-title">1000 measurements  seeing probability in action</div>
+        <div class="nb-desc">Run the same circuit at different shot counts and watch how the probability distribution converges. The more measurements you take, the closer you get to the true probability.</div>
+        <div class="nb-meta-row">
+          <span class="nb-meta-item">⏱ ~20 minutes</span>
+          <span class="nb-meta-item">📊 Probability focus</span>
+        </div>
+      </div>
+
+      <div class="obj-box">
+        <div class="obj-label">By the end of this notebook</div>
+        <ul class="obj-list">
+          <li>You understand why we need many shots, not just one measurement</li>
+          <li>You have plotted probability distributions at 10, 100, and 1000 shots</li>
+          <li>You can see how more shots → more accurate probability estimate</li>
+        </ul>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-num">1</div>
+        <div class="step-divider-title">Why one measurement is not enough</div>
+      </div>
+
+      <div class="nb-prose">
+        <p>When you measure a qubit in superposition, you get 0 or 1  one answer. That single answer tells you nothing about the probability distribution. You need to run the circuit many times to build a picture of the true probabilities.</p>
+        <p>This is like asking: "Is this coin fair?" You cannot tell from one flip. You need hundreds of flips to estimate the true probability.</p>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-filename">nb04_shots.py</span>
+          <span class="code-run-hint">python nb04_shots.py</span>
+        </div>
+        <div class="code-body">
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>, <span class="fn">transpile</span>
+<span class="kw">from</span> <span class="var">qiskit_aer</span> <span class="kw">import</span> <span class="cls">AerSimulator</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="kw">def</span> <span class="fn">measure_superposition</span>(<span class="var">shots</span>):
+    <span class="st">"""Run H|0⟩ circuit and return probability of 0 and 1."""</span>
+    <span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="nm">1</span>, <span class="nm">1</span>)
+    <span class="var">qc</span>.h(<span class="nm">0</span>)
+    <span class="var">qc</span>.measure(<span class="nm">0</span>, <span class="nm">0</span>)
+    <span class="var">sim</span> = <span class="cls">AerSimulator</span>()
+    <span class="var">counts</span> = <span class="var">sim</span>.run(
+        <span class="fn">transpile</span>(<span class="var">qc</span>, <span class="var">sim</span>), shots=<span class="var">shots</span>
+    ).result().get_counts()
+    <span class="kw">return</span> (
+        <span class="var">counts</span>.get(<span class="st">'0'</span>, <span class="nm">0</span>) / <span class="var">shots</span>,
+        <span class="var">counts</span>.get(<span class="st">'1'</span>, <span class="nm">0</span>) / <span class="var">shots</span>
+    )
+
+<span class="cm"># Run at 3 different shot counts</span>
+<span class="var">shot_counts</span> = [<span class="nm">10</span>, <span class="nm">100</span>, <span class="nm">1000</span>]
+<span class="var">results</span> = {s: <span class="fn">measure_superposition</span>(s) <span class="kw">for</span> s <span class="kw">in</span> <span class="var">shot_counts</span>}
+
+<span class="cm"># Plot side by side  one graph per shot count</span>
+<span class="var">fig</span>, <span class="var">axes</span> = plt.subplots(<span class="nm">1</span>, <span class="nm">3</span>, figsize=(<span class="nm">12</span>, <span class="nm">4</span>))
+<span class="kw">for</span> <span class="var">ax</span>, <span class="var">shots</span> <span class="kw">in</span> <span class="fn">zip</span>(<span class="var">axes</span>, <span class="var">shot_counts</span>):
+    <span class="var">p0</span>, <span class="var">p1</span> = <span class="var">results</span>[<span class="var">shots</span>]
+    <span class="var">ax</span>.bar([<span class="st">'|0⟩'</span>, <span class="st">'|1⟩'</span>], [<span class="var">p0</span>, <span class="var">p1</span>],
+           color=[<span class="st">'#1A4FDB'</span>, <span class="st">'#6B3FA0'</span>], alpha=<span class="nm">0.7</span>, width=<span class="nm">0.5</span>)
+    <span class="var">ax</span>.set_ylim(<span class="nm">0</span>, <span class="nm">1.1</span>)
+    <span class="var">ax</span>.axhline(<span class="nm">0.5</span>, color=<span class="st">'red'</span>, linestyle=<span class="st">'--'</span>, alpha=<span class="nm">0.4</span>)
+    <span class="var">ax</span>.set_title(<span class="st">f'{shots} shots\np(0)={p0:.2f}, p(1)={p1:.2f}'</span>)
+    <span class="var">ax</span>.set_ylabel(<span class="st">'Probability'</span> <span class="kw">if</span> <span class="var">shots</span> == <span class="nm">10</span> <span class="kw">else</span> <span class="st">''</span>)
+
+plt.suptitle(<span class="st">'H|0⟩  More shots → closer to true 50/50'</span>)
+plt.tight_layout()
+plt.savefig(<span class="st">'nb04_output.png'</span>)
+plt.show()
+        </div>
+      </div>
+
+      <div class="output-section">
+        <div class="output-header">
+          <span class="output-label">Expected output  three graphs side by side</span>
+        </div>
+
+        <!-- 10 shots -->
+        <div class="multi-run">
+          <div class="multi-run-title">How results converge as shots increase</div>
+          <div class="run-row">
+            <span class="run-label">10 shots</span>
+            <div class="run-bars">
+              <div class="run-bar-0" style="width:70%"></div>
+              <div class="run-bar-1" style="width:30%"></div>
+            </div>
+            <span class="run-counts">p(0)=0.70, p(1)=0.30 ← noisy</span>
+          </div>
+          <div class="run-row">
+            <span class="run-label">100 shots</span>
+            <div class="run-bars">
+              <div class="run-bar-0" style="width:54%"></div>
+              <div class="run-bar-1" style="width:46%"></div>
+            </div>
+            <span class="run-counts">p(0)=0.54, p(1)=0.46 ← getting closer</span>
+          </div>
+          <div class="run-row">
+            <span class="run-label">1000 shots</span>
+            <div class="run-bars">
+              <div class="run-bar-0" style="width:51%"></div>
+              <div class="run-bar-1" style="width:49%"></div>
+            </div>
+            <span class="run-counts">p(0)=0.51, p(1)=0.49 ← near perfect</span>
+          </div>
+        </div>
+
+        <div class="prob-interpret" style="background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;margin-top:12px;">
+          <strong>The pattern:</strong> With only 10 shots, the result looks wildly uneven  70/30 instead of 50/50. With 100 shots it gets closer. With 1000 shots it converges near the true 50/50. This is why quantum computing uses many shots  a single measurement gives you almost no useful information about the probability distribution.
+        </div>
+      </div>
+
+      <div class="nb-footer">
+        <button class="foot-btn" onclick="showNb(3,document.getElementById('nb-nav-3'))">← NB 03</button>
+        <button class="foot-btn primary" onclick="completeNb(4)">Complete &amp; next →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         NB 05  COMPARISON
+    ══════════════════════════ -->
+    <div class="nb-page" id="nb-5">
+      <div class="nb-header">
+        <div class="nb-eyebrow">NB 05 · Comparison</div>
+        <div class="nb-title">Classical vs quantum  side by side</div>
+        <div class="nb-desc">The moment of contrast. Run the classical bit simulation and the quantum superposition side by side on the same graph. This is the entire lesson in one image.</div>
+        <div class="nb-meta-row">
+          <span class="nb-meta-item">⏱ ~15 minutes</span>
+          <span class="nb-meta-item">📊 Visual comparison</span>
+        </div>
+      </div>
+
+      <div class="obj-box">
+        <div class="obj-label">By the end of this notebook</div>
+        <ul class="obj-list">
+          <li>You have one graph showing classical bit vs qubit in superposition</li>
+          <li>You can explain the difference in your own words</li>
+          <li>You understand why this difference matters for quantum computing</li>
+        </ul>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-filename">nb05_comparison.py</span>
+          <span class="code-run-hint">python nb05_comparison.py</span>
+        </div>
+        <div class="code-body">
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>, <span class="fn">transpile</span>
+<span class="kw">from</span> <span class="var">qiskit_aer</span> <span class="kw">import</span> <span class="cls">AerSimulator</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+<span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+
+<span class="var">sim</span> = <span class="cls">AerSimulator</span>()
+<span class="var">SHOTS</span> = <span class="nm">1000</span>
+
+<span class="cm"># ── Classical bit = 0 (no quantum, pure Python) ──</span>
+<span class="var">classical_results</span> = [<span class="nm">0</span>] * <span class="var">SHOTS</span>
+<span class="var">classical_prob</span> = [<span class="var">classical_results</span>.count(<span class="nm">0</span>)/<span class="var">SHOTS</span>,
+                   <span class="var">classical_results</span>.count(<span class="nm">1</span>)/<span class="var">SHOTS</span>]
+
+<span class="cm"># ── Qubit in |0⟩ (no gate  classical-like) ──</span>
+<span class="var">qc_zero</span> = <span class="cls">QuantumCircuit</span>(<span class="nm">1</span>, <span class="nm">1</span>)
+<span class="var">qc_zero</span>.measure(<span class="nm">0</span>, <span class="nm">0</span>)
+<span class="var">c_zero</span> = <span class="var">sim</span>.run(<span class="fn">transpile</span>(<span class="var">qc_zero</span>, <span class="var">sim</span>), shots=<span class="var">SHOTS</span>).result().get_counts()
+<span class="var">zero_prob</span> = [<span class="var">c_zero</span>.get(<span class="st">'0'</span>,<span class="nm">0</span>)/<span class="var">SHOTS</span>, <span class="var">c_zero</span>.get(<span class="st">'1'</span>,<span class="nm">0</span>)/<span class="var">SHOTS</span>]
+
+<span class="cm"># ── Qubit in superposition H|0⟩ ──</span>
+<span class="var">qc_super</span> = <span class="cls">QuantumCircuit</span>(<span class="nm">1</span>, <span class="nm">1</span>)
+<span class="var">qc_super</span>.h(<span class="nm">0</span>)
+<span class="var">qc_super</span>.measure(<span class="nm">0</span>, <span class="nm">0</span>)
+<span class="var">c_super</span> = <span class="var">sim</span>.run(<span class="fn">transpile</span>(<span class="var">qc_super</span>,<span class="var">sim</span>),shots=<span class="var">SHOTS</span>).result().get_counts()
+<span class="var">super_prob</span> = [<span class="var">c_super</span>.get(<span class="st">'0'</span>,<span class="nm">0</span>)/<span class="var">SHOTS</span>, <span class="var">c_super</span>.get(<span class="st">'1'</span>,<span class="nm">0</span>)/<span class="var">SHOTS</span>]
+
+<span class="cm"># ── Plot all three side by side ──</span>
+<span class="var">fig</span>, <span class="var">axes</span> = plt.subplots(<span class="nm">1</span>, <span class="nm">3</span>, figsize=(<span class="nm">12</span>, <span class="nm">4</span>))
+<span class="var">labels</span> = [<span class="st">'|0⟩'</span>, <span class="st">'|1⟩'</span>]
+<span class="var">colors</span> = [<span class="st">'#1A4FDB'</span>, <span class="st">'#6B3FA0'</span>]
+
+<span class="kw">for</span> <span class="var">ax</span>, <span class="var">probs</span>, <span class="var">title</span>, <span class="var">subtitle</span> <span class="kw">in</span> [
+    (<span class="var">axes</span>[<span class="nm">0</span>], <span class="var">classical_prob</span>, <span class="st">'Classical bit = 0'</span>,     <span class="st">'Deterministic'</span>),
+    (<span class="var">axes</span>[<span class="nm">1</span>], <span class="var">zero_prob</span>,      <span class="st">'Qubit in |0⟩'</span>,           <span class="st">'No superposition'</span>),
+    (<span class="var">axes</span>[<span class="nm">2</span>], <span class="var">super_prob</span>,     <span class="st">'Qubit: H|0⟩'</span>,            <span class="st">'Superposition!'</span>),
+]:
+    <span class="var">bars</span> = <span class="var">ax</span>.bar(<span class="var">labels</span>, <span class="var">probs</span>, color=<span class="var">colors</span>, alpha=<span class="nm">0.75</span>, width=<span class="nm">0.45</span>)
+    <span class="var">ax</span>.set_ylim(<span class="nm">0</span>, <span class="nm">1.15</span>)
+    <span class="var">ax</span>.axhline(<span class="nm">0.5</span>, color=<span class="st">'#ccc'</span>, linestyle=<span class="st">'--'</span>, linewidth=<span class="nm">0.8</span>)
+    <span class="var">ax</span>.set_title(<span class="st">f'{title}\n({subtitle})'</span>, fontsize=<span class="nm">11</span>)
+    <span class="var">ax</span>.set_ylabel(<span class="st">'Probability'</span>)
+    <span class="kw">for</span> <span class="var">bar</span>, <span class="var">p</span> <span class="kw">in</span> <span class="fn">zip</span>(<span class="var">bars</span>, <span class="var">probs</span>):
+        <span class="kw">if</span> <span class="var">p</span> &gt; <span class="nm">0.02</span>:
+            <span class="var">ax</span>.text(<span class="var">bar</span>.get_x() + <span class="var">bar</span>.get_width()/<span class="nm">2</span>,
+                    <span class="var">bar</span>.get_height() + <span class="nm">0.02</span>,
+                    <span class="st">f'{p:.1%}'</span>, ha=<span class="st">'center'</span>, fontsize=<span class="nm">10</span>)
+
+plt.suptitle(<span class="st">'Classical bit vs qubit  1000 measurements each'</span>,
+             fontsize=<span class="nm">13</span>, fontweight=<span class="st">'bold'</span>)
+plt.tight_layout()
+plt.savefig(<span class="st">'nb05_comparison.png'</span>)
+plt.show()
+        </div>
+      </div>
+
+      <div class="output-section">
+        <div class="output-header">
+          <span class="output-label">Expected output  three graphs side by side</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+          <div class="prob-graph">
+            <div class="prob-graph-title" style="font-size:12px">Classical bit = 0</div>
+            <div class="prob-bars" style="height:80px;">
+              <div class="prob-bar-group">
+                <div class="prob-bar-container" style="height:70px;">
+                  <div class="prob-bar zero" style="height:100%" data-pct="100%"></div>
+                </div>
+                <div class="prob-bar-label">|0⟩</div>
+              </div>
+              <div class="prob-bar-group">
+                <div class="prob-bar-container" style="height:70px;">
+                  <div class="prob-bar one empty" style="height:2%" data-pct="0%"></div>
+                </div>
+                <div class="prob-bar-label">|1⟩</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:6px;">Deterministic</div>
+          </div>
+          <div class="prob-graph">
+            <div class="prob-graph-title" style="font-size:12px">Qubit in |0⟩</div>
+            <div class="prob-bars" style="height:80px;">
+              <div class="prob-bar-group">
+                <div class="prob-bar-container" style="height:70px;">
+                  <div class="prob-bar zero" style="height:100%" data-pct="100%"></div>
+                </div>
+                <div class="prob-bar-label">|0⟩</div>
+              </div>
+              <div class="prob-bar-group">
+                <div class="prob-bar-container" style="height:70px;">
+                  <div class="prob-bar one empty" style="height:2%" data-pct="0%"></div>
+                </div>
+                <div class="prob-bar-label">|1⟩</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--ink3);text-align:center;margin-top:6px;">Same as classical</div>
+          </div>
+          <div class="prob-graph">
+            <div class="prob-graph-title" style="font-size:12px">H|0⟩ superposition</div>
+            <div class="prob-bars" style="height:80px;">
+              <div class="prob-bar-group">
+                <div class="prob-bar-container" style="height:70px;">
+                  <div class="prob-bar zero" style="height:50%" data-pct="50%"></div>
+                </div>
+                <div class="prob-bar-label">|0⟩</div>
+              </div>
+              <div class="prob-bar-group">
+                <div class="prob-bar-container" style="height:70px;">
+                  <div class="prob-bar one" style="height:50%" data-pct="50%"></div>
+                </div>
+                <div class="prob-bar-label">|1⟩</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--accent);text-align:center;margin-top:6px;font-weight:600;">Superposition!</div>
+          </div>
+        </div>
+        <div class="prob-interpret" style="margin-top:12px;">
+          <strong>The whole lesson in one image.</strong> Left and middle: one bar, deterministic. Right: two equal bars, quantum superposition. One gate  <code style="font-family:var(--mono);font-size:12px">qc.h(0)</code>  is the difference between classical and quantum behaviour.
+        </div>
+      </div>
+
+      <div class="nb-footer">
+        <button class="foot-btn" onclick="showNb(4,document.getElementById('nb-nav-4'))">← NB 04</button>
+        <button class="foot-btn primary" onclick="completeNb(5)">Complete &amp; next →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         NB 06  BLOCH SPHERE
+    ══════════════════════════ -->
+    <div class="nb-page" id="nb-6">
+      <div class="nb-header">
+        <div class="nb-eyebrow">NB 06 · Quantum</div>
+        <div class="nb-title">Explore the Bloch sphere</div>
+        <div class="nb-desc">Visualise qubit states on the Bloch sphere. Explore how different gates move the state vector, and see what different positions mean in terms of measurement probability.</div>
+        <div class="nb-meta-row">
+          <span class="nb-meta-item">⏱ ~20 minutes</span>
+          <span class="nb-meta-item">🔮 Visual exploration</span>
+        </div>
+      </div>
+
+      <div class="obj-box">
+        <div class="obj-label">By the end of this notebook</div>
+        <ul class="obj-list">
+          <li>You have visualised a qubit state on the Bloch sphere using Qiskit</li>
+          <li>You understand what different positions on the sphere mean</li>
+          <li>You have seen how the H gate moves the state from pole to equator</li>
+        </ul>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-num">1</div>
+        <div class="step-divider-title">Bloch sphere states  interactive guide</div>
+      </div>
+
+      <div class="nb-prose">
+        <p>Every qubit state corresponds to a point on the Bloch sphere. Click each state below to see where it sits and what measurement probability it gives.</p>
+      </div>
+
+      <div class="bloch-wrap">
+        <div class="bloch-svg-wrap">
+          <svg width="180" height="200" viewBox="0 0 180 200" fill="none" id="blochSvg">
+            <circle cx="90" cy="100" r="70" stroke="#CBD5E1" stroke-width="1" fill="rgba(26,79,219,0.03)"></circle>
+            <ellipse cx="90" cy="100" rx="70" ry="19" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="3 3" fill="none"></ellipse>
+            <line x1="90" y1="20" x2="90" y2="180" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="3 3"></line>
+            <line x1="20" y1="100" x2="160" y2="100" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="3 3"></line>
+            <!-- |0> -->
+            <circle cx="90" cy="30" r="5" fill="#1A4FDB"></circle>
+            <text x="100" y="34" font-size="12" fill="#1A4FDB" font-family="JetBrains Mono">|0⟩</text>
+            <!-- |1> -->
+            <circle cx="90" cy="170" r="5" fill="#6B3FA0"></circle>
+            <text x="100" y="174" font-size="12" fill="#6B3FA0" font-family="JetBrains Mono">|1⟩</text>
+            <!-- |+> -->
+            <circle cx="160" cy="100" r="4" fill="#1A7A4A"></circle>
+            <text x="165" y="104" font-size="10" fill="#1A7A4A" font-family="JetBrains Mono">|+⟩</text>
+            <!-- State vector  starts at |0> -->
+            <line x1="90" y1="100" x2="90" y2="36" stroke="#C4860A" stroke-width="2.5" stroke-linecap="round" id="blochVector"></line>
+            <circle cx="90" cy="36" r="5" fill="#C4860A" id="blochPoint"></circle>
+            <!-- Z label -->
+            <text x="76" y="17" font-size="9" fill="#8A8480" font-family="DM Sans">Z</text>
+          </svg>
+        </div>
+        <div class="bloch-states">
+          <div class="bloch-states-title">States  click to explore</div>
+          <div class="bloch-state-row selected" onclick="selectState(this,90,36,'#C4860A',100,0)">
+            <div class="bloch-state-dot" style="background:#1A4FDB"></div>
+            <div class="bloch-state-name">|0⟩</div>
+            <div class="bloch-state-desc">North pole. Measures 0 with certainty.</div>
+            <div class="bloch-state-prob">p(0)=1.0</div>
+          </div>
+          <div class="bloch-state-row" onclick="selectState(this,90,164,'#6B3FA0',0,100)">
+            <div class="bloch-state-dot" style="background:#6B3FA0"></div>
+            <div class="bloch-state-name">|1⟩</div>
+            <div class="bloch-state-desc">South pole. Measures 1 with certainty.</div>
+            <div class="bloch-state-prob">p(1)=1.0</div>
+          </div>
+          <div class="bloch-state-row" onclick="selectState(this,160,100,'#1A7A4A',50,50)">
+            <div class="bloch-state-dot" style="background:#1A7A4A"></div>
+            <div class="bloch-state-name">|+⟩</div>
+            <div class="bloch-state-desc">Equator (X axis). Superposition  H|0⟩.</div>
+            <div class="bloch-state-prob">p(0)=0.5</div>
+          </div>
+          <div class="bloch-state-row" onclick="selectState(this,20,100,'#C4860A',50,50)">
+            <div class="bloch-state-dot" style="background:#C4860A"></div>
+            <div class="bloch-state-name">|−⟩</div>
+            <div class="bloch-state-desc">Equator (−X axis). Also 50/50 but different phase.</div>
+            <div class="bloch-state-prob">p(0)=0.5</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="blochProbDisplay" class="prob-graph" style="margin:16px 0;">
+        <div class="prob-graph-title" id="blochGraphTitle">|0⟩ state  measurement probability</div>
+        <div class="prob-bars">
+          <div class="prob-bar-group">
+            <div class="prob-bar-container">
+              <div class="prob-bar zero" style="height:100%" data-pct="100%" id="blochBar0"></div>
+            </div>
+            <div class="prob-bar-label">|0⟩</div>
+          </div>
+          <div class="prob-bar-group">
+            <div class="prob-bar-container">
+              <div class="prob-bar one" style="height:0%" data-pct="0%" id="blochBar1"></div>
+            </div>
+            <div class="prob-bar-label">|1⟩</div>
+          </div>
+        </div>
+        <div class="prob-axis"><span>0%</span><span>50%</span><span>100%</span></div>
+        <div class="prob-interpret" id="blochInterpret">North pole = |0⟩. Measuring gives 0 with 100% certainty. The state vector points straight up.</div>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-num">2</div>
+        <div class="step-divider-title">Visualise with Qiskit</div>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header">
+          <span class="code-filename">nb06_bloch.py</span>
+          <span class="code-run-hint">python nb06_bloch.py</span>
+        </div>
+        <div class="code-body">
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>
+<span class="kw">from</span> <span class="var">qiskit.visualization</span> <span class="kw">import</span> <span class="fn">plot_bloch_multivector</span>
+<span class="kw">from</span> <span class="var">qiskit_aer</span> <span class="kw">import</span> <span class="cls">AerSimulator</span>
+<span class="kw">from</span> <span class="var">qiskit.quantum_info</span> <span class="kw">import</span> <span class="cls">Statevector</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="cm"># We will visualise 4 states on the Bloch sphere</span>
+<span class="var">states</span> = {
+    <span class="st">'|0⟩  north pole'</span>: [],                     <span class="cm"># no gates</span>
+    <span class="st">'|1⟩  south pole'</span>: [<span class="st">'x'</span>],                  <span class="cm"># X gate flips 0→1</span>
+    <span class="st">'|+⟩  superposition'</span>: [<span class="st">'h'</span>],               <span class="cm"># H gate = equator</span>
+    <span class="st">'|−⟩  negative superposition'</span>: [<span class="st">'x'</span>, <span class="st">'h'</span>],  <span class="cm"># X then H</span>
+}
+
+<span class="var">fig</span>, <span class="var">axes</span> = plt.subplots(<span class="nm">1</span>, <span class="nm">4</span>, figsize=(<span class="nm">16</span>, <span class="nm">5</span>),
+                         subplot_kw={<span class="st">'projection'</span>: <span class="st">'3d'</span>})
+
+<span class="kw">for</span> <span class="var">ax</span>, (<span class="var">label</span>, <span class="var">gates</span>) <span class="kw">in</span> <span class="fn">zip</span>(<span class="var">axes</span>, <span class="var">states</span>.items()):
+    <span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="nm">1</span>)
+    <span class="kw">for</span> <span class="var">gate</span> <span class="kw">in</span> <span class="var">gates</span>:
+        <span class="fn">getattr</span>(<span class="var">qc</span>, <span class="var">gate</span>)(<span class="nm">0</span>)
+
+    <span class="cm"># Get the statevector (only works without measurement)</span>
+    <span class="var">sv</span> = <span class="cls">Statevector</span>(<span class="var">qc</span>)
+    <span class="fn">plot_bloch_multivector</span>(<span class="var">sv</span>, ax=<span class="var">ax</span>, title=<span class="var">label</span>)
+
+plt.tight_layout()
+plt.savefig(<span class="st">'nb06_bloch.png'</span>)
+plt.show()
+        </div>
+      </div>
+
+      <div class="whats-next">
+        <div class="wn-label">Module 01 complete  what's next</div>
+        <div class="wn-title">Module 02  Quantum Gates &amp; Circuits</div>
+        <div class="wn-desc">You now understand qubits and superposition  both the theory and the code. Next you will learn the full set of quantum gates, build multi-qubit circuits, and understand why circuit depth is the central constraint in NISQ hardware. The Hadamard gate was just the beginning.</div>
+      </div>
+
+      <div class="nb-footer">
+        <button class="foot-btn" onclick="showNb(5,document.getElementById('nb-nav-5'))">← NB 05</button>
+        <button class="foot-btn primary" onclick="completeNb(6)">Module 01 complete ✓</button>
+      </div>
+    </div>
+
+  </div>
+<script>
+function selectState(el, x2, y2, color, p0, p1) {
+  document.querySelectorAll('.bloch-state-row').forEach(r => r.classList.remove('selected'));
+  el.classList.add('selected');
+  const vec = document.getElementById('blochVector');
+  const pt  = document.getElementById('blochPoint');
+  if (vec) { vec.setAttribute('x2', x2); vec.setAttribute('y2', y2); vec.setAttribute('stroke', color); }
+  if (pt)  { pt.setAttribute('cx', x2);  pt.setAttribute('cy', y2);  pt.setAttribute('fill', color); }
+  const bar0 = document.getElementById('blochBar0');
+  const bar1 = document.getElementById('blochBar1');
+  if (bar0) { bar0.style.height = p0 + '%'; bar0.dataset.pct = p0 + '%'; }
+  if (bar1) { bar1.style.height = p1 + '%'; bar1.dataset.pct = p1 + '%'; }
+  const nameEl = el.querySelector('.bloch-state-name');
+  const descEl = el.querySelector('.bloch-state-desc');
+  const title  = document.getElementById('blochGraphTitle');
+  const interp = document.getElementById('blochInterpret');
+  if (title && nameEl) title.textContent = nameEl.textContent + ' state  measurement probability';
+  if (interp && descEl) interp.textContent = descEl.textContent;
+}
+
+function showNb(idx, navEl) {
+  document.querySelectorAll('.nb-page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById('nb-' + idx);
+  if (page) { page.classList.add('active'); page.scrollIntoView({behavior:'smooth', block:'start'}); }
+  document.querySelectorAll('[id^="nb-nav-"]').forEach(n => n && n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+}
+
+function completeNb(idx) {
+  const page = document.getElementById('nb-' + idx);
+  if (page) page.classList.add('done');
+  const next = document.getElementById('nb-' + (idx + 1));
+  if (next) { next.classList.add('active'); next.scrollIntoView({behavior:'smooth', block:'start'}); }
+}
+</script>

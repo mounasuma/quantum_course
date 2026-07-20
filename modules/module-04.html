@@ -1,0 +1,1175 @@
+﻿<style>
+:root {
+  --bg:#F7F5F0;--bg2:#EFEDE7;--bg3:#E8E4DC;
+  --ink:#1A1814;--ink2:#4A4640;--ink3:#8A8480;
+  --rule:rgba(26,24,20,0.1);--rule2:rgba(26,24,20,0.06);
+  --accent:#1A4FDB;--accent2:#0E35A8;
+  --gold:#C4860A;--green:#1A7A4A;--red:#C0392B;--purple:#6B3FA0;
+  --serif:'Lora',Georgia,serif;--sans:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.7;}
+.shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{background:var(--bg2);border-right:1px solid var(--rule);position:sticky;top:0;height:100vh;overflow-y:auto;padding:20px 0;display:flex;flex-direction:column;}
+.sidebar::-webkit-scrollbar{width:2px;}
+.sidebar-logo{padding:0 20px 18px;border-bottom:1px solid var(--rule);margin-bottom:14px;}
+.sidebar-logo-name{font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.06em;color:var(--ink);display:flex;align-items:center;gap:8px;}
+.sidebar-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(26,79,219,.4);}
+.sidebar-logo-sub{font-size:11px;color:var(--ink3);font-family:var(--sans);margin-top:3px;}
+.sidebar-section{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);padding:10px 20px 4px;}
+.sidebar-item{display:flex;align-items:flex-start;gap:10px;padding:8px 20px;cursor:pointer;border-left:2px solid transparent;transition:all .15s;}
+.sidebar-item:hover{background:rgba(26,24,20,.04);}
+.sidebar-item.active{background:rgba(26,79,219,.05);border-left-color:var(--accent);}
+.sidebar-item.done .si-check{background:var(--green);border-color:var(--green);}
+.sidebar-item.locked{opacity:.35;cursor:default;}
+.si-check{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--rule);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.si-check svg{display:none;}
+.sidebar-item.done .si-check svg{display:block;}
+.si-num{font-size:10px;font-family:var(--mono);color:var(--ink3);}
+.si-name{font-size:13px;font-weight:500;color:var(--ink2);line-height:1.3;margin-top:1px;}
+.sidebar-item.active .si-name{color:var(--ink);}
+.si-dur{font-size:10px;font-family:var(--mono);color:var(--ink3);margin-top:1px;}
+.sidebar-footer{margin-top:auto;padding:14px 20px 0;border-top:1px solid var(--rule);}
+.prog-lbl{font-size:11px;color:var(--ink3);margin-bottom:5px;}
+.prog-bar{height:3px;background:var(--rule);border-radius:999px;overflow:hidden;}
+.prog-fill{height:3px;background:var(--accent);border-radius:999px;width:36%;}
+
+/* MAIN */
+.main{overflow-y:auto;}
+.reading-bar{position:fixed;top:0;left:260px;right:0;height:2px;background:var(--rule);z-index:100;}
+.reading-bar-fill{height:2px;background:var(--accent);width:0%;transition:width .1s;}
+
+/* SUBTABS */
+.subtabs{display:flex;padding:0 52px;border-bottom:1px solid var(--rule2);background:var(--bg);position:sticky;top:0;z-index:10;}
+.subtab{font-size:12px;font-family:var(--mono);padding:10px 16px;cursor:pointer;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-1px;background:none;border-top:none;border-left:none;border-right:none;transition:all .1s;}
+.subtab:hover{color:var(--ink2);}
+.subtab.active{color:var(--ink);border-bottom-color:var(--accent);}
+
+/* SECTIONS */
+.mod-section{display:none;}
+.mod-section.active{display:block;}
+
+/* THEORY */
+.theory-wrap{padding:44px 52px 52px;max-width:780px;}
+.prose-max{max-width:640px;}
+.eyebrow{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
+.mod-title{font-family:var(--serif);font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1.15;color:var(--ink);margin-bottom:8px;}
+.mod-sub{font-size:15px;color:var(--ink2);line-height:1.65;max-width:520px;}
+.prose-divider{border:none;border-top:1px solid var(--rule2);margin:40px 0;}
+.prose-h2{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:-.01em;color:var(--ink);margin:44px 0 12px;display:flex;align-items:center;gap:12px;}
+.prose-h2:first-of-type{margin-top:32px;}
+.prose-h2 .sn{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--ink3);letter-spacing:.06em;min-width:28px;}
+.prose-p{font-family:var(--serif);font-size:17px;color:var(--ink2);line-height:1.85;margin-bottom:18px;}
+.prose-p strong{color:var(--ink);font-weight:600;}
+.prose-p em{font-style:italic;}
+.prose-p code{font-family:var(--mono);font-size:13px;background:var(--bg2);padding:1px 5px;border-radius:3px;color:var(--ink);border:1px solid var(--rule);}
+
+/* Callouts */
+.callout{border-radius:8px;padding:16px 18px;margin:22px 0;font-family:var(--sans);font-size:14px;line-height:1.7;}
+.callout .cl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;}
+.callout p{margin:0;}
+.callout.analogy{background:rgba(107,63,160,.06);border:1px solid rgba(107,63,160,.15);}
+.callout.analogy .cl{color:var(--purple);}
+.callout.analogy p{color:#3D2060;}
+.callout.insight{background:rgba(26,79,219,.05);border:1px solid rgba(26,79,219,.14);}
+.callout.insight .cl{color:var(--accent);}
+.callout.insight p{color:#0D2865;}
+.callout.warning{background:rgba(192,57,43,.05);border:1px solid rgba(192,57,43,.14);}
+.callout.warning .cl{color:var(--red);}
+.callout.warning p{color:#5C1A12;}
+.callout.fact{background:rgba(26,122,74,.05);border:1px solid rgba(26,122,74,.14);}
+.callout.fact .cl{color:var(--green);}
+.callout.fact p{color:#0D3D22;}
+
+/* Concept card */
+.concept-card{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:18px 20px;margin:20px 0;}
+.cc-title{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:7px;display:flex;align-items:center;gap:8px;}
+.cc-body{font-family:var(--sans);font-size:14px;color:var(--ink2);line-height:1.7;}
+
+/* Misconception */
+.misconception{background:rgba(196,134,10,.06);border:1px solid rgba(196,134,10,.2);border-radius:8px;padding:16px 18px;margin:20px 0;}
+.mc-lbl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.mc-wrong{font-family:var(--sans);font-size:14px;color:var(--red);margin-bottom:6px;display:flex;gap:8px;}
+.mc-right{font-family:var(--sans);font-size:14px;color:var(--green);display:flex;gap:8px;}
+
+/* Complexity table */
+.compare-tbl{width:100%;border-collapse:collapse;margin:22px 0;font-family:var(--sans);font-size:14px;}
+.compare-tbl th{padding:9px 12px;text-align:left;font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.08em;text-transform:uppercase;border-bottom:2px solid var(--rule);color:var(--ink3);}
+.compare-tbl td{padding:9px 12px;border-bottom:1px solid var(--rule2);color:var(--ink2);vertical-align:top;line-height:1.6;}
+.compare-tbl tr:last-child td{border-bottom:none;}
+.compare-tbl td:first-child{font-weight:500;color:var(--ink);width:120px;}
+
+/* Amplitude bars  visual amplification diagram */
+.amp-diagram{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:20px 24px;margin:22px 0;}
+.amp-title{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:16px;}
+.amp-row{margin-bottom:14px;}
+.amp-row-label{font-family:var(--mono);font-size:11px;color:var(--ink3);margin-bottom:6px;}
+.amp-bars{display:flex;align-items:flex-end;gap:4px;height:60px;}
+.amp-bar{border-radius:3px 3px 0 0;transition:height .5s;flex:1;}
+.amp-bar.normal{background:rgba(26,79,219,.4);}
+.amp-bar.target{background:var(--accent);}
+.amp-caption{font-family:var(--sans);font-size:12px;color:var(--ink3);margin-top:8px;font-style:italic;}
+
+/* Step list */
+.step-list-l{margin:20px 0;}
+.step-l{display:flex;gap:14px;margin-bottom:16px;align-items:flex-start;}
+.step-l-num{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-family:var(--mono);font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-l-title{font-family:var(--sans);font-weight:600;font-size:14px;color:var(--ink);margin-bottom:3px;}
+.step-l-text{font-family:var(--sans);font-size:13px;color:var(--ink2);line-height:1.6;}
+
+/* Circuit box */
+.circuit-box{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:24px;margin:22px 0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;}
+.circuit-caption{font-size:12px;font-family:var(--sans);color:var(--ink3);text-align:center;font-style:italic;}
+
+/* Quiz */
+.quiz-box{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:18px;margin:28px 0;}
+.quiz-lbl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px;}
+.quiz-q{font-family:var(--sans);font-size:15px;font-weight:500;color:var(--ink);margin-bottom:10px;}
+.quiz-opts{display:flex;flex-direction:column;gap:7px;}
+.quiz-opt{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-radius:6px;border:1px solid var(--rule);background:var(--bg);cursor:pointer;transition:all .15s;font-family:var(--sans);font-size:14px;color:var(--ink2);}
+.quiz-opt:hover{border-color:var(--accent);color:var(--ink);}
+.quiz-opt.correct{background:rgba(26,122,74,.08);border-color:var(--green);color:var(--green);}
+.quiz-opt.wrong{background:rgba(192,57,43,.06);border-color:var(--red);color:var(--red);}
+.quiz-opt .ol{font-family:var(--mono);font-size:11px;color:var(--ink3);min-width:18px;margin-top:1px;}
+.quiz-fb{margin-top:9px;padding:9px 12px;border-radius:6px;font-family:var(--sans);font-size:13px;line-height:1.6;display:none;}
+.quiz-fb.show{display:block;}
+.quiz-fb.correct{background:rgba(26,122,74,.08);color:var(--green);}
+.quiz-fb.wrong{background:rgba(192,57,43,.06);color:var(--red);}
+
+/* What's next */
+.whats-next{background:linear-gradient(135deg,rgba(26,79,219,.06),rgba(107,63,160,.06));border:1px solid rgba(26,79,219,.15);border-radius:8px;padding:20px;margin:40px 0 0;}
+.wn-lbl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.wn-title{font-family:var(--serif);font-size:17px;font-weight:600;margin-bottom:5px;}
+.wn-desc{font-family:var(--sans);font-size:14px;color:var(--ink2);line-height:1.6;}
+
+/* Theory footer */
+.theory-footer{display:flex;align-items:center;justify-content:space-between;padding:22px 52px 40px;max-width:780px;border-top:1px solid var(--rule2);}
+.tf-btn{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:14px;font-weight:500;padding:10px 20px;border-radius:6px;cursor:pointer;border:1px solid var(--rule);background:var(--bg2);color:var(--ink2);transition:all .15s;}
+.tf-btn:hover{border-color:var(--ink3);color:var(--ink);}
+.tf-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.tf-btn.primary:hover{background:var(--accent2);}
+
+/* HANDS-ON */
+.handson-wrap{padding:32px 52px 52px;max-width:780px;}
+.nb-hdr{margin-bottom:26px;padding-bottom:20px;border-bottom:1px solid var(--rule2);}
+.nb-eyebrow{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.nb-title{font-family:var(--serif);font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.2;margin-bottom:7px;}
+.nb-desc{font-size:14px;color:var(--ink2);line-height:1.65;max-width:500px;margin-bottom:12px;font-family:var(--sans);}
+.nb-meta{display:flex;gap:14px;flex-wrap:wrap;}
+.nb-meta-item{font-size:12px;font-family:var(--mono);color:var(--ink3);}
+.obj-box{background:rgba(26,79,219,.05);border:1px solid rgba(26,79,219,.14);border-radius:8px;padding:14px 16px;margin-bottom:26px;}
+.obj-lbl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:7px;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:4px;}
+.obj-list li{font-size:14px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;font-family:var(--sans);}
+.obj-list li::before{content:'→';font-family:var(--mono);color:var(--accent);font-size:12px;margin-top:1px;flex-shrink:0;}
+.nb-step{display:flex;align-items:center;gap:12px;margin:28px 0 14px;}
+.nb-step-num{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.nb-step-title{font-family:var(--sans);font-size:16px;font-weight:600;color:var(--ink);}
+.nb-prose p{font-family:var(--sans);font-size:15px;color:var(--ink2);line-height:1.75;margin-bottom:14px;}
+.nb-prose p strong{color:var(--ink);}
+.nb-prose p code{font-family:var(--mono);font-size:13px;background:var(--bg2);padding:1px 5px;border-radius:3px;color:var(--ink);border:1px solid var(--rule);}
+
+/* Callout nb */
+.callout-nb{border-radius:8px;padding:13px 16px;margin:16px 0;font-size:14px;line-height:1.65;font-family:var(--sans);}
+.cn-lbl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.callout-nb.tip{background:rgba(26,79,219,.05);border:1px solid rgba(26,79,219,.14);}
+.callout-nb.tip .cn-lbl{color:var(--accent);}
+.callout-nb.tip p{color:#0D2865;margin:0;}
+.callout-nb.note{background:rgba(196,134,10,.06);border:1px solid rgba(196,134,10,.2);}
+.callout-nb.note .cn-lbl{color:var(--gold);}
+.callout-nb.note p{color:#4A3008;margin:0;}
+.callout-nb.success{background:rgba(26,122,74,.05);border:1px solid rgba(26,122,74,.15);}
+.callout-nb.success .cn-lbl{color:var(--green);}
+.callout-nb.success p{color:#0A3320;margin:0;}
+.callout-nb.warning{background:rgba(192,57,43,.05);border:1px solid rgba(192,57,43,.14);}
+.callout-nb.warning .cn-lbl{color:var(--red);}
+.callout-nb.warning p{color:#5C1A12;margin:0;}
+
+/* Code */
+.code-wrap{margin:16px 0;}
+.code-hdr{background:#1E1E2E;padding:8px 13px;border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:space-between;}
+.code-fn{font-family:var(--mono);font-size:11px;color:#7C7F93;display:flex;align-items:center;gap:5px;}
+.code-fn::before{content:'📄';font-size:11px;}
+.code-hint{font-size:11px;font-family:var(--mono);color:#6C7086;}
+.code-body{background:#1E1E2E;padding:18px;border-radius:0 0 8px 8px;font-family:var(--mono);font-size:12px;line-height:2;overflow-x:auto;border:1px solid rgba(255,255,255,.05);border-top:none;white-space:pre;}
+.code-body .kw{color:#CBA6F7;}.code-body .fn{color:#89B4FA;}.code-body .st{color:#A6E3A1;}.code-body .cm{color:#585B70;}.code-body .nm{color:#FAB387;}.code-body .cls{color:#F9E2AF;}.code-body .var{color:#CDD6F4;}
+
+/* Line explanation */
+.line-exp{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;margin:7px 0 18px;}
+.le-title{font-size:11px;font-family:var(--mono);font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:9px;}
+.le-row{display:flex;gap:12px;padding:5px 0;border-bottom:1px solid var(--rule2);font-size:13px;align-items:flex-start;}
+.le-row:last-child{border-bottom:none;}
+.le-code{font-family:var(--mono);font-size:11px;color:var(--accent);min-width:180px;flex-shrink:0;padding-top:1px;}
+.le-meaning{color:var(--ink2);line-height:1.5;font-family:var(--sans);}
+
+/* Probability graphs */
+.output-lbl{font-size:11px;font-family:var(--mono);font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:18px 0 10px;}
+.prob-graph{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:20px 24px;margin-bottom:8px;}
+.pg-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:16px;font-family:var(--sans);}
+.pg-bars{display:flex;align-items:flex-end;gap:8px;height:110px;margin-bottom:9px;}
+.pg-group{display:flex;flex-direction:column;align-items:center;flex:1;}
+.pg-bar-con{width:100%;display:flex;align-items:flex-end;height:90px;position:relative;}
+.pg-bar{width:100%;border-radius:4px 4px 0 0;transition:height .6s;position:relative;}
+.pg-bar::after{content:attr(data-pct);position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:10px;font-weight:600;color:var(--ink);white-space:nowrap;}
+.pg-bar.uniform{background:linear-gradient(180deg,rgba(26,79,219,.5),rgba(26,79,219,.25));}
+.pg-bar.target{background:linear-gradient(180deg,rgba(192,57,43,.9),rgba(192,57,43,.5));}
+.pg-bar.suppressed{background:linear-gradient(180deg,rgba(26,79,219,.2),rgba(26,79,219,.1));}
+.pg-lbl{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--ink2);margin-top:5px;}
+.pg-axis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--ink3);padding:0 2px;}
+.pg-interp{margin-top:10px;font-size:13px;color:var(--ink2);line-height:1.6;padding-top:10px;border-top:1px solid var(--rule2);font-family:var(--sans);}
+.pg-interp strong{color:var(--ink);}
+
+/* Runtime chart */
+.runtime-chart{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:20px 24px;margin:20px 0;}
+.rc-title{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:14px;}
+.rc-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--rule2);}
+.rc-row:last-child{border-bottom:none;}
+.rc-label{font-family:var(--mono);font-size:11px;color:var(--ink3);min-width:50px;}
+.rc-classical{height:14px;border-radius:2px;background:rgba(192,57,43,.5);}
+.rc-grover{height:14px;border-radius:2px;background:rgba(26,79,219,.5);}
+.rc-note{font-family:var(--mono);font-size:11px;color:var(--ink3);margin-left:auto;}
+
+.section-sep{border:none;border-top:1px solid var(--rule2);margin:32px 0;}
+.insight-box{background:var(--bg2);border-left:3px solid var(--accent);padding:14px 16px;margin:18px 0;border-radius:0 8px 8px 0;}
+.insight-box p{font-family:var(--sans);font-size:14px;color:var(--ink2);margin:0;line-height:1.65;}
+.insight-box p strong{color:var(--ink);}
+
+.nb-footer{display:flex;align-items:center;justify-content:space-between;padding:18px 0 0;margin-top:32px;border-top:1px solid var(--rule2);}
+.nb-foot-btn{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:14px;font-weight:500;padding:9px 18px;border-radius:6px;cursor:pointer;border:1px solid var(--rule);background:var(--bg2);color:var(--ink2);transition:all .15s;}
+.nb-foot-btn:hover{border-color:var(--ink3);color:var(--ink);}
+.nb-foot-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.nb-foot-btn.primary:hover{background:var(--accent2);}
+</style>
+<style>
+.ql-adapted{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100%;}
+.ql-adapted .sidebar,.ql-adapted .reading-bar{display:none!important;}
+.ql-adapted .main{background:var(--bg);overflow:visible;}
+.ql-adapted .lesson-footer,.ql-adapted .theory-footer,.ql-adapted .nb-footer{display:none!important;}
+.ql-adapted .lesson,.ql-adapted .mod-section{display:block;}
+.ql-adapted .lesson:not(.active){display:none;}
+.ql-adapted .mod-section:not(.active){display:none;}
+.ql-adapted .code-wrap{margin:18px 0;border:1px solid #D7D0C6;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 10px 28px rgba(26,24,20,.06);}
+.ql-adapted .code-header,.ql-adapted .code-hdr{background:#F3F4F6!important;padding:8px 14px!important;border-radius:0!important;border-bottom:1px solid #D7D0C6;display:flex;align-items:center;justify-content:space-between;}
+.ql-adapted .code-lang,.ql-adapted .code-title,.ql-adapted .code-fn,.ql-adapted .code-filename,.ql-adapted .code-hint,.ql-adapted .code-run-hint{color:#4A4640!important;font-family:var(--mono);}
+.ql-adapted .code-fn::before,.ql-adapted .code-filename::before{content:'PY'!important;font-size:10px;color:#1A4FDB;font-weight:600;}
+.ql-adapted .code-block,.ql-adapted .code-body{background:#fff!important;color:#1F2937!important;border:0!important;border-left:3px solid #E8F0FF!important;border-radius:0!important;padding:18px 18px 18px 78px!important;font-family:var(--mono);font-size:12px;line-height:2;overflow-x:auto;white-space:pre;position:relative;}
+.ql-adapted .code-block::before,.ql-adapted .code-body::before{content:'In [ ]:';position:absolute;left:14px;top:18px;font-family:var(--mono);font-size:10px;color:#1A4FDB;}
+.ql-adapted .code-block .kw,.ql-adapted .code-body .kw{color:#7C3AED!important;}
+.ql-adapted .code-block .fn,.ql-adapted .code-body .fn{color:#1A4FDB!important;}
+.ql-adapted .code-block .st,.ql-adapted .code-body .st{color:#1A7A4A!important;}
+.ql-adapted .code-block .cm,.ql-adapted .code-body .cm{color:#6B625B!important;}
+.ql-adapted .code-block .nm,.ql-adapted .code-body .nm{color:#C0392B!important;}
+.ql-adapted .code-block .cls,.ql-adapted .code-body .cls{color:#C4860A!important;}
+.ql-adapted .code-block .var,.ql-adapted .code-body .var{color:#1A1814!important;}
+.ql-adapted .output-box{background:#FBFBFB!important;border:1px solid #E3DED6!important;color:#1A1814!important;}
+.ql-adapted .terminal-header,.ql-adapted .term-hdr{background:#F3F4F6!important;border:1px solid #D7D0C6;border-bottom:0;}
+.ql-adapted .terminal-body,.ql-adapted .term-body{background:#fff!important;color:#1A1814!important;border:1px solid #D7D0C6;border-left:3px solid #E8F0FF;}
+.ql-adapted .terminal-body .cmd,.ql-adapted .term-body .cmd{color:#1A1814!important;}
+.ql-adapted .terminal-body .prompt,.ql-adapted .term-body .pr{color:#1A4FDB!important;}
+</style>
+<div class="ql-adapted module-04">
+<div class="subtabs">
+      <button class="subtab active" onclick="showSubtab('theory',this)" id="tab-theory">📖 Theory</button>
+      <button class="subtab" onclick="showSubtab('handson',this)" id="tab-handson">💻 Hands-on</button>
+    </div>
+
+    <!-- ══════════════════════════
+         THEORY
+    ══════════════════════════ -->
+    <div class="mod-section active" id="sec-theory">
+      <div class="theory-wrap">
+        <div class="prose-max">
+
+          <!-- Bridge from M00-M03 -->
+          <div style="background:rgba(26,79,219,.05);border:1px solid rgba(26,79,219,.14);border-radius:8px;padding:16px 18px;margin-bottom:28px;">
+            <div style="font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;">Bridge from M00–M03</div>
+            <p style="font-family:var(--sans);font-size:14px;color:#0D2865;margin:0;line-height:1.7;">In M01 you saw that H puts a qubit in equal superposition  exploring 0 and 1 simultaneously. In M03 you saw that entanglement correlates qubits across the whole system. Grover's algorithm combines both: it starts with equal superposition across <em>all possible answers</em>, then repeatedly amplifies the probability of the correct answer while suppressing the wrong ones. By the time you measure, the right answer is highly probable  not certain, but highly likely.</p>
+          </div>
+
+          <div class="eyebrow">Module 04 · Algorithms · ~3 hrs · Code included</div>
+          <h1 class="mod-title">Grover's Algorithm</h1>
+          <p class="mod-sub">The first quantum algorithm with a proven speedup over classical computers. Searches an unsorted database of N items in O(√N) steps instead of O(N). Real, verified, limited by noise on current hardware.</p>
+
+          <hr class="prose-divider"/>
+
+          <!-- SECTION 1 -->
+          <h2 class="prose-h2"><span class="sn">01</span> The problem  searching without structure</h2>
+          <p class="prose-p">Imagine you have a phonebook with one million entries, but it is completely unsorted  names are in random order. You want to find one specific name. Classically, you have no choice but to check entries one by one. On average you will check half the entries before finding it  half a million checks. In the worst case, you check all one million.</p>
+          <p class="prose-p">This is called <strong>unstructured search</strong>. There is no pattern to exploit, no shortcut, no clever indexing that helps. The classical lower bound is O(N)  you must check at least some linear fraction of the entries. No classical algorithm can do better.</p>
+          <p class="prose-p">Grover's algorithm does better. It finds the target entry in approximately <strong>√N steps</strong>. For one million entries: about 1,000 steps instead of 500,000. This is a quadratic speedup  not exponential, but proven, unconditional, and applies to any unstructured search problem.</p>
+
+          <table class="compare-tbl">
+            <thead><tr><th>Database size N</th><th>Classical (average)</th><th>Grover's</th><th>Speedup</th></tr></thead>
+            <tbody>
+              <tr><td>1,000</td><td>500 checks</td><td>~25 steps</td><td style="color:var(--green)">20×</td></tr>
+              <tr><td>1,000,000</td><td>500,000 checks</td><td>~785 steps</td><td style="color:var(--green)">637×</td></tr>
+              <tr><td>1,000,000,000</td><td>500,000,000 checks</td><td>~24,849 steps</td><td style="color:var(--green)">20,121×</td></tr>
+              <tr><td>2²⁵⁶ (cryptographic)</td><td>2²⁵⁵ checks</td><td>2¹²⁸ steps</td><td style="color:var(--gold)">Significant but not enough for AES-256</td></tr>
+            </tbody>
+          </table>
+
+          <div class="callout fact">
+            <div class="cl">✓ This speedup is proven</div>
+            <p>Unlike many quantum computing claims, the O(√N) speedup of Grover's algorithm is not a conjecture or an approximation. It is a proven lower bound result  no quantum algorithm can search an unstructured database faster. Grover's algorithm is optimal.</p>
+          </div>
+
+          <hr class="prose-divider"/>
+
+          <!-- SECTION 2 -->
+          <h2 class="prose-h2"><span class="sn">02</span> The quantum strategy  three steps</h2>
+          <p class="prose-p">Grover's algorithm works by repeatedly applying two operations: the <strong>oracle</strong> and the <strong>diffusion operator</strong>. Together they form one Grover iteration. Each iteration increases the probability of measuring the target state.</p>
+
+          <div class="step-list-l">
+            <div class="step-l">
+              <div class="step-l-num">1</div>
+              <div>
+                <div class="step-l-title">Initialise  equal superposition</div>
+                <div class="step-l-text">Apply H to all qubits. Every possible answer now has equal amplitude 1/√N. The system is simultaneously "considering" all N possibilities.</div>
+              </div>
+            </div>
+            <div class="step-l">
+              <div class="step-l-num">2</div>
+              <div>
+                <div class="step-l-title">Oracle  mark the target</div>
+                <div class="step-l-text">Apply the oracle gate. It flips the phase of the target state  multiplying its amplitude by −1. The amplitude magnitudes are unchanged but the target now has negative phase. This "marks" it without revealing it.</div>
+              </div>
+            </div>
+            <div class="step-l">
+              <div class="step-l-num">3</div>
+              <div>
+                <div class="step-l-title">Diffusion  amplify the marked state</div>
+                <div class="step-l-text">Apply the diffusion operator (also called inversion about the mean). This reflects all amplitudes about their average value. Because the target has negative amplitude, it gets amplified above the average. All others get suppressed. Repeat steps 2–3 approximately √N/4 times, then measure.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout analogy">
+            <div class="cl">🧠 Analogy  noise-cancelling headphones for wrong answers</div>
+            <p>Imagine all N candidates at equal volume. The oracle plays the target candidate's sound out of phase  it does not cancel, it just marks it differently. The diffusion operator then uses interference: the out-of-phase target gets louder (constructive interference) while all others get quieter (destructive interference). After √N repetitions, the target is loud enough to hear clearly above the noise.</p>
+          </div>
+
+          <!-- SECTION 3 -->
+          <h2 class="prose-h2"><span class="sn">03</span> Amplitude amplification  the geometric picture</h2>
+          <p class="prose-p">The clearest way to understand why Grover's works is geometrically. Think of the quantum state as a vector in a two-dimensional space. One axis represents the target state. The other axis represents the uniform superposition of all non-target states.</p>
+          <p class="prose-p">Initially the state vector is very close to the non-target axis  because with N items, the target has amplitude 1/√N which is tiny. Each Grover iteration rotates the state vector by a fixed angle toward the target axis. After approximately π/(4·arcsin(1/√N)) ≈ π√N/4 iterations, the vector points almost directly at the target axis. Measuring then gives the target with high probability.</p>
+
+          <div class="amp-diagram">
+            <div class="amp-title">Amplitude amplification  8 states, target = state 3</div>
+            <div class="amp-row">
+              <div class="amp-row-label">After H  equal superposition (12.5% each)</div>
+              <div class="amp-bars">
+                <div class="amp-bar normal" style="height:100%"></div>
+                <div class="amp-bar normal" style="height:100%"></div>
+                <div class="amp-bar normal" style="height:100%"></div>
+                <div class="amp-bar normal" style="height:100%"></div>
+                <div class="amp-bar normal" style="height:100%"></div>
+                <div class="amp-bar normal" style="height:100%"></div>
+                <div class="amp-bar normal" style="height:100%"></div>
+                <div class="amp-bar normal" style="height:100%"></div>
+              </div>
+              <div class="amp-caption">All 8 states have equal probability ~12.5%</div>
+            </div>
+            <div class="amp-row">
+              <div class="amp-row-label">After 1 Grover iteration  target amplified</div>
+              <div class="amp-bars">
+                <div class="amp-bar suppressed" style="height:28%"></div>
+                <div class="amp-bar suppressed" style="height:28%"></div>
+                <div class="amp-bar suppressed" style="height:28%"></div>
+                <div class="amp-bar target" style="height:100%"></div>
+                <div class="amp-bar suppressed" style="height:28%"></div>
+                <div class="amp-bar suppressed" style="height:28%"></div>
+                <div class="amp-bar suppressed" style="height:28%"></div>
+                <div class="amp-bar suppressed" style="height:28%"></div>
+              </div>
+              <div class="amp-caption">Target (state 3, red) amplified to ~78%. Others suppressed to ~3%.</div>
+            </div>
+          </div>
+
+          <div class="callout insight">
+            <div class="cl">💡 How many iterations?</div>
+            <p>The optimal number of Grover iterations is approximately π√N/4. For N=4: 1 iteration. For N=8: 2–3 iterations. For N=1024: ~25 iterations. Applying too many iterations rotates past the target and the probability decreases again  it is sinusoidal. This is why you must calculate the right number of iterations in advance.</p>
+          </div>
+
+          <div style="background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:24px;margin:28px 0;">
+            <div style="font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">Interactive  Grover's Spotlight</div>
+            <div style="font-family:var(--sans);font-size:12px;color:var(--ink3);margin-bottom:16px;">N=8 search space. Target: item 5. Watch amplitude amplification in action.</div>
+            <!-- Chart area -->
+            <div style="position:relative;height:150px;display:flex;align-items:flex-end;gap:5px;padding:0 4px;margin-bottom:8px;" id="gv-chart">
+              <!-- bars injected by JS -->
+            </div>
+            <!-- X axis labels -->
+            <div style="display:flex;gap:5px;padding:0 4px;margin-bottom:12px;" id="gv-xlabels"></div>
+            <!-- Status line -->
+            <div id="gv-status" style="font-family:var(--sans);font-size:13px;color:var(--ink);font-weight:500;text-align:center;margin-bottom:4px;min-height:20px;"></div>
+            <div id="gv-mood" style="font-family:var(--sans);font-size:13px;color:var(--ink3);text-align:center;margin-bottom:16px;min-height:20px;font-style:italic;"></div>
+            <!-- Buttons -->
+            <div style="display:flex;gap:10px;justify-content:center;">
+              <button id="gv-iter-btn" onclick="groverIterate()" style="font-family:var(--sans);font-size:13px;font-weight:500;padding:9px 22px;border-radius:6px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;transition:all .15s;">Run Grover iteration</button>
+              <button onclick="groverReset()" style="font-family:var(--sans);font-size:13px;font-weight:500;padding:9px 20px;border-radius:6px;border:1.5px solid var(--rule);background:var(--bg2);color:var(--ink2);cursor:pointer;transition:all .15s;">Reset</button>
+            </div>
+            <script>
+            (function(){
+              var TARGET = 5;
+              var ITERS = [
+                [12.5, 12.5, 12.5, 12.5, 12.5, 12.5, 12.5, 12.5],
+                [4,    4,    4,    4,    4,    50,   4,    4   ],
+                [1,    1,    1,    1,    1,    95,   0.5,  0.5 ],
+                [5,    5,    5,    5,    5,    65,   5,    5   ]
+              ];
+              var MOODS = [
+                'Everyone equally suspicious 🤷',
+                'Getting warm... 🌡️',
+                'Found it! 🎯',
+                'Whoops, over-rotated 😬'
+              ];
+              var curIter = 0;
+
+              function buildChart() {
+                var chart = document.getElementById('gv-chart');
+                var xlabels = document.getElementById('gv-xlabels');
+                chart.innerHTML = '';
+                xlabels.innerHTML = '';
+                for (var i = 0; i < 8; i++) {
+                  // Bar wrapper
+                  var wrap = document.createElement('div');
+                  wrap.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative;';
+                  // Pct label
+                  var pctEl = document.createElement('div');
+                  pctEl.id = 'gv-pct-'+i;
+                  pctEl.style.cssText = 'font-family:var(--mono);font-size:9px;font-weight:600;color:var(--ink);margin-bottom:2px;transition:all .5s ease;';
+                  pctEl.textContent = '12.5%';
+                  // Bar itself
+                  var bar = document.createElement('div');
+                  bar.id = 'gv-bar-'+i;
+                  bar.style.cssText = 'width:100%;border-radius:4px 4px 0 0;transition:height .55s ease, background .55s ease;';
+                  if (i === TARGET) {
+                    bar.style.background = 'var(--accent)';
+                    bar.style.outline = '2.5px solid var(--gold)';
+                    bar.style.outlineOffset = '1px';
+                  } else {
+                    bar.style.background = 'rgba(26,79,219,.35)';
+                  }
+                  bar.style.height = '18px'; // 12.5% of 140px ≈ 18px, set after paint
+                  wrap.appendChild(pctEl);
+                  wrap.appendChild(bar);
+                  chart.appendChild(wrap);
+                  // X label
+                  var lbl = document.createElement('div');
+                  lbl.style.cssText = 'flex:1;text-align:center;font-family:var(--mono);font-size:10px;font-weight:600;color:'+(i===TARGET?'var(--gold)':'var(--ink3)')+';';
+                  lbl.textContent = i + (i===TARGET ? '*' : '');
+                  xlabels.appendChild(lbl);
+                }
+                renderIter(0, false);
+              }
+
+              function renderIter(idx, animate) {
+                var probs = ITERS[idx];
+                var maxH = 134; // px available for bars
+                var maxP = Math.max.apply(null, probs);
+                for (var i = 0; i < 8; i++) {
+                  var bar = document.getElementById('gv-bar-'+i);
+                  var pctEl = document.getElementById('gv-pct-'+i);
+                  var h = Math.max(3, Math.round((probs[i] / maxP) * maxH));
+                  if (!animate) { bar.style.transition='none'; pctEl.style.transition='none'; }
+                  else { bar.style.transition='height .55s ease, background .55s ease'; pctEl.style.transition='all .5s ease'; }
+                  bar.style.height = h + 'px';
+                  pctEl.textContent = probs[i].toFixed(1) + '%';
+                  if (i === TARGET) {
+                    bar.style.background = idx === 0 ? 'var(--accent)' : (idx === 2 ? 'var(--green,#1A7A4A)' : (idx >= 3 ? 'var(--gold)' : 'var(--accent)'));
+                  } else {
+                    var op = idx === 0 ? 0.35 : (idx === 2 ? 0.12 : 0.25);
+                    bar.style.background = 'rgba(26,79,219,'+op+')';
+                  }
+                }
+                var status = document.getElementById('gv-status');
+                var mood   = document.getElementById('gv-mood');
+                status.textContent = 'Iteration ' + idx + '  item 5 probability: ' + probs[TARGET].toFixed(1) + '%';
+                mood.textContent   = MOODS[Math.min(idx, MOODS.length-1)];
+              }
+
+              window.groverIterate = function() {
+                if (curIter >= ITERS.length - 1) return;
+                curIter++;
+                renderIter(curIter, true);
+                if (curIter >= ITERS.length - 1) {
+                  var btn = document.getElementById('gv-iter-btn');
+                  btn.style.opacity = '0.4';
+                  btn.style.cursor  = 'default';
+                }
+              };
+
+              window.groverReset = function() {
+                curIter = 0;
+                renderIter(0, true);
+                var btn = document.getElementById('gv-iter-btn');
+                btn.style.opacity = '1';
+                btn.style.cursor  = 'pointer';
+              };
+
+              // Init on load
+              if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', buildChart);
+              } else {
+                buildChart();
+              }
+            })();
+            </script>
+          </div>
+
+          <hr class="prose-divider"/>
+
+          <!-- SECTION 4 -->
+          <h2 class="prose-h2"><span class="sn">04</span> The oracle  what it is and why it is hard</h2>
+          <p class="prose-p">The oracle is a quantum gate that recognises the target state and flips its phase. In circuit terms: if the input is the target state |x⟩, the oracle outputs −|x⟩. For all other states, it does nothing.</p>
+          <p class="prose-p">For simple cases like "find the state |101⟩ among all 3-qubit states", building the oracle is straightforward  use a multi-controlled Z gate that triggers exactly on |101⟩. For real-world problems, building the oracle is the hard part.</p>
+
+          <div class="concept-card">
+            <div class="cc-title">The oracle problem in practice</div>
+            <div class="cc-body">For Grover's to help with a real problem, you need to encode the problem's "checking" function as a reversible quantum circuit. For example, to search for a password that hashes to a specific value, you would need to implement the hash function as a quantum circuit. This is technically possible but the resulting circuit is very deep  which means it is vulnerable to NISQ noise. This is one of the main reasons Grover's speedup is difficult to realise on current hardware.</div>
+          </div>
+
+          <div class="circuit-box">
+            <svg width="340" height="120" viewBox="0 0 340 120" fill="none">
+              <line x1="10" y1="30" x2="330" y2="30" stroke="#CBD5E1" stroke-width="1.5"/>
+              <line x1="10" y1="60" x2="330" y2="60" stroke="#CBD5E1" stroke-width="1.5"/>
+              <line x1="10" y1="90" x2="330" y2="90" stroke="#CBD5E1" stroke-width="1.5"/>
+              <text x="8" y="17" font-size="8" fill="#8A8480" font-family="JetBrains Mono">q₀</text>
+              <text x="8" y="47" font-size="8" fill="#8A8480" font-family="JetBrains Mono">q₁</text>
+              <text x="8" y="77" font-size="8" fill="#8A8480" font-family="JetBrains Mono">q₂</text>
+              <!-- H gates -->
+              <rect x="30" y="20" width="24" height="20" rx="3" fill="#EFEDE7" stroke="#1A4FDB" stroke-width="1.5"/>
+              <text x="42" y="34" text-anchor="middle" font-size="10" fill="#1A4FDB" font-family="JetBrains Mono">H</text>
+              <rect x="30" y="50" width="24" height="20" rx="3" fill="#EFEDE7" stroke="#1A4FDB" stroke-width="1.5"/>
+              <text x="42" y="64" text-anchor="middle" font-size="10" fill="#1A4FDB" font-family="JetBrains Mono">H</text>
+              <rect x="30" y="80" width="24" height="20" rx="3" fill="#EFEDE7" stroke="#1A4FDB" stroke-width="1.5"/>
+              <text x="42" y="94" text-anchor="middle" font-size="10" fill="#1A4FDB" font-family="JetBrains Mono">H</text>
+              <!-- Oracle box -->
+              <rect x="74" y="16" width="70" height="88" rx="4" fill="rgba(192,57,43,.08)" stroke="#C0392B" stroke-width="1.5" stroke-dasharray="4 3"/>
+              <text x="109" y="60" text-anchor="middle" font-size="11" fill="#C0392B" font-family="JetBrains Mono">Oracle</text>
+              <text x="109" y="74" text-anchor="middle" font-size="9" fill="#C0392B" font-family="JetBrains Mono">Uω</text>
+              <!-- Diffusion box -->
+              <rect x="160" y="16" width="80" height="88" rx="4" fill="rgba(26,79,219,.06)" stroke="#1A4FDB" stroke-width="1.5" stroke-dasharray="4 3"/>
+              <text x="200" y="57" text-anchor="middle" font-size="10" fill="#1A4FDB" font-family="JetBrains Mono">Diffusion</text>
+              <text x="200" y="71" text-anchor="middle" font-size="9" fill="#1A4FDB" font-family="JetBrains Mono">2|s⟩⟨s|−I</text>
+              <!-- Brace -->
+              <text x="248" y="57" font-size="10" fill="#8A8480" font-family="JetBrains Mono">} ×k</text>
+              <!-- Measurement -->
+              <rect x="296" y="20" width="22" height="20" rx="3" fill="#EFEDE7" stroke="#8A8480" stroke-width="1"/>
+              <text x="307" y="34" text-anchor="middle" font-size="8" fill="#8A8480" font-family="JetBrains Mono">M</text>
+              <rect x="296" y="50" width="22" height="20" rx="3" fill="#EFEDE7" stroke="#8A8480" stroke-width="1"/>
+              <text x="307" y="64" text-anchor="middle" font-size="8" fill="#8A8480" font-family="JetBrains Mono">M</text>
+              <rect x="296" y="80" width="22" height="20" rx="3" fill="#EFEDE7" stroke="#8A8480" stroke-width="1"/>
+              <text x="307" y="94" text-anchor="middle" font-size="8" fill="#8A8480" font-family="JetBrains Mono">M</text>
+            </svg>
+            <div class="circuit-caption">Grover's circuit: H gates → (Oracle + Diffusion) repeated k=⌊π√N/4⌋ times → Measure</div>
+          </div>
+
+          <!-- SECTION 5 -->
+          <h2 class="prose-h2"><span class="sn">05</span> The proven O(√N) speedup</h2>
+          <p class="prose-p">The speedup is exactly quadratic. If classical search needs T steps, Grover's needs √T steps. This is provably optimal  no quantum algorithm can do unstructured search faster.</p>
+
+          <div class="misconception">
+            <div class="mc-lbl">⚠ Common overstatement</div>
+            <div class="mc-wrong">✗ &nbsp;"Grover's gives exponential speedup over classical search"</div>
+            <div class="mc-right">✓ &nbsp;Grover's gives quadratic speedup. Classical: O(N). Grover's: O(√N). For N=2²⁵⁶: classical needs 2²⁵⁵ steps, Grover's needs 2¹²⁸. Still astronomically large for AES-256.</div>
+          </div>
+
+          <div class="callout warning">
+            <div class="cl">⚠ What this means for cryptography</div>
+            <p>Grover's halves the effective key length of symmetric encryption. AES-256 effectively becomes AES-128 against a quantum attacker. NIST has already recommended doubling key lengths as a precaution. But AES-128 is still considered secure  2¹²⁸ operations is still computationally infeasible even with a quantum computer. RSA is broken by Shor's algorithm (M05)  not Grover's.</p>
+          </div>
+
+          <!-- SECTION 6 -->
+          <h2 class="prose-h2"><span class="sn">06</span> NISQ reality  where Grover's breaks today</h2>
+          <p class="prose-p">On current NISQ hardware, Grover's algorithm only demonstrates a speedup for very small N. Here is why:</p>
+
+          <div class="concept-card">
+            <div class="cc-title">The depth problem</div>
+            <div class="cc-body">Each Grover iteration requires the oracle circuit plus the diffusion circuit. For a 3-qubit (N=8) Grover's search, the circuit depth is manageable. But for N=1024 (10 qubits), each iteration is much deeper, and you need ~25 iterations. The total circuit depth quickly exceeds NISQ coherence limits  noise washes out the answer before amplification completes.</div>
+          </div>
+
+          <div class="concept-card">
+            <div class="cc-title">Practical NISQ limit</div>
+            <div class="cc-body">On IBM hardware today, Grover's reliably demonstrates speedup for N ≤ 16 (4 qubits). Beyond that, noise degrades the amplification and the classical computer wins again. The theoretical speedup over classical search only materialises on fault-tolerant hardware  which requires error correction not yet available.</div>
+          </div>
+
+          <!-- SECTION 7 -->
+          <h2 class="prose-h2"><span class="sn">07</span> When Grover's actually matters today</h2>
+          <p class="prose-p">Despite the NISQ limitations, Grover's matters for three reasons right now:</p>
+
+          <div class="concept-card">
+            <div class="cc-title">1. It proves quantum advantage is possible</div>
+            <div class="cc-body">Grover's is the clearest proof that quantum computers can outperform classical computers on a well-defined task. This motivates the entire field. It is not hype  it is a theorem.</div>
+          </div>
+          <div class="concept-card">
+            <div class="cc-title">2. Amplitude amplification is used everywhere</div>
+            <div class="cc-body">The technique Grover's uses  amplitude amplification  is a subroutine in dozens of other quantum algorithms. Understanding Grover's gives you the intuition for how quantum speedups work more broadly.</div>
+          </div>
+          <div class="concept-card">
+            <div class="cc-title">3. Future hardware will unlock the speedup</div>
+            <div class="cc-body">When fault-tolerant quantum computers arrive (estimated 10–20 years), Grover's speedup will apply to real cryptographic and optimisation problems. Building intuition now means being ready when the hardware catches up.</div>
+          </div>
+
+          <!-- QUIZ -->
+          <div class="quiz-box">
+            <div class="quiz-lbl">✓ Check your understanding</div>
+            <div class="quiz-q">Grover's algorithm searches N=1,000,000 items. Approximately how many iterations does it need?</div>
+            <div class="quiz-opts">
+              <div class="quiz-opt" onclick="checkQ(this,'wrong','qfb-0')"><span class="ol">A</span>1,000,000  same as classical</div>
+              <div class="quiz-opt" onclick="checkQ(this,'wrong','qfb-0')"><span class="ol">B</span>500,000  half of classical</div>
+              <div class="quiz-opt" onclick="checkQ(this,'correct','qfb-0')"><span class="ol">C</span>~785  approximately √1,000,000 × π/4</div>
+              <div class="quiz-opt" onclick="checkQ(this,'wrong','qfb-0')"><span class="ol">D</span>~20  logarithmic speedup</div>
+            </div>
+            <div class="quiz-fb correct" id="qfb-0">✓ Correct. Grover's needs approximately π√N/4 iterations. For N=1,000,000: π×1000/4 ≈ 785 iterations. This is the quadratic speedup  √1,000,000 = 1,000, and with the π/4 factor it becomes ~785.</div>
+          </div>
+
+          <div class="quiz-box">
+            <div class="quiz-lbl">✓ Check your understanding</div>
+            <div class="quiz-q">What happens if you apply too many Grover iterations  more than the optimal number?</div>
+            <div class="quiz-opts">
+              <div class="quiz-opt" onclick="checkQ(this,'wrong','qfb-1')"><span class="ol">A</span>The probability of the target keeps increasing towards 100%</div>
+              <div class="quiz-opt" onclick="checkQ(this,'correct','qfb-1')"><span class="ol">B</span>The probability decreases  it rotates past the target and back towards uniform</div>
+              <div class="quiz-opt" onclick="checkQ(this,'wrong','qfb-1')"><span class="ol">C</span>The circuit produces an error</div>
+              <div class="quiz-opt" onclick="checkQ(this,'wrong','qfb-1')"><span class="ol">D</span>Nothing changes  extra iterations are harmless</div>
+            </div>
+            <div class="quiz-fb correct" id="qfb-1">✓ Correct. Grover's iterations rotate the state vector by a fixed angle. Too many rotations overshoot the target and the probability decreases sinusoidally. You must apply approximately π√N/4 iterations  no more, no less. This is why knowing N in advance is required.</div>
+          </div>
+
+          <div class="whats-next">
+            <div class="wn-lbl">Ready for code?</div>
+            <div class="wn-title">Switch to Hands-on tab</div>
+            <div class="wn-desc">You understand Grover's conceptually. Now switch to Hands-on to implement it in Qiskit  starting with classical linear search, then Grover's for N=4, N=8, plotting amplitude amplification in action, and comparing classical vs quantum runtimes.</div>
+          </div>
+        </div>
+      </div>
+      <div class="theory-footer">
+        <button class="tf-btn" onclick="alert('Go to M03')">← M03: Entanglement</button>
+        <button class="tf-btn primary" onclick="showSubtab('handson',document.getElementById('tab-handson'))">Go to Hands-on →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         HANDS-ON
+    ══════════════════════════ -->
+    <div class="mod-section" id="sec-handson">
+      <div class="handson-wrap">
+
+        <!-- NB 00  Classical baseline -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 00 · Classical baseline</div>
+          <div class="nb-title">Classical linear search  your benchmark</div>
+          <div class="nb-desc">Implement classical unstructured search in Python. Time it at different database sizes. This is the O(N) baseline that Grover's must beat.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~10 min</span><span class="nb-meta-item">🐍 No Qiskit</span></div>
+        </div>
+        <div class="obj-box">
+          <div class="obj-lbl">By the end of this notebook</div>
+          <ul class="obj-list">
+            <li>You have implemented classical linear search and timed it</li>
+            <li>You have a table of search times at N = 10, 100, 1000, 10000</li>
+            <li>You have confirmed the O(N) scaling  doubling N doubles the time</li>
+          </ul>
+        </div>
+        <div class="nb-prose"><p>Import the timing and plotting libraries, then define the linear_search function that iterates through a shuffled list element by element until it finds the target. This O(N) approach is the classical baseline  no shortcuts exist for an unsorted list.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb00_classical_search.py</span><span class="code-hint">step 1  imports + define linear_search function</span></div>
+          <div class="code-body">
+<span class="kw">import</span> <span class="var">time</span>
+<span class="kw">import</span> <span class="var">random</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="kw">def</span> <span class="fn">linear_search</span>(<span class="var">database</span>, <span class="var">target</span>):
+    <span class="st">"""O(N) unstructured search  check every element."""</span>
+    <span class="kw">for</span> <span class="var">i</span>, <span class="var">item</span> <span class="kw">in</span> <span class="fn">enumerate</span>(<span class="var">database</span>):
+        <span class="kw">if</span> <span class="var">item</span> == <span class="var">target</span>:
+            <span class="kw">return</span> <span class="var">i</span>   <span class="cm"># found at index i</span>
+    <span class="kw">return</span> -<span class="nm">1</span>  <span class="cm"># not found</span>
+          </div>
+        </div>
+        <div class="nb-prose"><p>Run the search at five database sizes from N=10 up to N=100,000, timing each run and recording how many checks were needed. Print a table showing that checks scale linearly with N  this is the O(N) behaviour that Grover's algorithm replaces with O(√N).</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb00_classical_search.py</span><span class="code-hint">step 2  time search at N=10..100k + print table</span></div>
+          <div class="code-body">
+<span class="var">sizes</span>       = [<span class="nm">10</span>, <span class="nm">100</span>, <span class="nm">1_000</span>, <span class="nm">10_000</span>, <span class="nm">100_000</span>]
+<span class="var">avg_checks</span> = []
+<span class="var">times_ms</span>   = []
+
+<span class="fn">print</span>(<span class="st">f"{'N':>10}  {'Avg checks':>12}  {'Time (ms)':>10}  {'Expected O(N)'}"</span>)
+<span class="fn">print</span>(<span class="st">"-" * 55</span>)
+
+<span class="kw">for</span> <span class="var">N</span> <span class="kw">in</span> <span class="var">sizes</span>:
+    <span class="var">database</span> = <span class="fn">list</span>(<span class="fn">range</span>(<span class="var">N</span>))
+    <span class="var">random</span>.shuffle(<span class="var">database</span>)
+    <span class="var">target</span>   = <span class="var">database</span>[<span class="var">N</span> // <span class="nm">2</span>]  <span class="cm"># pick middle element (worst case ≈ N/2)</span>
+
+    <span class="var">start</span> = <span class="var">time</span>.perf_counter()
+    <span class="var">idx</span>   = <span class="fn">linear_search</span>(<span class="var">database</span>, <span class="var">target</span>)
+    <span class="var">elapsed</span> = (<span class="var">time</span>.perf_counter() - <span class="var">start</span>) * <span class="nm">1000</span>
+
+    <span class="var">avg_checks</span>.append(<span class="var">idx</span> + <span class="nm">1</span>)
+    <span class="var">times_ms</span>.append(<span class="var">elapsed</span>)
+    <span class="fn">print</span>(<span class="st">f"{N:>10}  {idx+1:>12}  {elapsed:>10.3f}  ~N/2 = {N//2}"</span>)
+          </div>
+        </div>
+        <div class="nb-prose"><p>Plot the results in two side-by-side charts: checks needed vs N on the left and elapsed time vs N on the right. Both should show a straight line on a linear scale, confirming O(N) scaling  this is your benchmark reference for the Grover comparison at the end of this module.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb00_classical_search.py</span><span class="code-hint">step 3  plot results</span></div>
+          <div class="code-body">
+<span class="cm"># Plot  should show linear scaling</span>
+<span class="var">fig</span>, (<span class="var">ax1</span>, <span class="var">ax2</span>) = plt.subplots(<span class="nm">1</span>, <span class="nm">2</span>, figsize=(<span class="nm">10</span>, <span class="nm">4</span>))
+<span class="var">ax1</span>.plot(<span class="var">sizes</span>, <span class="var">avg_checks</span>, <span class="st">'o-'</span>, color=<span class="st">'#C0392B'</span>)
+<span class="var">ax1</span>.set_xlabel(<span class="st">'Database size N'</span>); <span class="var">ax1</span>.set_ylabel(<span class="st">'Checks needed'</span>)
+<span class="var">ax1</span>.set_title(<span class="st">'Classical search  O(N) checks'</span>)
+<span class="var">ax2</span>.plot(<span class="var">sizes</span>, <span class="var">times_ms</span>, <span class="st">'o-'</span>, color=<span class="st">'#C0392B'</span>)
+<span class="var">ax2</span>.set_xlabel(<span class="st">'Database size N'</span>); <span class="var">ax2</span>.set_ylabel(<span class="st">'Time (ms)'</span>)
+<span class="var">ax2</span>.set_title(<span class="st">'Classical search  time grows linearly'</span>)
+plt.tight_layout(); plt.savefig(<span class="st">'nb00_classical_search.png'</span>); plt.show()
+          </div>
+        </div>
+        <div class="callout-nb tip"><div class="cn-lbl">💡 Remember this</div><p>Save this table. At the end of NB 05 you will plot classical checks vs Grover's iterations side by side and see the quadratic speedup directly. The O(N) linear growth you see here is exactly what Grover's replaces with O(√N).</p></div>
+
+        <hr class="section-sep"/>
+
+        <!-- NB 01  Grover's N=4 -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 01 · Quantum</div>
+          <div class="nb-title">Grover's algorithm  N=4 (2 qubits), 1 iteration</div>
+          <div class="nb-desc">The simplest possible Grover's circuit. Two qubits, four possible states. One iteration finds the target with ~100% probability. See the oracle and diffusion operator clearly.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~20 min</span><span class="nb-meta-item">⚛️ First Grover's</span></div>
+        </div>
+        <div class="obj-box">
+          <div class="obj-lbl">By the end of this notebook</div>
+          <ul class="obj-list">
+            <li>You have built your first Grover's circuit in Qiskit</li>
+            <li>You understand what the oracle gate does (phase flip on target)</li>
+            <li>You have seen the target state amplified to ~100% in one iteration</li>
+          </ul>
+        </div>
+        <div class="nb-prose"><p>Import Qiskit and create a 2-qubit circuit, then apply H to both qubits to put the system in equal superposition over all four states  |00⟩, |01⟩, |10⟩, |11⟩  each starting at 25% probability. This initialisation step is the same for every Grover's circuit regardless of N.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb01_grover_n4.py</span><span class="code-hint">step 1  imports + build 2-qubit circuit with H gates</span></div>
+          <div class="code-body">
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>, <span class="fn">transpile</span>
+<span class="kw">from</span> <span class="var">qiskit_aer</span> <span class="kw">import</span> <span class="cls">AerSimulator</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="cm"># ─── Target: state |11⟩ (= item 3 in 4-item database) ───</span>
+<span class="cm"># N=4, 2 qubits, optimal iterations = 1</span>
+
+<span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="nm">2</span>, <span class="nm">2</span>)
+
+<span class="cm"># Step 1: Initialise  equal superposition over all 4 states</span>
+<span class="var">qc</span>.h([<span class="nm">0</span>, <span class="nm">1</span>])
+<span class="var">qc</span>.barrier()
+          </div>
+        </div>
+        <div class="nb-prose"><p>Apply the oracle using a CZ gate, which flips the phase of |11⟩  the only state where both qubits are 1  without changing any measurement probabilities yet. Then apply the diffusion operator (H → X → CZ → X → H) which reflects all amplitudes about their mean, converting the oracle's phase flip into an actual probability boost for |11⟩.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb01_grover_n4.py</span><span class="code-hint">step 2  apply oracle (CZ gate) + diffusion operator</span></div>
+          <div class="code-body">
+<span class="cm"># Step 2: Oracle  phase flip the target |11⟩</span>
+<span class="cm"># CZ gate flips phase when both qubits are |1⟩</span>
+<span class="var">qc</span>.cz(<span class="nm">0</span>, <span class="nm">1</span>)
+<span class="var">qc</span>.barrier()
+
+<span class="cm"># Step 3: Diffusion operator (inversion about the mean)</span>
+<span class="cm"># H → X → CZ → X → H</span>
+<span class="var">qc</span>.h([<span class="nm">0</span>, <span class="nm">1</span>])
+<span class="var">qc</span>.x([<span class="nm">0</span>, <span class="nm">1</span>])
+<span class="var">qc</span>.cz(<span class="nm">0</span>, <span class="nm">1</span>)
+<span class="var">qc</span>.x([<span class="nm">0</span>, <span class="nm">1</span>])
+<span class="var">qc</span>.h([<span class="nm">0</span>, <span class="nm">1</span>])
+<span class="var">qc</span>.barrier()
+          </div>
+        </div>
+        <div class="nb-prose"><p>Add the measurement gates, print the circuit diagram so you can see all three stages (H / oracle / diffusion), then run 1000 shots on the Aer simulator and print the outcome counts to verify the target |11⟩ was amplified.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb01_grover_n4.py</span><span class="code-hint">step 3  measure + run + print counts</span></div>
+          <div class="code-body">
+<span class="cm"># Step 4: Measure</span>
+<span class="var">qc</span>.measure([<span class="nm">0</span>, <span class="nm">1</span>], [<span class="nm">0</span>, <span class="nm">1</span>])
+
+<span class="fn">print</span>(<span class="st">"Grover's circuit (N=4, target=|11⟩, 1 iteration):"</span>)
+<span class="fn">print</span>(<span class="var">qc</span>.draw(output=<span class="st">'text'</span>))
+
+<span class="cm"># Run</span>
+<span class="var">sim</span> = <span class="cls">AerSimulator</span>()
+<span class="var">counts</span> = <span class="var">sim</span>.run(
+    <span class="fn">transpile</span>(<span class="var">qc</span>, <span class="var">sim</span>), shots=<span class="nm">1000</span>
+).result().get_counts()
+<span class="fn">print</span>(<span class="st">"\nResults:"</span>, <span class="var">counts</span>)
+          </div>
+        </div>
+        <div class="nb-prose"><p>Build a bar chart coloring the target state |11⟩ in red and all other states in grey, with a dashed line at 25% showing where a uniform distribution would sit. After one iteration you should see |11⟩ near 100%  amplitude amplification worked in a single step.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb01_grover_n4.py</span><span class="code-hint">step 4  plot bar chart</span></div>
+          <div class="code-body">
+<span class="cm"># Plot</span>
+<span class="var">states</span> = [<span class="st">'00'</span>, <span class="st">'01'</span>, <span class="st">'10'</span>, <span class="st">'11'</span>]
+<span class="var">probs</span>  = [<span class="var">counts</span>.get(s, <span class="nm">0</span>)/<span class="nm">1000</span> <span class="kw">for</span> s <span class="kw">in</span> <span class="var">states</span>]
+<span class="var">colors</span> = [<span class="st">'#8A95A3'</span>, <span class="st">'#8A95A3'</span>, <span class="st">'#8A95A3'</span>, <span class="st">'#C0392B'</span>]  <span class="cm"># target in red</span>
+
+<span class="var">fig</span>, <span class="var">ax</span> = plt.subplots(figsize=(<span class="nm">6</span>, <span class="nm">4</span>))
+<span class="var">bars</span> = <span class="var">ax</span>.bar(<span class="var">states</span>, <span class="var">probs</span>, color=<span class="var">colors</span>, alpha=<span class="nm">0.8</span>, width=<span class="nm">0.5</span>)
+<span class="var">ax</span>.set_ylim(<span class="nm">0</span>, <span class="nm">1.1</span>)
+<span class="var">ax</span>.set_ylabel(<span class="st">'Probability'</span>)
+<span class="var">ax</span>.set_title(<span class="st">"Grover's N=4  1 iteration  target |11⟩ amplified"</span>)
+<span class="var">ax</span>.axhline(<span class="nm">0.25</span>, color=<span class="st">'gray'</span>, linestyle=<span class="st">'--'</span>, alpha=<span class="nm">0.4</span>, label=<span class="st">'Uniform (25%)'</span>)
+<span class="var">ax</span>.legend()
+<span class="kw">for</span> <span class="var">bar</span>, <span class="var">p</span> <span class="kw">in</span> <span class="fn">zip</span>(<span class="var">bars</span>, <span class="var">probs</span>):
+    <span class="kw">if</span> <span class="var">p</span> > <span class="nm">0.02</span>:
+        <span class="var">ax</span>.text(<span class="var">bar</span>.get_x()+<span class="var">bar</span>.get_width()/<span class="nm">2</span>,
+                <span class="var">bar</span>.get_height()+<span class="nm">0.02</span>,
+                <span class="st">f'{p:.1%}'</span>, ha=<span class="st">'center'</span>, fontsize=<span class="nm">10</span>)
+plt.tight_layout(); plt.savefig(<span class="st">'nb01_grover_n4.png'</span>); plt.show()
+          </div>
+        </div>
+        <div class="line-exp">
+          <div class="le-title">What each part does</div>
+          <div class="le-row"><span class="le-code">qc.h([0, 1])</span><span class="le-meaning">H on both qubits. Creates equal superposition of all 4 states: |00⟩, |01⟩, |10⟩, |11⟩ each at 25%.</span></div>
+          <div class="le-row"><span class="le-code">qc.cz(0, 1)</span><span class="le-meaning">Oracle: CZ gate. Applies phase flip (−1) when both qubits are |1⟩. This marks the target state |11⟩ without measuring it.</span></div>
+          <div class="le-row"><span class="le-code">H → X → CZ → X → H</span><span class="le-meaning">Diffusion operator: converts the oracle's phase flip into an amplitude boost. After this, |11⟩ has ~100% probability.</span></div>
+        </div>
+        <div class="output-lbl">Expected output  probability graph</div>
+        <div class="prob-graph">
+          <div class="pg-title">Grover's N=4  1 iteration  target |11⟩</div>
+          <div class="pg-bars">
+            <div class="pg-group"><div class="pg-bar-con"><div class="pg-bar suppressed" style="height:3%" data-pct="~0%"></div></div><div class="pg-lbl">|00⟩</div></div>
+            <div class="pg-group"><div class="pg-bar-con"><div class="pg-bar suppressed" style="height:3%" data-pct="~0%"></div></div><div class="pg-lbl">|01⟩</div></div>
+            <div class="pg-group"><div class="pg-bar-con"><div class="pg-bar suppressed" style="height:3%" data-pct="~0%"></div></div><div class="pg-lbl">|10⟩</div></div>
+            <div class="pg-group"><div class="pg-bar-con"><div class="pg-bar target" style="height:100%" data-pct="~100%"></div></div><div class="pg-lbl">|11⟩</div></div>
+          </div>
+          <div class="pg-axis"><span>0%</span><span>50%</span><span>100%</span></div>
+          <div class="pg-interp"><strong>Target |11⟩ amplified to ~100% in just 1 iteration.</strong> Started at 25% (uniform). After oracle + diffusion, the correct answer is almost certain. A classical computer would need on average 2 checks for N=4. Grover's needs 1 iteration  the speedup starts here.</div>
+        </div>
+
+        <hr class="section-sep"/>
+
+        <!-- NB 02  Grover's N=8 -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 02 · Quantum</div>
+          <div class="nb-title">Grover's algorithm  N=8 (3 qubits), 2 iterations</div>
+          <div class="nb-desc">Scale up to 3 qubits, 8 states. See the diffusion operator amplify a different target. Run with 1, 2, and 3 iterations  observe the sinusoidal behaviour.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~25 min</span><span class="nb-meta-item">⚛️ Amplitude amplification</span></div>
+        </div>
+        <div class="obj-box">
+          <div class="obj-lbl">By the end of this notebook</div>
+          <ul class="obj-list">
+            <li>You have built Grover's for N=8 with a 3-qubit oracle</li>
+            <li>You have seen that 2 iterations gives the best result</li>
+            <li>You have observed that 3 iterations overshoots and decreases probability</li>
+          </ul>
+        </div>
+        <div class="nb-prose"><p>Define the grover_n8 function, which builds a 3-qubit Grover circuit targeting |101⟩. It starts with H on all three qubits for equal superposition, then loops n_iterations times  each iteration applies the oracle (X on q1, then CCZ, then X on q1 to flip phase only on |101⟩) followed by the diffusion operator (H → X → CCZ → X → H on all qubits).</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb02_grover_n8.py</span><span class="code-hint">step 1  define grover_n8 function (init + oracle + diffusion loop)</span></div>
+          <div class="code-body">
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>, <span class="fn">transpile</span>
+<span class="kw">from</span> <span class="var">qiskit_aer</span> <span class="kw">import</span> <span class="cls">AerSimulator</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+<span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+
+<span class="kw">def</span> <span class="fn">grover_n8</span>(<span class="var">n_iterations</span>):
+    <span class="st">"""Grover's for N=8, target=|101⟩, variable iterations."""</span>
+    <span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="nm">3</span>, <span class="nm">3</span>)
+
+    <span class="cm"># Initialise: equal superposition</span>
+    <span class="var">qc</span>.h([<span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">2</span>])
+
+    <span class="kw">for</span> <span class="var">_</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">n_iterations</span>):
+        <span class="var">qc</span>.barrier()
+        <span class="cm"># Oracle: mark target |101⟩ (q2=1, q1=0, q0=1)</span>
+        <span class="cm"># CCZ flips phase when q0=1, q1=1, q2=1</span>
+        <span class="cm"># X on q1 first so q1=0 → q1=1 for the CCZ</span>
+        <span class="var">qc</span>.x(<span class="nm">1</span>)
+        <span class="var">qc</span>.ccz(<span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">2</span>)   <span class="cm"># Toffoli gate</span>
+        <span class="var">qc</span>.x(<span class="nm">1</span>)
+        <span class="var">qc</span>.barrier()
+
+        <span class="cm"># Diffusion operator: H → X → CCZ → X → H</span>
+        <span class="var">qc</span>.h([<span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">2</span>])
+        <span class="var">qc</span>.x([<span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">2</span>])
+        <span class="var">qc</span>.ccz(<span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">2</span>)
+        <span class="var">qc</span>.x([<span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">2</span>])
+        <span class="var">qc</span>.h([<span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">2</span>])
+
+    <span class="var">qc</span>.measure([<span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">2</span>], [<span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">2</span>])
+    <span class="var">sim</span> = <span class="cls">AerSimulator</span>()
+    <span class="var">counts</span> = <span class="var">sim</span>.run(
+        <span class="fn">transpile</span>(<span class="var">qc</span>, <span class="var">sim</span>), shots=<span class="nm">2000</span>
+    ).result().get_counts()
+    <span class="kw">return</span> <span class="var">counts</span>.get(<span class="st">'101'</span>, <span class="nm">0</span>) / <span class="nm">2000</span>  <span class="cm"># probability of target</span>
+          </div>
+        </div>
+        <div class="nb-prose"><p>Call grover_n8 with 1, 2, and 3 iterations and collect the probability of measuring the target |101⟩ in each case. Print a summary table so you can see the sinusoidal pattern  probability rises from iteration 1 to 2 (the optimal), then falls back at iteration 3.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb02_grover_n8.py</span><span class="code-hint">step 2  test with 1, 2, 3 iterations</span></div>
+          <div class="code-body">
+<span class="cm"># Run with 1, 2, 3 iterations and compare</span>
+<span class="var">iterations</span> = [<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span>]
+<span class="var">probs</span> = [<span class="fn">grover_n8</span>(k) <span class="kw">for</span> k <span class="kw">in</span> <span class="var">iterations</span>]
+
+<span class="fn">print</span>(<span class="st">"N=8, target=|101⟩"</span>)
+<span class="fn">print</span>(<span class="st">f"Uniform probability (no Grover): 12.5%"</span>)
+<span class="kw">for</span> <span class="var">k</span>, <span class="var">p</span> <span class="kw">in</span> <span class="fn">zip</span>(<span class="var">iterations</span>, <span class="var">probs</span>):
+    <span class="fn">print</span>(<span class="st">f"After {k} iteration(s): {p:.1%} probability of target"</span>)
+          </div>
+        </div>
+        <div class="nb-prose"><p>Plot a three-bar chart comparing the target probability after 1, 2, and 3 iterations. Color the optimal result (2 iterations) in red to make it stand out. The dashed line at 12.5% marks the uniform baseline  all three bars should be above it, but only the middle bar reaches near 97%.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb02_grover_n8.py</span><span class="code-hint">step 3  plot comparison</span></div>
+          <div class="code-body">
+<span class="var">fig</span>, <span class="var">ax</span> = plt.subplots(figsize=(<span class="nm">6</span>, <span class="nm">4</span>))
+<span class="var">colors</span> = [<span class="st">'#8A95A3'</span>, <span class="st">'#C0392B'</span>, <span class="st">'#8A95A3'</span>]
+<span class="var">ax</span>.bar([<span class="st">'1 iter'</span>, <span class="st">'2 iter (optimal)'</span>, <span class="st">'3 iter'</span>],
+       <span class="var">probs</span>, color=<span class="var">colors</span>, alpha=<span class="nm">0.8</span>, width=<span class="nm">0.5</span>)
+<span class="var">ax</span>.axhline(<span class="nm">0.125</span>, color=<span class="st">'gray'</span>, linestyle=<span class="st">'--'</span>, alpha=<span class="nm">0.4</span>, label=<span class="st">'Uniform (12.5%)'</span>)
+<span class="var">ax</span>.set_ylabel(<span class="st">'Probability of target |101⟩'</span>)
+<span class="var">ax</span>.set_title(<span class="st">"Grover's N=8  over-iterating decreases probability"</span>)
+<span class="var">ax</span>.set_ylim(<span class="nm">0</span>, <span class="nm">1.1</span>)
+<span class="var">ax</span>.legend()
+plt.tight_layout(); plt.savefig(<span class="st">'nb02_grover_n8.png'</span>); plt.show()
+          </div>
+        </div>
+        <div class="callout-nb note"><div class="cn-lbl">📌 Expected results</div><p>1 iteration: ~78% probability. 2 iterations: ~97% probability (optimal). 3 iterations: ~78% probability again. The sinusoidal pattern is clear  2 iterations is the sweet spot for N=8. <code>ceil(π√8/4) = ceil(2.22) = 2</code>. Over-iterating really does hurt.</p></div>
+
+        <hr class="section-sep"/>
+
+        <!-- NB 03  Amplitude vs iterations plot -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 03 · Quantum</div>
+          <div class="nb-title">Amplitude amplification  visualise the sinusoidal pattern</div>
+          <div class="nb-desc">Run Grover's for N=16 with 1 through 10 iterations. Plot probability of target vs iteration count. See the sinusoidal amplification directly.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~20 min</span><span class="nb-meta-item">📊 Core concept</span></div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb03_amplitude_plot.py</span><span class="code-hint">python nb03_amplitude_plot.py</span></div>
+          <div class="code-body">
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>, <span class="fn">transpile</span>
+<span class="kw">from</span> <span class="var">qiskit_aer</span> <span class="kw">import</span> <span class="cls">AerSimulator</span>
+<span class="kw">from</span> <span class="var">qiskit.circuit.library</span> <span class="kw">import</span> <span class="cls">GroverOperator</span>
+<span class="kw">from</span> <span class="var">qiskit.algorithms</span> <span class="kw">import</span> <span class="cls">AmplificationProblem</span>
+<span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="cm"># Use Qiskit's built-in Grover for N=16 (4 qubits), target=|1010⟩</span>
+<span class="var">n_qubits</span> = <span class="nm">4</span>   <span class="cm"># N = 2^4 = 16</span>
+<span class="var">target</span>   = <span class="st">'1010'</span>
+<span class="var">sim</span>      = <span class="cls">AerSimulator</span>()
+
+<span class="kw">def</span> <span class="fn">run_grover</span>(<span class="var">k</span>):
+    <span class="st">"""Run Grover's with k iterations, return probability of target."""</span>
+    <span class="var">oracle</span> = <span class="cls">QuantumCircuit</span>(<span class="var">n_qubits</span>)
+    <span class="cm"># Mark |1010⟩: X on q1,q3 (0-indexed) so CCZ fires on |1111⟩</span>
+    <span class="var">oracle</span>.x([<span class="nm">1</span>, <span class="nm">3</span>])
+    <span class="var">oracle</span>.h(<span class="var">n_qubits</span>-<span class="nm">1</span>)
+    <span class="var">oracle</span>.mcx(<span class="fn">list</span>(<span class="fn">range</span>(<span class="var">n_qubits</span>-<span class="nm">1</span>)), <span class="var">n_qubits</span>-<span class="nm">1</span>)
+    <span class="var">oracle</span>.h(<span class="var">n_qubits</span>-<span class="nm">1</span>)
+    <span class="var">oracle</span>.x([<span class="nm">1</span>, <span class="nm">3</span>])
+
+    <span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="var">n_qubits</span>, <span class="var">n_qubits</span>)
+    <span class="var">qc</span>.h(<span class="fn">range</span>(<span class="var">n_qubits</span>))     <span class="cm"># uniform superposition</span>
+    <span class="var">go</span> = <span class="cls">GroverOperator</span>(<span class="var">oracle</span>)
+    <span class="kw">for</span> <span class="var">_</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">k</span>):
+        <span class="var">qc</span>.compose(<span class="var">go</span>, inplace=<span class="kw">True</span>)
+    <span class="var">qc</span>.measure(<span class="fn">range</span>(<span class="var">n_qubits</span>), <span class="fn">range</span>(<span class="var">n_qubits</span>))
+
+    <span class="var">counts</span> = <span class="var">sim</span>.run(
+        <span class="fn">transpile</span>(<span class="var">qc</span>, <span class="var">sim</span>), shots=<span class="nm">2000</span>
+    ).result().get_counts()
+    <span class="kw">return</span> <span class="var">counts</span>.get(<span class="var">target</span>, <span class="nm">0</span>) / <span class="nm">2000</span>
+
+<span class="var">max_iter</span> = <span class="nm">10</span>
+<span class="var">iters</span>    = <span class="fn">list</span>(<span class="fn">range</span>(<span class="nm">1</span>, <span class="var">max_iter</span>+<span class="nm">1</span>))
+<span class="var">probs</span>    = [<span class="fn">run_grover</span>(<span class="var">k</span>) <span class="kw">for</span> <span class="var">k</span> <span class="kw">in</span> <span class="var">iters</span>]
+
+<span class="cm"># Theoretical prediction: sin²((2k+1)·arcsin(1/√N))</span>
+<span class="var">theta</span>     = np.arcsin(<span class="nm">1</span>/np.sqrt(<span class="nm">16</span>))
+<span class="var">theory</span>    = [np.sin((<span class="nm">2</span>*k+<span class="nm">1</span>)*<span class="var">theta</span>)**<span class="nm">2</span> <span class="kw">for</span> k <span class="kw">in</span> <span class="var">iters</span>]
+<span class="var">optimal_k</span> = <span class="fn">int</span>(np.round(np.pi/(4*<span class="var">theta</span>)-<span class="nm">0.5</span>))
+<span class="fn">print</span>(<span class="st">f"N=16: optimal iterations = {optimal_k} (theory: π√N/4 ≈ {np.pi*4/4:.1f})"</span>)
+
+<span class="var">fig</span>, <span class="var">ax</span> = plt.subplots(figsize=(<span class="nm">8</span>, <span class="nm">4</span>))
+<span class="var">ax</span>.plot(<span class="var">iters</span>, <span class="var">probs</span>,   <span class="st">'o-'</span>, color=<span class="st">'#1A4FDB'</span>, label=<span class="st">'Simulated'</span>, linewidth=<span class="nm">2</span>)
+<span class="var">ax</span>.plot(<span class="var">iters</span>, <span class="var">theory</span>,  <span class="st">'--'</span>, color=<span class="st">'#C0392B'</span>, label=<span class="st">'Theory sin²'</span>, linewidth=<span class="nm">1.5</span>, alpha=<span class="nm">0.7</span>)
+<span class="var">ax</span>.axvline(<span class="var">optimal_k</span>, color=<span class="st">'#1A7A4A'</span>, linestyle=<span class="st">':'</span>, label=<span class="st">f'Optimal k={optimal_k}'</span>)
+<span class="var">ax</span>.axhline(<span class="nm">0.0625</span>, color=<span class="st">'gray'</span>, linestyle=<span class="st">'--'</span>, alpha=<span class="nm">0.3</span>, label=<span class="st">'Uniform (6.25%)'</span>)
+<span class="var">ax</span>.set_xlabel(<span class="st">'Number of Grover iterations'</span>)
+<span class="var">ax</span>.set_ylabel(<span class="st">'P(target)'</span>)
+<span class="var">ax</span>.set_title(<span class="st">"Grover's N=16  sinusoidal amplitude amplification"</span>)
+<span class="var">ax</span>.set_ylim(<span class="nm">0</span>, <span class="nm">1.1</span>)
+<span class="var">ax</span>.legend()
+plt.tight_layout(); plt.savefig(<span class="st">'nb03_amplitude_plot.png'</span>); plt.show()
+          </div>
+        </div>
+        <div class="callout-nb success"><div class="cn-lbl">✓ What to expect</div><p>You will see the probability peak at iteration 3 (optimal for N=16), then decrease, then increase again  a clear sinusoidal pattern. The theoretical curve (red dashed) should closely match the simulated results (blue). This is the cleanest visual proof that Grover's amplitude amplification is a controlled, mathematical process  not random luck.</p></div>
+
+        <hr class="section-sep"/>
+
+        <!-- NB 04  Noisy Grover's -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 04 · Reality check</div>
+          <div class="nb-title">Grover's under noise  NISQ limits</div>
+          <div class="nb-desc">Run Grover's N=16 on ideal vs noisy simulator. Watch noise flatten the sinusoidal curve and push the distribution toward uniform. The quantum advantage disappears.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~20 min</span><span class="nb-meta-item">⚠️ NISQ reality</span></div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb04_noisy_grover.py</span><span class="code-hint">python nb04_noisy_grover.py</span></div>
+          <div class="code-body">
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>, <span class="fn">transpile</span>
+<span class="kw">from</span> <span class="var">qiskit_aer</span> <span class="kw">import</span> <span class="cls">AerSimulator</span>
+<span class="kw">from</span> <span class="var">qiskit_aer.noise</span> <span class="kw">import</span> <span class="cls">NoiseModel</span>, <span class="cls">depolarizing_error</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="cm"># Simple 2-qubit Grover for N=4 on ideal vs noisy</span>
+<span class="kw">def</span> <span class="fn">grover_n4_circuit</span>():
+    <span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="nm">2</span>, <span class="nm">2</span>)
+    <span class="var">qc</span>.h([<span class="nm">0</span>, <span class="nm">1</span>])
+    <span class="var">qc</span>.cz(<span class="nm">0</span>, <span class="nm">1</span>)                  <span class="cm"># oracle</span>
+    <span class="var">qc</span>.h([<span class="nm">0</span>,<span class="nm">1</span>]); <span class="var">qc</span>.x([<span class="nm">0</span>,<span class="nm">1</span>])
+    <span class="var">qc</span>.cz(<span class="nm">0</span>, <span class="nm">1</span>)                  <span class="cm"># diffusion</span>
+    <span class="var">qc</span>.x([<span class="nm">0</span>,<span class="nm">1</span>]); <span class="var">qc</span>.h([<span class="nm">0</span>,<span class="nm">1</span>])
+    <span class="var">qc</span>.measure([<span class="nm">0</span>,<span class="nm">1</span>], [<span class="nm">0</span>,<span class="nm">1</span>])
+    <span class="kw">return</span> <span class="var">qc</span>
+
+<span class="var">qc</span>     = <span class="fn">grover_n4_circuit</span>()
+<span class="var">states</span> = [<span class="st">'00'</span>, <span class="st">'01'</span>, <span class="st">'10'</span>, <span class="st">'11'</span>]
+
+<span class="cm"># Ideal</span>
+<span class="var">ideal_counts</span> = <span class="cls">AerSimulator</span>().run(
+    <span class="fn">transpile</span>(<span class="var">qc</span>, <span class="cls">AerSimulator</span>()), shots=<span class="nm">2000</span>
+).result().get_counts()
+
+<span class="cm"># Noisy (1% error  similar to IBM today)</span>
+<span class="var">nm</span> = <span class="cls">NoiseModel</span>()
+<span class="var">nm</span>.add_all_qubit_quantum_error(<span class="fn">depolarizing_error</span>(<span class="nm">0.01</span>, <span class="nm">1</span>), [<span class="st">'h'</span>, <span class="st">'x'</span>])
+<span class="var">nm</span>.add_all_qubit_quantum_error(<span class="fn">depolarizing_error</span>(<span class="nm">0.02</span>, <span class="nm">2</span>), [<span class="st">'cz'</span>])
+<span class="var">noisy_counts</span> = <span class="cls">AerSimulator</span>(noise_model=<span class="var">nm</span>).run(
+    <span class="fn">transpile</span>(<span class="var">qc</span>, <span class="cls">AerSimulator</span>(noise_model=<span class="var">nm</span>)), shots=<span class="nm">2000</span>
+).result().get_counts()
+
+<span class="var">ideal_probs</span> = [<span class="var">ideal_counts</span>.get(s,<span class="nm">0</span>)/<span class="nm">2000</span> <span class="kw">for</span> s <span class="kw">in</span> <span class="var">states</span>]
+<span class="var">noisy_probs</span> = [<span class="var">noisy_counts</span>.get(s,<span class="nm">0</span>)/<span class="nm">2000</span> <span class="kw">for</span> s <span class="kw">in</span> <span class="var">states</span>]
+
+<span class="fn">print</span>(<span class="st">"Ideal:  target |11⟩ ="</span>, <span class="st">f"{ideal_probs[3]:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">"Noisy:  target |11⟩ ="</span>, <span class="st">f"{noisy_probs[3]:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">"Uniform would be:    25.0%"</span>)
+
+<span class="var">x</span> = <span class="fn">range</span>(<span class="nm">4</span>)
+<span class="var">fig</span>, <span class="var">ax</span> = plt.subplots(figsize=(<span class="nm">7</span>, <span class="nm">4</span>))
+<span class="var">ax</span>.bar([i-<span class="nm">0.2</span> <span class="kw">for</span> i <span class="kw">in</span> x], <span class="var">ideal_probs</span>, <span class="nm">0.35</span>,
+       label=<span class="st">'Ideal'</span>, color=<span class="st">'#1A4FDB'</span>, alpha=<span class="nm">0.8</span>)
+<span class="var">ax</span>.bar([i+<span class="nm">0.2</span> <span class="kw">for</span> i <span class="kw">in</span> x], <span class="var">noisy_probs</span>, <span class="nm">0.35</span>,
+       label=<span class="st">'Noisy (1% error)'</span>, color=<span class="st">'#C0392B'</span>, alpha=<span class="nm">0.7</span>)
+<span class="var">ax</span>.axhline(<span class="nm">0.25</span>, color=<span class="st">'gray'</span>, linestyle=<span class="st">'--'</span>, alpha=<span class="nm">0.4</span>, label=<span class="st">'Uniform (25%)'</span>)
+<span class="var">ax</span>.set_xticks(<span class="fn">list</span>(<span class="var">x</span>)); <span class="var">ax</span>.set_xticklabels(<span class="var">states</span>)
+<span class="var">ax</span>.set_ylabel(<span class="st">'Probability'</span>); <span class="var">ax</span>.legend()
+<span class="var">ax</span>.set_title(<span class="st">"Grover's N=4  ideal vs noisy (1% gate error)"</span>)
+plt.tight_layout(); plt.savefig(<span class="st">'nb04_noisy_grover.png'</span>); plt.show()
+          </div>
+        </div>
+        <div class="callout-nb warning"><div class="cn-lbl">⚠ What you will observe</div><p>Even at 1% gate error (similar to IBM hardware today), the target state probability drops from ~100% (ideal) to ~80–85%. The non-target states pick up probability they should not have. At higher error rates the distribution flattens toward uniform  the quantum advantage disappears completely. This is the core NISQ challenge for Grover's.</p></div>
+
+        <hr class="section-sep"/>
+
+        <!-- NB 05  Classical vs Grover comparison -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 05 · Comparison</div>
+          <div class="nb-title">Classical O(N) vs Grover's O(√N)  the full comparison</div>
+          <div class="nb-desc">Plot classical search checks vs Grover's iterations across N = 4, 8, 16, 64, 256, 1024. See the quadratic speedup directly as the gap widens. The definitive comparison.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~15 min</span><span class="nb-meta-item">📊 Final comparison</span></div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb05_comparison.py</span><span class="code-hint">python nb05_comparison.py</span></div>
+          <div class="code-body">
+<span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="var">N_values</span>  = [<span class="nm">4</span>, <span class="nm">8</span>, <span class="nm">16</span>, <span class="nm">64</span>, <span class="nm">256</span>, <span class="nm">1024</span>, <span class="nm">4096</span>, <span class="nm">16384</span>]
+
+<span class="cm"># Classical: average N/2 checks</span>
+<span class="var">classical</span> = [N/<span class="nm">2</span> <span class="kw">for</span> N <span class="kw">in</span> <span class="var">N_values</span>]
+
+<span class="cm"># Grover's: π√N/4 iterations</span>
+<span class="var">grover</span>    = [np.pi * np.sqrt(N) / <span class="nm">4</span> <span class="kw">for</span> N <span class="kw">in</span> <span class="var">N_values</span>]
+
+<span class="cm"># Speedup factor</span>
+<span class="var">speedup</span>   = [c/g <span class="kw">for</span> c, g <span class="kw">in</span> <span class="fn">zip</span>(<span class="var">classical</span>, <span class="var">grover</span>)]
+
+<span class="fn">print</span>(<span class="st">f"{'N':>8}  {'Classical':>12}  {'Grover':>10}  {'Speedup':>10}"</span>)
+<span class="fn">print</span>(<span class="st">"-" * 48</span>)
+<span class="kw">for</span> <span class="var">N</span>, <span class="var">c</span>, <span class="var">g</span>, <span class="var">s</span> <span class="kw">in</span> <span class="fn">zip</span>(<span class="var">N_values</span>, <span class="var">classical</span>, <span class="var">grover</span>, <span class="var">speedup</span>):
+    <span class="fn">print</span>(<span class="st">f"{N:>8}  {c:>12.0f}  {g:>10.1f}  {s:>9.1f}×"</span>)
+
+<span class="cm"># Plot log scale</span>
+<span class="var">fig</span>, (<span class="var">ax1</span>, <span class="var">ax2</span>) = plt.subplots(<span class="nm">1</span>, <span class="nm">2</span>, figsize=(<span class="nm">12</span>, <span class="nm">4</span>))
+
+<span class="cm"># Left: steps comparison</span>
+<span class="var">ax1</span>.loglog(<span class="var">N_values</span>, <span class="var">classical</span>, <span class="st">'o-'</span>, color=<span class="st">'#C0392B'</span>,
+           label=<span class="st">'Classical O(N)'</span>, linewidth=<span class="nm">2</span>)
+<span class="var">ax1</span>.loglog(<span class="var">N_values</span>, <span class="var">grover</span>, <span class="st">'o-'</span>, color=<span class="st">'#1A4FDB'</span>,
+           label=<span class="st">"Grover's O(√N)"</span>, linewidth=<span class="nm">2</span>)
+<span class="var">ax1</span>.set_xlabel(<span class="st">'Database size N (log scale)'</span>)
+<span class="var">ax1</span>.set_ylabel(<span class="st">'Steps required (log scale)'</span>)
+<span class="var">ax1</span>.set_title(<span class="st">'Classical vs Grover  steps to find target'</span>)
+<span class="var">ax1</span>.legend(); <span class="var">ax1</span>.grid(alpha=<span class="nm">0.3</span>)
+
+<span class="cm"># Right: speedup factor</span>
+<span class="var">ax2</span>.semilogx(<span class="var">N_values</span>, <span class="var">speedup</span>, <span class="st">'o-'</span>, color=<span class="st">'#1A7A4A'</span>, linewidth=<span class="nm">2</span>)
+<span class="var">ax2</span>.set_xlabel(<span class="st">'Database size N (log scale)'</span>)
+<span class="var">ax2</span>.set_ylabel(<span class="st">'Speedup factor (Classical / Grover)'</span>)
+<span class="var">ax2</span>.set_title(<span class="st">"Grover speedup grows as √N"</span>)
+<span class="var">ax2</span>.grid(alpha=<span class="nm">0.3</span>)
+
+plt.suptitle(<span class="st">"Grover's quadratic speedup over classical search"</span>,
+             fontweight=<span class="st">'bold'</span>)
+plt.tight_layout()
+plt.savefig(<span class="st">'nb05_comparison.png'</span>)
+plt.show()
+          </div>
+        </div>
+
+        <div class="output-lbl">Expected speedup numbers</div>
+        <div class="runtime-chart">
+          <div class="rc-title">Classical O(N/2) vs Grover's O(π√N/4)  steps required</div>
+          <div class="rc-row"><span class="rc-label">N=4</span><div style="flex:1;display:flex;gap:4px;align-items:center;"><div class="rc-classical" style="width:4%"></div><span style="font-size:10px;color:#C0392B;margin-left:4px">Classical: 2</span></div><div style="flex:1;display:flex;gap:4px;align-items:center;"><div class="rc-grover" style="width:4%"></div><span style="font-size:10px;color:#1A4FDB;margin-left:4px">Grover: 1.1</span></div><span class="rc-note">1.8× speedup</span></div>
+          <div class="rc-row"><span class="rc-label">N=64</span><div style="flex:1;display:flex;gap:4px;align-items:center;"><div class="rc-classical" style="width:32%"></div><span style="font-size:10px;color:#C0392B;margin-left:4px">Classical: 32</span></div><div style="flex:1;display:flex;gap:4px;align-items:center;"><div class="rc-grover" style="width:12%"></div><span style="font-size:10px;color:#1A4FDB;margin-left:4px">Grover: 6.3</span></div><span class="rc-note">5.1× speedup</span></div>
+          <div class="rc-row"><span class="rc-label">N=1024</span><div style="flex:1;display:flex;gap:4px;align-items:center;"><div class="rc-classical" style="width:90%"></div><span style="font-size:10px;color:#C0392B;margin-left:4px">Classical: 512</span></div><div style="flex:1;display:flex;gap:4px;align-items:center;"><div class="rc-grover" style="width:20%"></div><span style="font-size:10px;color:#1A4FDB;margin-left:4px">Grover: 25</span></div><span class="rc-note">20× speedup</span></div>
+          <div class="rc-row"><span class="rc-label">N=16384</span><div style="flex:1;display:flex;gap:4px;align-items:center;"><div class="rc-classical" style="width:100%"></div><span style="font-size:10px;color:#C0392B;margin-left:4px">Classical: 8192</span></div><div style="flex:1;display:flex;gap:4px;align-items:center;"><div class="rc-grover" style="width:35%"></div><span style="font-size:10px;color:#1A4FDB;margin-left:4px">Grover: 101</span></div><span class="rc-note">81× speedup</span></div>
+        </div>
+        <div class="insight-box"><p>The speedup grows as <strong>√N</strong>  doubling N increases the speedup by √2. At N=16,384 the speedup is 81×. At N=1,000,000 it would be ~637×. This is the proven quadratic advantage of Grover's algorithm over classical unstructured search.</p></div>
+
+        <div style="background:linear-gradient(135deg,rgba(26,79,219,.06),rgba(107,63,160,.06));border:1px solid rgba(26,79,219,.15);border-radius:8px;padding:20px;margin-top:32px;">
+          <div style="font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">Next module</div>
+          <div style="font-family:var(--serif);font-size:17px;font-weight:600;margin-bottom:5px;">Module 05  Quantum Fourier Transform</div>
+          <div style="font-family:var(--sans);font-size:14px;color:var(--ink2);line-height:1.6;">You have now implemented two core quantum phenomena (entanglement) and one complete quantum algorithm (Grover's). The Quantum Fourier Transform is the mathematical engine behind Shor's algorithm and phase estimation. It is the most important subroutine in quantum computing  and it is built directly on the gates you learned in M02.</div>
+        </div>
+
+        <div class="nb-footer">
+          <button class="nb-foot-btn" onclick="showSubtab('theory',document.getElementById('tab-theory'))">← Back to Theory</button>
+          <button class="nb-foot-btn primary" onclick="alert('M04 complete  M05 unlocked!')">Complete M04 & continue →</button>
+        </div>
+
+      </div>
+    </div><!-- end handson -->
+</div>
+<script>
+function showSubtab(id, btn) {
+  document.querySelectorAll('.mod-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.subtab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+function checkQ(el, verdict, fbId) {
+  const parent = el.closest('.quiz-box');
+  parent.querySelectorAll('.quiz-opt').forEach(o => {
+    o.classList.remove('correct', 'wrong');
+    o.style.pointerEvents = 'none';
+  });
+  el.classList.add(verdict);
+  const fb = document.getElementById(fbId);
+  fb.className = 'quiz-fb ' + verdict + ' show';
+}
+</script>

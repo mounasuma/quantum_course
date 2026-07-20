@@ -1,0 +1,1127 @@
+<style>
+:root {
+  --bg:#F7F5F0;--bg2:#EFEDE7;--bg3:#E8E4DC;
+  --ink:#1A1814;--ink2:#4A4640;--ink3:#8A8480;
+  --rule:rgba(26,24,20,0.1);--rule2:rgba(26,24,20,0.06);
+  --accent:#1A4FDB;--accent2:#0E35A8;
+  --gold:#C4860A;--green:#1A7A4A;--red:#C0392B;--purple:#6B3FA0;
+  --serif:'Lora',Georgia,serif;--sans:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.7;}
+.shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{background:var(--bg2);border-right:1px solid var(--rule);position:sticky;top:0;height:100vh;overflow-y:auto;padding:20px 0;display:flex;flex-direction:column;}
+.sidebar::-webkit-scrollbar{width:2px;}
+.sidebar-logo{padding:0 20px 18px;border-bottom:1px solid var(--rule);margin-bottom:14px;}
+.sidebar-logo-name{font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.06em;color:var(--ink);display:flex;align-items:center;gap:8px;}
+.sidebar-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(26,79,219,.4);}
+.sidebar-logo-sub{font-size:11px;color:var(--ink3);font-family:var(--sans);margin-top:3px;}
+.sidebar-section{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);padding:10px 20px 4px;}
+.sidebar-item{display:flex;align-items:flex-start;gap:10px;padding:8px 20px;cursor:pointer;border-left:2px solid transparent;transition:all .15s;}
+.sidebar-item:hover{background:rgba(26,24,20,.04);}
+.sidebar-item.active{background:rgba(26,79,219,.05);border-left-color:var(--accent);}
+.sidebar-item.done .si-check{background:var(--green);border-color:var(--green);}
+.sidebar-item.locked{opacity:.35;cursor:default;}
+.si-check{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--rule);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.si-check svg{display:none;}
+.sidebar-item.done .si-check svg{display:block;}
+.si-num{font-size:10px;font-family:var(--mono);color:var(--ink3);}
+.si-name{font-size:13px;font-weight:500;color:var(--ink2);line-height:1.3;margin-top:1px;}
+.sidebar-item.active .si-name{color:var(--ink);}
+.si-dur{font-size:10px;font-family:var(--mono);color:var(--ink3);margin-top:1px;}
+.sidebar-footer{margin-top:auto;padding:14px 20px 0;border-top:1px solid var(--rule);}
+.prog-lbl{font-size:11px;color:var(--ink3);margin-bottom:5px;}
+.prog-bar{height:3px;background:var(--rule);border-radius:999px;overflow:hidden;}
+.prog-fill{height:3px;background:var(--accent);border-radius:999px;width:27%;}
+
+/* MAIN */
+.main{overflow-y:auto;}
+.reading-bar{position:fixed;top:0;left:260px;right:0;height:2px;background:var(--rule);z-index:100;}
+.reading-bar-fill{height:2px;background:var(--accent);width:0%;transition:width .1s;}
+
+/* SUBTABS */
+.subtabs{display:flex;padding:0 52px;border-bottom:1px solid var(--rule2);background:var(--bg);position:sticky;top:0;z-index:10;}
+.subtab{font-size:12px;font-family:var(--mono);padding:10px 16px;cursor:pointer;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-1px;background:none;border-top:none;border-left:none;border-right:none;transition:all .1s;}
+.subtab:hover{color:var(--ink2);}
+.subtab.active{color:var(--ink);border-bottom-color:var(--accent);}
+
+/* SECTIONS */
+.mod-section{display:none;}
+.mod-section.active{display:block;}
+
+/* THEORY */
+.theory-wrap{padding:44px 52px 52px;max-width:780px;}
+.prose-max{max-width:640px;}
+.eyebrow{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
+.mod-title{font-family:var(--serif);font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1.15;color:var(--ink);margin-bottom:8px;}
+.mod-sub{font-size:15px;color:var(--ink2);line-height:1.65;max-width:520px;}
+.prose-divider{border:none;border-top:1px solid var(--rule2);margin:40px 0;}
+.prose-h2{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:-.01em;color:var(--ink);margin:44px 0 12px;display:flex;align-items:center;gap:12px;}
+.prose-h2:first-of-type{margin-top:32px;}
+.prose-h2 .sn{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--ink3);letter-spacing:.06em;min-width:28px;}
+.prose-p{font-family:var(--serif);font-size:17px;color:var(--ink2);line-height:1.85;margin-bottom:18px;}
+.prose-p strong{color:var(--ink);font-weight:600;}
+.prose-p em{font-style:italic;}
+.prose-p code{font-family:var(--mono);font-size:13px;background:var(--bg2);padding:1px 5px;border-radius:3px;color:var(--ink);border:1px solid var(--rule);}
+
+/* Callouts */
+.callout{border-radius:8px;padding:16px 18px;margin:22px 0;font-family:var(--sans);font-size:14px;line-height:1.7;}
+.callout .cl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;}
+.callout p{margin:0;}
+.callout.analogy{background:rgba(107,63,160,.06);border:1px solid rgba(107,63,160,.15);}
+.callout.analogy .cl{color:var(--purple);}
+.callout.analogy p{color:#3D2060;}
+.callout.insight{background:rgba(26,79,219,.05);border:1px solid rgba(26,79,219,.14);}
+.callout.insight .cl{color:var(--accent);}
+.callout.insight p{color:#0D2865;}
+.callout.warning{background:rgba(192,57,43,.05);border:1px solid rgba(192,57,43,.14);}
+.callout.warning .cl{color:var(--red);}
+.callout.warning p{color:#5C1A12;}
+.callout.fact{background:rgba(26,122,74,.05);border:1px solid rgba(26,122,74,.14);}
+.callout.fact .cl{color:var(--green);}
+.callout.fact p{color:#0D3D22;}
+
+/* Concept card */
+.concept-card{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:18px 20px;margin:20px 0;}
+.cc-title{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:7px;display:flex;align-items:center;gap:8px;}
+.cc-body{font-family:var(--sans);font-size:14px;color:var(--ink2);line-height:1.7;}
+
+/* Misconception */
+.misconception{background:rgba(196,134,10,.06);border:1px solid rgba(196,134,10,.2);border-radius:8px;padding:16px 18px;margin:20px 0;}
+.mc-lbl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.mc-wrong{font-family:var(--sans);font-size:14px;color:var(--red);margin-bottom:6px;display:flex;gap:8px;}
+.mc-right{font-family:var(--sans);font-size:14px;color:var(--green);display:flex;gap:8px;}
+
+/* Bell state table */
+.bell-table{width:100%;border-collapse:collapse;margin:22px 0;font-family:var(--sans);font-size:14px;}
+.bell-table th{padding:9px 12px;text-align:left;font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.08em;text-transform:uppercase;border-bottom:2px solid var(--rule);color:var(--ink3);}
+.bell-table td{padding:9px 12px;border-bottom:1px solid var(--rule2);color:var(--ink2);vertical-align:top;line-height:1.6;}
+.bell-table tr:last-child td{border-bottom:none;}
+.bell-table td:first-child{font-family:var(--mono);font-weight:600;color:var(--accent);width:80px;}
+.bell-table td:nth-child(2){font-family:var(--mono);font-size:13px;color:var(--ink);width:200px;}
+
+/* Circuit box */
+.circuit-box{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:24px;margin:22px 0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;}
+.circuit-caption{font-size:12px;font-family:var(--sans);color:var(--ink3);text-align:center;font-style:italic;}
+
+/* Correlation diagram */
+.correlation-box{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:20px;margin:22px 0;}
+.corr-title{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:14px;}
+.corr-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--rule2);font-family:var(--mono);font-size:12px;}
+.corr-row:last-child{border-bottom:none;}
+.corr-q0{min-width:80px;color:var(--accent);font-weight:600;}
+.corr-q1{min-width:80px;color:var(--purple);font-weight:600;}
+.corr-note{color:var(--ink3);font-family:var(--sans);font-size:12px;}
+.corr-tick{color:var(--green);font-size:14px;}
+.corr-cross{color:var(--red);font-size:14px;}
+
+/* Quiz */
+.quiz-box{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:18px;margin:28px 0;}
+.quiz-lbl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px;}
+.quiz-q{font-family:var(--sans);font-size:15px;font-weight:500;color:var(--ink);margin-bottom:10px;}
+.quiz-opts{display:flex;flex-direction:column;gap:7px;}
+.quiz-opt{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-radius:6px;border:1px solid var(--rule);background:var(--bg);cursor:pointer;transition:all .15s;font-family:var(--sans);font-size:14px;color:var(--ink2);}
+.quiz-opt:hover{border-color:var(--accent);color:var(--ink);}
+.quiz-opt.correct{background:rgba(26,122,74,.08);border-color:var(--green);color:var(--green);}
+.quiz-opt.wrong{background:rgba(192,57,43,.06);border-color:var(--red);color:var(--red);}
+.quiz-opt .ol{font-family:var(--mono);font-size:11px;color:var(--ink3);min-width:18px;margin-top:1px;}
+.quiz-fb{margin-top:9px;padding:9px 12px;border-radius:6px;font-family:var(--sans);font-size:13px;line-height:1.6;display:none;}
+.quiz-fb.show{display:block;}
+.quiz-fb.correct{background:rgba(26,122,74,.08);color:var(--green);}
+.quiz-fb.wrong{background:rgba(192,57,43,.06);color:var(--red);}
+
+/* What's next */
+.whats-next{background:linear-gradient(135deg,rgba(26,79,219,.06),rgba(107,63,160,.06));border:1px solid rgba(26,79,219,.15);border-radius:8px;padding:20px;margin:40px 0 0;}
+.wn-lbl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.wn-title{font-family:var(--serif);font-size:17px;font-weight:600;margin-bottom:5px;}
+.wn-desc{font-family:var(--sans);font-size:14px;color:var(--ink2);line-height:1.6;}
+
+/* Theory footer */
+.theory-footer{display:flex;align-items:center;justify-content:space-between;padding:22px 52px 40px;max-width:780px;border-top:1px solid var(--rule2);}
+.tf-btn{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:14px;font-weight:500;padding:10px 20px;border-radius:6px;cursor:pointer;border:1px solid var(--rule);background:var(--bg2);color:var(--ink2);transition:all .15s;}
+.tf-btn:hover{border-color:var(--ink3);color:var(--ink);}
+.tf-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.tf-btn.primary:hover{background:var(--accent2);}
+.tf-btn:disabled{opacity:.3;cursor:default;}
+
+/* HANDS-ON */
+.handson-wrap{padding:32px 52px 52px;max-width:780px;}
+.nb-hdr{margin-bottom:26px;padding-bottom:20px;border-bottom:1px solid var(--rule2);}
+.nb-eyebrow{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.nb-title{font-family:var(--serif);font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.2;margin-bottom:7px;}
+.nb-desc{font-size:14px;color:var(--ink2);line-height:1.65;max-width:500px;margin-bottom:12px;font-family:var(--sans);}
+.nb-meta{display:flex;gap:14px;flex-wrap:wrap;}
+.nb-meta-item{font-size:12px;font-family:var(--mono);color:var(--ink3);}
+.obj-box{background:rgba(26,79,219,.05);border:1px solid rgba(26,79,219,.14);border-radius:8px;padding:14px 16px;margin-bottom:26px;}
+.obj-lbl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:7px;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:4px;}
+.obj-list li{font-size:14px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;font-family:var(--sans);}
+.obj-list li::before{content:'→';font-family:var(--mono);color:var(--accent);font-size:12px;margin-top:1px;flex-shrink:0;}
+.nb-step{display:flex;align-items:center;gap:12px;margin:28px 0 14px;}
+.nb-step-num{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.nb-step-title{font-family:var(--sans);font-size:16px;font-weight:600;color:var(--ink);}
+.nb-prose p{font-family:var(--sans);font-size:15px;color:var(--ink2);line-height:1.75;margin-bottom:14px;}
+.nb-prose p strong{color:var(--ink);}
+.nb-prose p code{font-family:var(--mono);font-size:13px;background:var(--bg2);padding:1px 5px;border-radius:3px;color:var(--ink);border:1px solid var(--rule);}
+
+/* Callout nb */
+.callout-nb{border-radius:8px;padding:13px 16px;margin:16px 0;font-size:14px;line-height:1.65;font-family:var(--sans);}
+.cn-lbl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.callout-nb.tip{background:rgba(26,79,219,.05);border:1px solid rgba(26,79,219,.14);}
+.callout-nb.tip .cn-lbl{color:var(--accent);}
+.callout-nb.tip p{color:#0D2865;margin:0;}
+.callout-nb.note{background:rgba(196,134,10,.06);border:1px solid rgba(196,134,10,.2);}
+.callout-nb.note .cn-lbl{color:var(--gold);}
+.callout-nb.note p{color:#4A3008;margin:0;}
+.callout-nb.success{background:rgba(26,122,74,.05);border:1px solid rgba(26,122,74,.15);}
+.callout-nb.success .cn-lbl{color:var(--green);}
+.callout-nb.success p{color:#0A3320;margin:0;}
+.callout-nb.warning{background:rgba(192,57,43,.05);border:1px solid rgba(192,57,43,.14);}
+.callout-nb.warning .cn-lbl{color:var(--red);}
+.callout-nb.warning p{color:#5C1A12;margin:0;}
+
+/* Code */
+.code-wrap{margin:16px 0;}
+.code-hdr{background:#1E1E2E;padding:8px 13px;border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:space-between;}
+.code-fn{font-family:var(--mono);font-size:11px;color:#7C7F93;display:flex;align-items:center;gap:5px;}
+.code-fn::before{content:'📄';font-size:11px;}
+.code-hint{font-size:11px;font-family:var(--mono);color:#6C7086;}
+.code-body{background:#1E1E2E;padding:18px;border-radius:0 0 8px 8px;font-family:var(--mono);font-size:12px;line-height:2;overflow-x:auto;border:1px solid rgba(255,255,255,.05);border-top:none;}
+.code-body .kw{color:#CBA6F7;}.code-body .fn{color:#89B4FA;}.code-body .st{color:#A6E3A1;}.code-body .cm{color:#585B70;}.code-body .nm{color:#FAB387;}.code-body .cls{color:#F9E2AF;}.code-body .var{color:#CDD6F4;}
+
+/* Line explanation */
+.line-exp{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;margin:7px 0 18px;}
+.le-title{font-size:11px;font-family:var(--mono);font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:9px;}
+.le-row{display:flex;gap:12px;padding:5px 0;border-bottom:1px solid var(--rule2);font-size:13px;align-items:flex-start;}
+.le-row:last-child{border-bottom:none;}
+.le-code{font-family:var(--mono);font-size:11px;color:var(--accent);min-width:170px;flex-shrink:0;padding-top:1px;}
+.le-meaning{color:var(--ink2);line-height:1.5;font-family:var(--sans);}
+
+/* Probability graphs */
+.output-lbl{font-size:11px;font-family:var(--mono);font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:18px 0 10px;}
+.prob-graph{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:20px 24px;margin-bottom:8px;}
+.pg-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:16px;font-family:var(--sans);}
+.pg-bars{display:flex;align-items:flex-end;gap:10px;height:110px;margin-bottom:9px;}
+.pg-group{display:flex;flex-direction:column;align-items:center;flex:1;max-width:100px;}
+.pg-bar-con{width:100%;display:flex;align-items:flex-end;height:90px;position:relative;}
+.pg-bar{width:100%;border-radius:4px 4px 0 0;transition:height .6s;position:relative;}
+.pg-bar::after{content:attr(data-pct);position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:10px;font-weight:600;color:var(--ink);white-space:nowrap;}
+.pg-bar.b00{background:linear-gradient(180deg,rgba(26,79,219,.8),rgba(26,79,219,.45));}
+.pg-bar.b01{background:linear-gradient(180deg,rgba(192,57,43,.7),rgba(192,57,43,.35));}
+.pg-bar.b10{background:linear-gradient(180deg,rgba(192,57,43,.7),rgba(192,57,43,.35));}
+.pg-bar.b11{background:linear-gradient(180deg,rgba(107,63,160,.8),rgba(107,63,160,.45));}
+.pg-bar.empty{background:var(--rule);opacity:.3;}
+.pg-lbl{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--ink2);margin-top:5px;}
+.pg-axis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--ink3);padding:0 2px;}
+.pg-interp{margin-top:10px;font-size:13px;color:var(--ink2);line-height:1.6;padding-top:10px;border-top:1px solid var(--rule2);font-family:var(--sans);}
+.pg-interp strong{color:var(--ink);}
+
+.section-sep{border:none;border-top:1px solid var(--rule2);margin:32px 0;}
+.insight-box{background:var(--bg2);border-left:3px solid var(--accent);padding:14px 16px;margin:18px 0;border-radius:0 8px 8px 0;}
+.insight-box p{font-family:var(--sans);font-size:14px;color:var(--ink2);margin:0;line-height:1.65;}
+.insight-box p strong{color:var(--ink);}
+
+.nb-footer{display:flex;align-items:center;justify-content:space-between;padding:18px 0 0;margin-top:32px;border-top:1px solid var(--rule2);}
+.nb-foot-btn{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:14px;font-weight:500;padding:9px 18px;border-radius:6px;cursor:pointer;border:1px solid var(--rule);background:var(--bg2);color:var(--ink2);transition:all .15s;}
+.nb-foot-btn:hover{border-color:var(--ink3);color:var(--ink);}
+.nb-foot-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.nb-foot-btn.primary:hover{background:var(--accent2);}
+</style>
+<style>
+.ql-adapted{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100%;}
+.ql-adapted .sidebar,.ql-adapted .reading-bar{display:none!important;}
+.ql-adapted .main{background:var(--bg);overflow:visible;}
+.ql-adapted .lesson-footer,.ql-adapted .theory-footer,.ql-adapted .nb-footer{display:none!important;}
+.ql-adapted .lesson,.ql-adapted .mod-section{display:block;}
+.ql-adapted .lesson:not(.active){display:none;}
+.ql-adapted .mod-section:not(.active){display:none;}
+.ql-adapted .code-wrap{margin:18px 0;border:1px solid #D7D0C6;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 10px 28px rgba(26,24,20,.06);}
+.ql-adapted .code-header,.ql-adapted .code-hdr{background:#F3F4F6!important;padding:8px 14px!important;border-radius:0!important;border-bottom:1px solid #D7D0C6;display:flex;align-items:center;justify-content:space-between;}
+.ql-adapted .code-lang,.ql-adapted .code-title,.ql-adapted .code-fn,.ql-adapted .code-filename,.ql-adapted .code-hint,.ql-adapted .code-run-hint{color:#4A4640!important;font-family:var(--mono);}
+.ql-adapted .code-fn::before,.ql-adapted .code-filename::before{content:'PY'!important;font-size:10px;color:#1A4FDB;font-weight:600;}
+.ql-adapted .code-block,.ql-adapted .code-body{background:#fff!important;color:#1F2937!important;border:0!important;border-left:3px solid #E8F0FF!important;border-radius:0!important;padding:18px 18px 18px 78px!important;font-family:var(--mono);font-size:12px;line-height:2;overflow-x:auto;white-space:pre;position:relative;}
+.ql-adapted .code-block::before,.ql-adapted .code-body::before{content:'In [ ]:';position:absolute;left:14px;top:18px;font-family:var(--mono);font-size:10px;color:#1A4FDB;}
+.ql-adapted .code-block .kw,.ql-adapted .code-body .kw{color:#7C3AED!important;}
+.ql-adapted .code-block .fn,.ql-adapted .code-body .fn{color:#1A4FDB!important;}
+.ql-adapted .code-block .st,.ql-adapted .code-body .st{color:#1A7A4A!important;}
+.ql-adapted .code-block .cm,.ql-adapted .code-body .cm{color:#6B625B!important;}
+.ql-adapted .code-block .nm,.ql-adapted .code-body .nm{color:#C0392B!important;}
+.ql-adapted .code-block .cls,.ql-adapted .code-body .cls{color:#C4860A!important;}
+.ql-adapted .code-block .var,.ql-adapted .code-body .var{color:#1A1814!important;}
+.ql-adapted .output-box{background:#FBFBFB!important;border:1px solid #E3DED6!important;color:#1A1814!important;}
+.ql-adapted .terminal-header,.ql-adapted .term-hdr{background:#F3F4F6!important;border:1px solid #D7D0C6;border-bottom:0;}
+.ql-adapted .terminal-body,.ql-adapted .term-body{background:#fff!important;color:#1A1814!important;border:1px solid #D7D0C6;border-left:3px solid #E8F0FF;}
+.ql-adapted .terminal-body .cmd,.ql-adapted .term-body .cmd{color:#1A1814!important;}
+.ql-adapted .terminal-body .prompt,.ql-adapted .term-body .pr{color:#1A4FDB!important;}
+.ql-adapted.module-01-handson .nb-page{display:block!important;max-width:760px;padding:44px 52px 48px;border-top:1px solid var(--rule2);}
+.ql-adapted.module-01-handson .nb-page:first-child{border-top:0;}
+.ql-adapted.module-01-handson .nb-page:not(.active){display:block!important;}
+.ql-adapted.module-01-handson .nb-header{margin-bottom:28px;}
+.ql-adapted.module-01-handson .quiz-fb{display:block;}
+</style>
+<div class="ql-adapted module-03">
+
+    <div class="subtabs">
+      <button class="subtab active" onclick="showSubtab('theory',this)" id="tab-theory">📖 Theory</button>
+      <button class="subtab" onclick="showSubtab('handson',this)" id="tab-handson">💻 Hands-on</button>
+    </div>
+
+    <!-- ══════════════════════════
+         THEORY
+    ══════════════════════════ -->
+    <div class="mod-section active" id="sec-theory">
+      <div class="theory-wrap">
+        <div class="prose-max">
+          <div class="eyebrow">Module 03 · Foundation · ~2 hrs · Code included</div>
+          <h1 class="mod-title">Entanglement &amp; Bell States</h1>
+          <p class="mod-sub">Entanglement is the phenomenon that Einstein called "spooky action at a distance"  and it is the most powerful resource in quantum computing. By the end of this module you will have created entanglement, measured it, and understood exactly what it does and does not mean.</p>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 1 -->
+          <h2 class="prose-h2"><span class="sn">01</span> What entanglement is NOT  clearing the myths first</h2>
+          <p class="prose-p">Entanglement is the most misunderstood concept in quantum computing. Before explaining what it is, let's clear up the three things it is not  because the myths are everywhere, including in mainstream science writing.</p>
+
+          <div class="misconception">
+            <div class="mc-lbl">🚫 Myth 1</div>
+            <div class="mc-wrong">✗ &nbsp;"Entanglement allows faster-than-light communication"</div>
+            <div class="mc-right">✓ &nbsp;Measuring one entangled qubit gives a random result. You cannot control that result. Therefore you cannot send any information  you just get correlated randomness. No signal travels anywhere.</div>
+          </div>
+
+          <div class="misconception">
+            <div class="mc-lbl">🚫 Myth 2</div>
+            <div class="mc-wrong">✗ &nbsp;"Entangled qubits are physically connected by some invisible link"</div>
+            <div class="mc-right">✓ &nbsp;There is no physical connection. Entanglement is a property of the shared quantum state  a mathematical correlation encoded in the joint wave function of the two qubits.</div>
+          </div>
+
+          <div class="misconception">
+            <div class="mc-lbl">🚫 Myth 3</div>
+            <div class="mc-wrong">✗ &nbsp;"Entanglement means the qubits always have the same value"</div>
+            <div class="mc-right">✓ &nbsp;Before measurement, neither qubit has a definite value at all. After measurement, they are correlated  but depending on the Bell state, they might be the same or opposite. The correlation is the key, not equality.</div>
+          </div>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 2 -->
+          <h2 class="prose-h2"><span class="sn">02</span> What entanglement actually is</h2>
+          <p class="prose-p">Two qubits are entangled when their quantum states cannot be described independently of each other. Formally: the two-qubit state cannot be written as a product of two single-qubit states.</p>
+          <p class="prose-p">Here is the clearest way to understand it. Consider two separate qubits, each in superposition. Their combined state has four possibilities: 00, 01, 10, 11  each with some probability. If you measure one qubit and find 0, the other qubit might still be 0 or 1 with some probability  the two measurements are <em>independent</em>.</p>
+          <p class="prose-p">Now create an entangled pair. <strong>Measuring one qubit instantly determines the other  regardless of distance.</strong> Not because a signal travels between them. But because they share a single quantum state that spans both qubits simultaneously. The outcome is random, but the outcomes are correlated.</p>
+
+          <div style="background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:24px;margin:28px 0;">
+            <div style="font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;">Interactive  Gloves in Boxes</div>
+            <div style="display:flex;gap:28px;justify-content:center;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;" id="glove-boxes">
+              <!-- London box -->
+              <div style="text-align:center;">
+                <div id="gl-london-box" style="width:120px;height:110px;border-radius:12px;border:2.5px solid var(--accent);background:rgba(26,79,219,.07);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:default;transition:all .45s ease;position:relative;overflow:hidden;">
+                  <div id="gl-london-icon" style="font-size:36px;transition:all .35s ease;">?</div>
+                  <div id="gl-london-label" style="font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:600;transition:all .35s ease;"></div>
+                </div>
+                <div style="margin-top:8px;font-family:var(--sans);font-size:12px;color:var(--ink2);font-weight:500;">Box sent to London</div>
+              </div>
+              <!-- Connector -->
+              <div style="display:flex;flex-direction:column;align-items:center;padding-bottom:28px;">
+                <div id="gl-connector" style="width:60px;height:3px;background:var(--rule);border-radius:2px;position:relative;transition:background .4s ease;">
+                  <div id="gl-spark" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:0;height:0;border-radius:50%;background:var(--gold);transition:all .3s ease;opacity:0;"></div>
+                </div>
+                <div id="gl-instant-label" style="font-family:var(--mono);font-size:9px;color:var(--ink3);margin-top:4px;text-align:center;line-height:1.4;opacity:0;transition:opacity .4s ease;max-width:70px;">INSTANT</div>
+              </div>
+              <!-- Tokyo box -->
+              <div style="text-align:center;">
+                <div id="gl-tokyo-box" style="width:120px;height:110px;border-radius:12px;border:2.5px solid var(--purple,#6B3FA0);background:rgba(107,63,160,.07);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:default;transition:all .45s ease;position:relative;overflow:hidden;">
+                  <div id="gl-tokyo-icon" style="font-size:36px;transition:all .35s ease;">?</div>
+                  <div id="gl-tokyo-label" style="font-family:var(--mono);font-size:11px;color:#6B3FA0;font-weight:600;transition:all .35s ease;"></div>
+                </div>
+                <div style="margin-top:8px;font-family:var(--sans);font-size:12px;color:var(--ink2);font-weight:500;">Box sent to Tokyo</div>
+              </div>
+            </div>
+            <!-- Result text -->
+            <div id="gl-result" style="font-family:var(--sans);font-size:13px;color:var(--ink2);line-height:1.65;text-align:center;min-height:48px;margin-bottom:14px;transition:opacity .4s ease;opacity:0;"></div>
+            <!-- Sub note -->
+            <div id="gl-subnote" style="font-family:var(--sans);font-size:12px;color:var(--ink3);text-align:center;font-style:italic;margin-bottom:16px;opacity:0;transition:opacity .5s ease;"></div>
+            <!-- Buttons -->
+            <div style="display:flex;gap:10px;justify-content:center;">
+              <button id="gl-open-btn" onclick="gloveOpen()" style="font-family:var(--sans);font-size:13px;font-weight:500;padding:9px 20px;border-radius:6px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;transition:all .15s;">Open London's box</button>
+              <button onclick="gloveReset()" style="font-family:var(--sans);font-size:13px;font-weight:500;padding:9px 20px;border-radius:6px;border:1.5px solid var(--rule);background:var(--bg2);color:var(--ink2);cursor:pointer;transition:all .15s;">Reset</button>
+            </div>
+            <script>
+            (function(){
+              var opened = false;
+              window.gloveOpen = function() {
+                if (opened) return;
+                opened = true;
+                var londonIsLeft = Math.random() < 0.5;
+                var londonHand = londonIsLeft ? 'LEFT' : 'RIGHT';
+                var tokyoHand  = londonIsLeft ? 'RIGHT' : 'LEFT';
+                var londonEmoji = londonIsLeft ? '🫱' : '🫲';
+                var tokyoEmoji  = londonIsLeft ? '🫲' : '🫱';
+                var londonColor = '#1A4FDB';
+                var tokyoColor  = '#6B3FA0';
+                // Animate London box
+                var lBox = document.getElementById('gl-london-box');
+                var lIcon = document.getElementById('gl-london-icon');
+                var lLbl  = document.getElementById('gl-london-label');
+                lBox.style.borderColor = londonColor;
+                lBox.style.background  = 'rgba(26,79,219,.14)';
+                lBox.style.transform   = 'scale(1.06)';
+                lIcon.textContent = londonEmoji;
+                lLbl.textContent  = londonHand + ' glove';
+                setTimeout(function(){ lBox.style.transform = 'scale(1)'; }, 350);
+                // Animate connector spark
+                var conn = document.getElementById('gl-connector');
+                var spark = document.getElementById('gl-spark');
+                var instLbl = document.getElementById('gl-instant-label');
+                conn.style.background = 'linear-gradient(90deg,'+londonColor+','+tokyoColor+')';
+                spark.style.width  = '10px';
+                spark.style.height = '10px';
+                spark.style.opacity = '1';
+                instLbl.style.opacity = '1';
+                setTimeout(function(){ spark.style.opacity='0'; spark.style.width='0'; spark.style.height='0'; }, 400);
+                // Animate Tokyo box (tiny delay  same instant)
+                setTimeout(function(){
+                  var tBox = document.getElementById('gl-tokyo-box');
+                  var tIcon = document.getElementById('gl-tokyo-icon');
+                  var tLbl  = document.getElementById('gl-tokyo-label');
+                  tBox.style.borderColor = tokyoColor;
+                  tBox.style.background  = 'rgba(107,63,160,.14)';
+                  tBox.style.transform   = 'scale(1.06)';
+                  tIcon.textContent = tokyoEmoji;
+                  tLbl.textContent  = tokyoHand + ' glove';
+                  setTimeout(function(){ tBox.style.transform='scale(1)'; }, 350);
+                }, 120);
+                // Result text
+                setTimeout(function(){
+                  var res = document.getElementById('gl-result');
+                  res.innerHTML = '<strong>London: '+londonHand+' glove</strong> &rarr; Tokyo must have: <strong>'+tokyoHand+' glove.</strong><br>Always opposite. Always instant.';
+                  res.style.opacity = '1';
+                  var note = document.getElementById('gl-subnote');
+                  note.textContent = 'This is NOT sending information. The gloves were paired when created  just like entangled qubits.';
+                  note.style.opacity = '1';
+                  document.getElementById('gl-open-btn').style.opacity = '0.4';
+                  document.getElementById('gl-open-btn').style.cursor = 'default';
+                }, 250);
+              };
+              window.gloveReset = function() {
+                opened = false;
+                ['gl-london-box','gl-tokyo-box'].forEach(function(id,i){
+                  var el = document.getElementById(id);
+                  el.style.borderColor = i===0 ? 'var(--accent)' : '#6B3FA0';
+                  el.style.background  = i===0 ? 'rgba(26,79,219,.07)' : 'rgba(107,63,160,.07)';
+                  el.style.transform   = 'scale(1)';
+                });
+                document.getElementById('gl-london-icon').textContent = '?';
+                document.getElementById('gl-london-label').textContent = '';
+                document.getElementById('gl-tokyo-icon').textContent = '?';
+                document.getElementById('gl-tokyo-label').textContent = '';
+                document.getElementById('gl-connector').style.background = 'var(--rule)';
+                document.getElementById('gl-instant-label').style.opacity = '0';
+                document.getElementById('gl-result').style.opacity = '0';
+                document.getElementById('gl-result').innerHTML = '';
+                document.getElementById('gl-subnote').style.opacity = '0';
+                document.getElementById('gl-subnote').textContent = '';
+                document.getElementById('gl-open-btn').style.opacity = '1';
+                document.getElementById('gl-open-btn').style.cursor = 'pointer';
+              };
+            })();
+            </script>
+          </div>
+
+          <div class="callout analogy">
+            <div class="cl">🧠 Analogy  the magic gloves</div>
+            <p>Imagine you put one glove from a pair in a box and ship it to Tokyo. You open your box in London and find a left glove. You instantly know the glove in Tokyo is a right glove  without any signal traveling between London and Tokyo. The correlation was established when the gloves were paired. Entanglement is like this  except the gloves genuinely have no definite handedness until one is opened, and that handedness is set randomly at the moment of measurement.</p>
+          </div>
+
+          <p class="prose-p">The critical quantum difference from the glove analogy: in the classical glove case, each glove always had a definite handedness  you just did not know it. Bell's theorem (1964) proved experimentally that entangled qubits genuinely have <em>no definite value</em> until measured. This is not a matter of ignorance  it is physical reality.</p>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 3 -->
+          <h2 class="prose-h2"><span class="sn">03</span> The four Bell states</h2>
+          <p class="prose-p">There are exactly four maximally entangled two-qubit states, called the <strong>Bell states</strong> or Bell basis. They are the most entangled states two qubits can be in.</p>
+
+          <table class="bell-table">
+            <thead>
+              <tr><th>Name</th><th>State</th><th>What it means</th><th>Correlation</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>|Φ+⟩</td>
+                <td>(|00⟩ + |11⟩) / √2</td>
+                <td>Always same: both 0 or both 1</td>
+                <td style="color:var(--green)">Correlated</td>
+              </tr>
+              <tr>
+                <td>|Φ−⟩</td>
+                <td>(|00⟩ − |11⟩) / √2</td>
+                <td>Always same but with phase difference</td>
+                <td style="color:var(--green)">Correlated</td>
+              </tr>
+              <tr>
+                <td>|Ψ+⟩</td>
+                <td>(|01⟩ + |10⟩) / √2</td>
+                <td>Always opposite: one 0 and one 1</td>
+                <td style="color:var(--purple)">Anti-correlated</td>
+              </tr>
+              <tr>
+                <td>|Ψ−⟩</td>
+                <td>(|01⟩ − |10⟩) / √2</td>
+                <td>Always opposite with phase difference</td>
+                <td style="color:var(--purple)">Anti-correlated</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p class="prose-p">The most important for now is |Φ+⟩  this is what the H + CNOT circuit creates, and it is what you will measure most often. The minus signs in |Φ−⟩ and |Ψ−⟩ represent phase differences that are invisible in measurement statistics alone but matter when combined with other gates.</p>
+
+          <!-- SECTION 4 -->
+          <h2 class="prose-h2"><span class="sn">04</span> How to create entanglement  the H + CNOT circuit</h2>
+          <p class="prose-p">You already saw this circuit in Module 02. Now let's understand exactly why it creates entanglement, step by step.</p>
+
+          <div class="circuit-box">
+            <svg width="320" height="110" viewBox="0 0 320 110" fill="none">
+              <!-- Qubit lines -->
+              <line x1="10" y1="35" x2="310" y2="35" stroke="#CBD5E1" stroke-width="1.5"></line>
+              <line x1="10" y1="75" x2="310" y2="75" stroke="#CBD5E1" stroke-width="1.5"></line>
+              <!-- Labels -->
+              <text x="8" y="22" font-size="9" fill="#8A8480" font-family="JetBrains Mono">q₀ |0⟩</text>
+              <text x="8" y="88" font-size="9" fill="#8A8480" font-family="JetBrains Mono">q₁ |0⟩</text>
+              <!-- H gate -->
+              <rect x="50" y="25" width="28" height="20" rx="3" fill="#EFEDE7" stroke="#1A4FDB" stroke-width="1.5"></rect>
+              <text x="64" y="39" text-anchor="middle" font-size="11" fill="#1A4FDB" font-family="JetBrains Mono">H</text>
+              <!-- State after H -->
+              <text x="92" y="22" font-size="8" fill="#1A7A4A" font-family="JetBrains Mono">|+⟩=(|0⟩+|1⟩)/√2</text>
+              <!-- CNOT -->
+              <circle cx="160" cy="35" r="5" fill="#1A4FDB"></circle>
+              <line x1="160" y1="40" x2="160" y2="66" stroke="#1A4FDB" stroke-width="1.5"></line>
+              <circle cx="160" cy="75" r="9" fill="none" stroke="#1A4FDB" stroke-width="1.5"></circle>
+              <text x="160" y="80" text-anchor="middle" font-size="13" fill="#1A4FDB" font-family="JetBrains Mono">⊕</text>
+              <!-- State after CNOT -->
+              <text x="178" y="56" font-size="8" fill="#6B3FA0" font-family="JetBrains Mono">|Φ+⟩=(|00⟩+|11⟩)/√2</text>
+              <!-- Measurement -->
+              <rect x="250" y="25" width="28" height="20" rx="3" fill="#EFEDE7" stroke="#8A8480" stroke-width="1"></rect>
+              <text x="264" y="39" text-anchor="middle" font-size="9" fill="#8A8480" font-family="JetBrains Mono">M</text>
+              <rect x="250" y="65" width="28" height="20" rx="3" fill="#EFEDE7" stroke="#8A8480" stroke-width="1"></rect>
+              <text x="264" y="79" text-anchor="middle" font-size="9" fill="#8A8480" font-family="JetBrains Mono">M</text>
+            </svg>
+            <div class="circuit-caption">Step 1: H puts q₀ in superposition. Step 2: CNOT entangles q₁ to q₀. Result: Bell state |Φ+⟩.</div>
+          </div>
+
+          <div class="concept-card">
+            <div class="cc-title">Step by step: why H + CNOT creates entanglement</div>
+            <div class="cc-body">
+              <strong>Start:</strong> Both qubits in |0⟩. Combined state: |00⟩.<br><br>
+              <strong>After H on q₀:</strong> q₀ is in superposition |+⟩ = (|0⟩ + |1⟩)/√2. q₁ is still |0⟩. Combined state: (|0⟩ + |1⟩)/√2 ⊗ |0⟩ = (|00⟩ + |10⟩)/√2. These two qubits are still separable  not yet entangled.<br><br>
+              <strong>After CNOT (q₀ controls q₁):</strong> When q₀ = |0⟩, q₁ stays |0⟩ → contributes |00⟩. When q₀ = |1⟩, q₁ flips to |1⟩ → contributes |11⟩. Final state: (|00⟩ + |11⟩)/√2 = |Φ+⟩.<br><br>
+              <strong>This state cannot be factored.</strong> You cannot write it as (something about q₀) ⊗ (something about q₁). They are entangled.
+            </div>
+          </div>
+
+          <!-- SECTION 5 -->
+          <h2 class="prose-h2"><span class="sn">05</span> What happens when you measure a Bell state</h2>
+          <p class="prose-p">When you measure both qubits of a |Φ+⟩ Bell state, you get either 00 or 11, each with 50% probability. <strong>You never get 01 or 10.</strong> This perfect correlation  across any distance, instantaneously  is the signature of entanglement.</p>
+
+          <div class="correlation-box">
+            <div class="corr-title">Measurement outcomes for |Φ+⟩ = (|00⟩ + |11⟩)/√2</div>
+            <div class="corr-row">
+              <span class="corr-q0">q₀ = 0</span>
+              <span class="corr-q1">q₁ = 0</span>
+              <span style="flex:1;background:rgba(26,79,219,.15);height:14px;border-radius:2px;max-width:180px;"></span>
+              <span class="corr-note">~50% probability</span>
+              <span class="corr-tick">✓</span>
+            </div>
+            <div class="corr-row">
+              <span class="corr-q0">q₀ = 0</span>
+              <span class="corr-q1">q₁ = 1</span>
+              <span style="flex:1;background:var(--rule);height:14px;border-radius:2px;max-width:180px;opacity:.2;"></span>
+              <span class="corr-note">0%  never happens</span>
+              <span class="corr-cross">✗</span>
+            </div>
+            <div class="corr-row">
+              <span class="corr-q0">q₀ = 1</span>
+              <span class="corr-q1">q₁ = 0</span>
+              <span style="flex:1;background:var(--rule);height:14px;border-radius:2px;max-width:180px;opacity:.2;"></span>
+              <span class="corr-note">0%  never happens</span>
+              <span class="corr-cross">✗</span>
+            </div>
+            <div class="corr-row">
+              <span class="corr-q0">q₀ = 1</span>
+              <span class="corr-q1">q₁ = 1</span>
+              <span style="flex:1;background:rgba(107,63,160,.2);height:14px;border-radius:2px;max-width:180px;"></span>
+              <span class="corr-note">~50% probability</span>
+              <span class="corr-tick">✓</span>
+            </div>
+          </div>
+
+          <p class="prose-p">The 01 and 10 outcomes have exactly zero probability  not approximately zero, not rarely, but <em>exactly never</em>. This perfect correlation cannot be explained by any classical hidden variable theory. Bell's theorem proves it. This is one of the most experimentally verified facts in all of physics.</p>
+
+          <div class="callout insight">
+            <div class="cl">💡 Why this matters for quantum computing</div>
+            <p>Entanglement allows quantum computers to process exponentially many states simultaneously. When n qubits are entangled, their joint state cannot be described by n separate qubit states  it requires 2ⁿ amplitudes. This is the source of quantum computing's exponential state space. Without entanglement, a quantum computer is not more powerful than a classical one.</p>
+          </div>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 6 -->
+          <h2 class="prose-h2"><span class="sn">06</span> Where entanglement appears in real algorithms</h2>
+          <p class="prose-p">Entanglement is not just a curiosity  it is the computational resource that makes quantum algorithms work. Here is where it appears in the algorithms you will build in this course:</p>
+
+          <div class="concept-card">
+            <div class="cc-title">Grover's algorithm (Module 04)</div>
+            <div class="cc-body">The oracle and diffusion operator create entanglement across all qubits. This is what allows the amplitude of the correct answer to be amplified across the entire superposition simultaneously  not qubit by qubit.</div>
+          </div>
+          <div class="concept-card">
+            <div class="cc-title">QAOA (Module 06)</div>
+            <div class="cc-body">The cost Hamiltonian layer creates entanglement between qubits representing different variables. This is how the algorithm explores correlations between variables  which is exactly what makes combinatorial optimisation hard classically.</div>
+          </div>
+          <div class="concept-card">
+            <div class="cc-title">Quantum teleportation (this module, hands-on)</div>
+            <div class="cc-body">A Bell pair is used to transmit a qubit state from one location to another using only classical communication. The entanglement does the work  the classical channel carries the correction information.</div>
+          </div>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 7 -->
+          <h2 class="prose-h2"><span class="sn">07</span> Entanglement and decoherence  why it breaks</h2>
+          <p class="prose-p">Entanglement is fragile. Any interaction with the environment  a stray photon, a vibration, a tiny electromagnetic fluctuation  can collapse the entangled state. This is called <strong>decoherence</strong>, and it is one of the central engineering challenges of quantum computing.</p>
+
+          <div class="concept-card">
+            <div class="cc-title">T₂  the dephasing time</div>
+            <div class="cc-body">T₂ is the timescale over which quantum phase information (including entanglement) is lost due to environmental noise. On IBM's best superconducting hardware today, T₂ is approximately 100–300 microseconds. Your quantum circuit must complete before T₂ expires or the entanglement degrades into classical noise.</div>
+          </div>
+
+          <div class="callout warning">
+            <div class="cl">⚠ The practical consequence</div>
+            <p>On NISQ hardware, you can only maintain entanglement across a handful of gate operations before decoherence destroys it. This is why NISQ algorithms are designed to be shallow  not because the algorithms are simple, but because the hardware cannot sustain deep entangled circuits.</p>
+          </div>
+
+          <!-- QUIZ -->
+          <div class="quiz-box">
+            <div class="quiz-lbl">✓ Check your understanding</div>
+            <div class="quiz-q">You create a Bell state |Φ+⟩ and measure qubit q₀. You get the result 1. What can you conclude about qubit q₁ before measuring it?</div>
+            <div class="quiz-opts">
+              <div class="quiz-opt" onclick="checkQ(this,'wrong','qfb-0')"><span class="ol">A</span>q₁ is in superposition  50% chance of 0, 50% chance of 1</div>
+              <div class="quiz-opt" onclick="checkQ(this,'correct','qfb-0')"><span class="ol">B</span>q₁ is definitely in state |1⟩  measuring it will give 1 with 100% certainty</div>
+              <div class="quiz-opt" onclick="checkQ(this,'wrong','qfb-0')"><span class="ol">C</span>q₁ is definitely in state |0⟩  the qubits are anti-correlated</div>
+              <div class="quiz-opt" onclick="checkQ(this,'wrong','qfb-0')"><span class="ol">D</span>You cannot conclude anything  entanglement only affects probabilities</div>
+            </div>
+            <div class="quiz-fb correct" id="qfb-0">✓ Correct. |Φ+⟩ = (|00⟩ + |11⟩)/√2 means the qubits are always the same. If q₀ measures 1, the joint state collapses to |11⟩  so q₁ is definitely in |1⟩ and will measure 1 with certainty. The entanglement makes their outcomes perfectly correlated.</div>
+          </div>
+
+          <div class="quiz-box">
+            <div class="quiz-lbl">✓ Check your understanding</div>
+            <div class="quiz-q">Two unentangled qubits, each in superposition (|+⟩), are measured. Which outcome distribution do you expect?</div>
+            <div class="quiz-opts">
+              <div class="quiz-opt" onclick="checkQ(this,'correct','qfb-1')"><span class="ol">A</span>~25% each for 00, 01, 10, 11  all four outcomes roughly equal</div>
+              <div class="quiz-opt" onclick="checkQ(this,'wrong','qfb-1')"><span class="ol">B</span>~50% for 00 and 50% for 11  always correlated like a Bell state</div>
+              <div class="quiz-opt" onclick="checkQ(this,'wrong','qfb-1')"><span class="ol">C</span>100% for 00  superposition collapses to ground state</div>
+              <div class="quiz-opt" onclick="checkQ(this,'wrong','qfb-1')"><span class="ol">D</span>~50% for 00 and 50% for 11  superposition always gives extremes</div>
+            </div>
+            <div class="quiz-fb correct" id="qfb-1">✓ Correct. Two independent qubits in superposition give four equally likely outcomes  25% each. This is the key difference from an entangled pair. An entangled |Φ+⟩ state gives only 00 and 11, never 01 or 10. If you see all four outcomes roughly equal, the qubits are not entangled.</div>
+          </div>
+
+          <div class="whats-next">
+            <div class="wn-lbl">Ready for code?</div>
+            <div class="wn-title">Switch to Hands-on tab</div>
+            <div class="wn-desc">You understand entanglement conceptually. Now switch to Hands-on to create Bell states in Qiskit, measure the correlations, verify them statistically, implement superdense coding, and see entanglement break under noise.</div>
+          </div>
+        </div>
+      </div>
+      <div class="theory-footer">
+        <button class="tf-btn" onclick="alert('Go to M02')">← M02: Gates</button>
+        <button class="tf-btn primary" onclick="showSubtab('handson',document.getElementById('tab-handson'))">Go to Hands-on →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         HANDS-ON
+    ══════════════════════════ -->
+    <div class="mod-section" id="sec-handson">
+      <div class="handson-wrap">
+
+        <!-- NB 00 -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 00 · Classical baseline</div>
+          <div class="nb-title">Classical correlation  what entanglement is NOT</div>
+          <div class="nb-desc">Simulate classical correlated bits in Python. Show that classical correlation can be explained by hidden variables. This is the baseline that Bell's theorem disproves for quantum systems.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~10 min</span><span class="nb-meta-item">🐍 No Qiskit</span></div>
+        </div>
+        <div class="obj-box">
+          <div class="obj-lbl">By the end of this notebook</div>
+          <ul class="obj-list">
+            <li>You have simulated classical correlated bits</li>
+            <li>You understand why classical correlation is explained by pre-existing values</li>
+            <li>You can state clearly what makes quantum entanglement different</li>
+          </ul>
+        </div>
+
+        <div class="nb-step"><div class="nb-step-num">1</div><div class="nb-step-title">Classical correlated bits  the "glove" model</div></div>
+        <div class="nb-prose"><p>Set up the hidden-variable model: for each trial, pick one shared random bit at creation time and assign it to both bit_a and bit_b. This simulates a classical "glove pair" where each bit already has a definite value before it is measured.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb00_classical_correlation.py</span><span class="code-hint">step 1  setup + generate pairs</span></div>
+          <div class="code-body">
+<span class="kw">import</span> <span class="var">random</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="fn">random</span>.seed(<span class="nm">42</span>)
+
+<span class="cm"># Classical correlation: both bits set to same value at creation</span>
+<span class="cm"># This is the "hidden variable" model  value exists before measurement</span>
+<span class="var">results</span> = []
+<span class="kw">for</span> <span class="var">_</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1000</span>):
+    <span class="var">shared_value</span> = <span class="var">random</span>.randint(<span class="nm">0</span>, <span class="nm">1</span>)  <span class="cm"># decided at creation</span>
+    <span class="var">bit_a</span> = <span class="var">shared_value</span>
+    <span class="var">bit_b</span> = <span class="var">shared_value</span>   <span class="cm"># always same  "glove pair"</span>
+    <span class="var">results</span>.append((<span class="var">bit_a</span>, <span class="var">bit_b</span>))
+          </div>
+        </div>
+        <div class="nb-prose"><p>Count the four possible outcome combinations and print the percentages. You will see that 01 and 10 never appear  just like a Bell state  but here it is because both bits were determined upfront, not because of quantum entanglement.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb00_classical_correlation.py</span><span class="code-hint">step 2  count + print analysis</span></div>
+          <div class="code-body">
+<span class="cm"># Count outcomes</span>
+<span class="var">counts</span> = {<span class="st">'00'</span>: <span class="nm">0</span>, <span class="st">'01'</span>: <span class="nm">0</span>, <span class="st">'10'</span>: <span class="nm">0</span>, <span class="st">'11'</span>: <span class="nm">0</span>}
+<span class="kw">for</span> <span class="var">a</span>, <span class="var">b</span> <span class="kw">in</span> <span class="var">results</span>:
+    <span class="var">counts</span>[<span class="st">f'{a}{b}'</span>] += <span class="nm">1</span>
+
+<span class="fn">print</span>(<span class="st">"Classical correlated bits:"</span>)
+<span class="kw">for</span> <span class="var">k</span>, <span class="var">v</span> <span class="kw">in</span> <span class="var">counts</span>.items():
+    <span class="fn">print</span>(<span class="st">f"  {k}: {v/10:.1f}%"</span>)
+
+<span class="fn">print</span>(<span class="st">"\n→ 01 and 10 are 0% just like a Bell state!"</span>)
+<span class="fn">print</span>(<span class="st">"→ BUT this is explained by pre-existing values (hidden variables)."</span>)
+<span class="fn">print</span>(<span class="st">"→ Bell's theorem shows quantum entanglement CANNOT be explained this way."</span>)
+          </div>
+        </div>
+        <div class="callout-nb tip"><div class="cn-lbl">💡 The key point</div><p>Classical correlated bits also show 0% for 01 and 10  just like a Bell state. The difference is that classical correlation is explained by pre-existing values (each bit had a value all along). Quantum entanglement cannot be explained this way  Bell's theorem proves it with actual experiments. The qubits have no definite value until measured.</p></div>
+
+        <hr class="section-sep">
+
+        <!-- NB 01 -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 01 · Quantum</div>
+          <div class="nb-title">Create your first Bell state</div>
+          <div class="nb-desc">Build the H + CNOT circuit, run it 1000 times, and verify that 01 and 10 outcomes never appear. This is the signature of entanglement.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~15 min</span><span class="nb-meta-item">⚛️ First entanglement</span></div>
+        </div>
+        <div class="obj-box">
+          <div class="obj-lbl">By the end of this notebook</div>
+          <ul class="obj-list">
+            <li>You have created a Bell state |Φ+⟩ using H + CNOT</li>
+            <li>You have confirmed that 01 and 10 outcomes have zero probability</li>
+            <li>You can read the probability graph and explain what it proves</li>
+          </ul>
+        </div>
+
+        <div class="nb-step"><div class="nb-step-num">1</div><div class="nb-step-title">Build the Bell state circuit</div></div>
+        <div class="nb-prose"><p>Import Qiskit and create the Bell state circuit by applying H to qubit 0, then CNOT with qubit 0 as control and qubit 1 as target. This two-gate sequence is all it takes to produce entanglement  print the circuit to see its structure before running it.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb01_bell_state.py</span><span class="code-hint">step 1  imports + build H+CNOT circuit</span></div>
+          <div class="code-body">
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>, <span class="fn">transpile</span>
+<span class="kw">from</span> <span class="var">qiskit_aer</span> <span class="kw">import</span> <span class="cls">AerSimulator</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="cm"># Build the Bell state circuit: H then CNOT</span>
+<span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="nm">2</span>, <span class="nm">2</span>)
+<span class="var">qc</span>.h(<span class="nm">0</span>)           <span class="cm"># Hadamard on q₀ → superposition</span>
+<span class="var">qc</span>.cx(<span class="nm">0</span>, <span class="nm">1</span>)       <span class="cm"># CNOT: q₀ controls q₁ → entanglement</span>
+<span class="var">qc</span>.measure([<span class="nm">0</span>,<span class="nm">1</span>], [<span class="nm">0</span>,<span class="nm">1</span>])
+
+<span class="cm"># Print the circuit</span>
+<span class="fn">print</span>(<span class="var">qc</span>.draw(output=<span class="st">'text'</span>))
+          </div>
+        </div>
+        <div class="nb-prose"><p>Run the Bell state circuit 1000 times on the Aer simulator and print the measurement counts. You should see only 00 and 11 outcomes  the 01 and 10 results should be exactly zero, confirming perfect entanglement correlation.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb01_bell_state.py</span><span class="code-hint">step 2  run + print counts</span></div>
+          <div class="code-body">
+<span class="cm"># Run 1000 times</span>
+<span class="var">sim</span> = <span class="cls">AerSimulator</span>()
+<span class="var">counts</span> = <span class="var">sim</span>.run(
+    <span class="fn">transpile</span>(<span class="var">qc</span>, <span class="var">sim</span>), shots=<span class="nm">1000</span>
+).result().get_counts()
+
+<span class="fn">print</span>(<span class="st">"\nMeasurement counts:"</span>, <span class="var">counts</span>)
+<span class="fn">print</span>(<span class="st">f"  00: {counts.get('00',0)/10:.1f}%"</span>)
+<span class="fn">print</span>(<span class="st">f"  01: {counts.get('01',0)/10:.1f}%  ← should be 0%"</span>)
+<span class="fn">print</span>(<span class="st">f"  10: {counts.get('10',0)/10:.1f}%  ← should be 0%"</span>)
+<span class="fn">print</span>(<span class="st">f"  11: {counts.get('11',0)/10:.1f}%"</span>)
+          </div>
+        </div>
+        <div class="nb-prose"><p>Build a bar chart showing the probability of all four two-qubit outcomes. Color 00 in blue and 11 in purple so the correlated pair stands out; the red bars for 01 and 10 will be empty, making the Bell state signature immediately visible.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb01_bell_state.py</span><span class="code-hint">step 3  build bar chart + plot</span></div>
+          <div class="code-body">
+<span class="cm"># Plot all four possible outcomes</span>
+<span class="var">states</span> = [<span class="st">'00'</span>, <span class="st">'01'</span>, <span class="st">'10'</span>, <span class="st">'11'</span>]
+<span class="var">probs</span>  = [<span class="var">counts</span>.get(s, <span class="nm">0</span>) / <span class="nm">1000</span> <span class="kw">for</span> s <span class="kw">in</span> <span class="var">states</span>]
+<span class="var">colors</span> = [<span class="st">'#1A4FDB'</span>, <span class="st">'#C0392B'</span>, <span class="st">'#C0392B'</span>, <span class="st">'#6B3FA0'</span>]
+
+<span class="var">fig</span>, <span class="var">ax</span> = plt.subplots(figsize=(<span class="nm">6</span>, <span class="nm">4</span>))
+<span class="var">bars</span> = <span class="var">ax</span>.bar(<span class="var">states</span>, <span class="var">probs</span>, color=<span class="var">colors</span>, alpha=<span class="nm">0.8</span>, width=<span class="nm">0.5</span>)
+<span class="var">ax</span>.set_ylim(<span class="nm">0</span>, <span class="nm">0.7</span>)
+<span class="var">ax</span>.set_ylabel(<span class="st">'Probability'</span>)
+<span class="var">ax</span>.set_title(<span class="st">'Bell state |Φ+⟩ = (|00⟩ + |11⟩)/√2'</span>)
+<span class="kw">for</span> <span class="var">bar</span>, <span class="var">p</span> <span class="kw">in</span> <span class="fn">zip</span>(<span class="var">bars</span>, <span class="var">probs</span>):
+    <span class="kw">if</span> <span class="var">p</span> &gt; <span class="nm">0.01</span>:
+        <span class="var">ax</span>.text(<span class="var">bar</span>.get_x() + <span class="var">bar</span>.get_width()/<span class="nm">2</span>,
+                <span class="var">bar</span>.get_height() + <span class="nm">0.01</span>,
+                <span class="st">f'{p:.1%}'</span>, ha=<span class="st">'center'</span>, fontsize=<span class="nm">10</span>)
+plt.tight_layout()
+plt.savefig(<span class="st">'nb01_bell_state.png'</span>)
+plt.show()
+          </div>
+        </div>
+        <div class="line-exp">
+          <div class="le-title">What each line does</div>
+          <div class="le-row"><span class="le-code">qc.h(0)</span><span class="le-meaning">Hadamard on q₀. State becomes (|0⟩+|1⟩)/√2 ⊗ |0⟩ = (|00⟩+|10⟩)/√2. Not yet entangled.</span></div>
+          <div class="le-row"><span class="le-code">qc.cx(0, 1)</span><span class="le-meaning">CNOT with q₀ as control, q₁ as target. When q₀=|0⟩, leave q₁. When q₀=|1⟩, flip q₁. Result: (|00⟩+|11⟩)/√2. Now entangled.</span></div>
+          <div class="le-row"><span class="le-code">counts.get('01',0)</span><span class="le-meaning">Get count for outcome '01'. Should be 0  the Bell state has no |01⟩ amplitude. This is the proof of entanglement.</span></div>
+        </div>
+        <div class="output-lbl">Expected output  probability graph</div>
+        <div class="prob-graph">
+          <div class="pg-title">Bell state |Φ+⟩  1000 measurements</div>
+          <div class="pg-bars">
+            <div class="pg-group"><div class="pg-bar-con"><div class="pg-bar b00" style="height:50%" data-pct="~50%"></div></div><div class="pg-lbl">|00⟩</div></div>
+            <div class="pg-group"><div class="pg-bar-con"><div class="pg-bar b01 empty" style="height:2%" data-pct="0%"></div></div><div class="pg-lbl">|01⟩</div></div>
+            <div class="pg-group"><div class="pg-bar-con"><div class="pg-bar b10 empty" style="height:2%" data-pct="0%"></div></div><div class="pg-lbl">|10⟩</div></div>
+            <div class="pg-group"><div class="pg-bar-con"><div class="pg-bar b11" style="height:50%" data-pct="~50%"></div></div><div class="pg-lbl">|11⟩</div></div>
+          </div>
+          <div class="pg-axis"><span>0%</span><span>25%</span><span>50%</span></div>
+          <div class="pg-interp"><strong>Only 00 and 11  never 01 or 10.</strong> This is the signature of the Bell state |Φ+⟩. The qubits are perfectly correlated. Compare this to two independent qubits in superposition which would give all four outcomes at ~25% each.</div>
+        </div>
+
+        <hr class="section-sep">
+
+        <!-- NB 02  All four Bell states -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 02 · Quantum</div>
+          <div class="nb-title">All four Bell states  creating and distinguishing them</div>
+          <div class="nb-desc">Create all four Bell states by adding X gates before the H + CNOT. Plot all four probability distributions and compare correlations.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~20 min</span><span class="nb-meta-item">⚛️ All Bell states</span></div>
+        </div>
+        <div class="obj-box">
+          <div class="obj-lbl">By the end of this notebook</div>
+          <ul class="obj-list">
+            <li>You have created all four Bell states with Qiskit</li>
+            <li>You can distinguish correlated vs anti-correlated Bell states from measurement</li>
+            <li>You understand that |Φ−⟩ and |Ψ−⟩ look like |Φ+⟩ and |Ψ+⟩ in measurement statistics alone</li>
+          </ul>
+        </div>
+        <div class="nb-prose"><p>Import the necessary libraries and define the bell_circuit helper function. It accepts two boolean flags  x0 and x1  that control whether an X gate is applied to each qubit before the standard H+CNOT sequence, letting you generate any of the four Bell states from one function.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb02_all_bell_states.py</span><span class="code-hint">step 1  imports + define bell_circuit function</span></div>
+          <div class="code-body">
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>, <span class="fn">transpile</span>
+<span class="kw">from</span> <span class="var">qiskit_aer</span> <span class="kw">import</span> <span class="cls">AerSimulator</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="var">sim</span> = <span class="cls">AerSimulator</span>()
+<span class="var">states</span> = [<span class="st">'00'</span>, <span class="st">'01'</span>, <span class="st">'10'</span>, <span class="st">'11'</span>]
+
+<span class="kw">def</span> <span class="fn">bell_circuit</span>(<span class="var">x0</span>=<span class="kw">False</span>, <span class="var">x1</span>=<span class="kw">False</span>):
+    <span class="st">"""Create Bell state. x0/x1: apply X gate before H+CNOT."""</span>
+    <span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="nm">2</span>, <span class="nm">2</span>)
+    <span class="kw">if</span> <span class="var">x0</span>: <span class="var">qc</span>.x(<span class="nm">0</span>)    <span class="cm"># flip q₀ first</span>
+    <span class="kw">if</span> <span class="var">x1</span>: <span class="var">qc</span>.x(<span class="nm">1</span>)    <span class="cm"># flip q₁ first</span>
+    <span class="var">qc</span>.h(<span class="nm">0</span>)
+    <span class="var">qc</span>.cx(<span class="nm">0</span>, <span class="nm">1</span>)
+    <span class="var">qc</span>.measure([<span class="nm">0</span>,<span class="nm">1</span>], [<span class="nm">0</span>,<span class="nm">1</span>])
+    <span class="kw">return</span> <span class="var">qc</span>
+          </div>
+        </div>
+        <div class="nb-prose"><p>Define all four Bell state configurations using the x0/x1 flag combinations, then create each circuit and run it 1000 shots to get the measurement probability distribution. |Φ+⟩ and |Φ−⟩ are correlated (only 00 and 11 appear), while |Ψ+⟩ and |Ψ−⟩ are anti-correlated (only 01 and 10 appear).</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb02_all_bell_states.py</span><span class="code-hint">step 2  create all 4 states + run each</span></div>
+          <div class="code-body">
+<span class="cm"># Create all four Bell states</span>
+<span class="var">bell_configs</span> = [
+    (<span class="kw">False</span>, <span class="kw">False</span>, <span class="st">'|Φ+⟩\n(|00⟩+|11⟩)/√2'</span>, <span class="st">'Correlated'</span>),
+    (<span class="kw">True</span>,  <span class="kw">False</span>, <span class="st">'|Φ−⟩\n(|00⟩−|11⟩)/√2'</span>, <span class="st">'Correlated (−phase)'</span>),
+    (<span class="kw">False</span>, <span class="kw">True</span>,  <span class="st">'|Ψ+⟩\n(|01⟩+|10⟩)/√2'</span>, <span class="st">'Anti-correlated'</span>),
+    (<span class="kw">True</span>,  <span class="kw">True</span>,  <span class="st">'|Ψ−⟩\n(|01⟩−|10⟩)/√2'</span>, <span class="st">'Anti-correlated (−phase)'</span>),
+]
+          </div>
+        </div>
+        <div class="nb-prose"><p>Plot all four probability distributions side by side in a 1×4 subplot grid. Each subplot shows which two-qubit outcomes are possible  this makes the correlated vs anti-correlated distinction immediately visible and also reveals that the ± phase difference is invisible in measurement statistics alone.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb02_all_bell_states.py</span><span class="code-hint">step 3  plot 4 subplots</span></div>
+          <div class="code-body">
+<span class="var">fig</span>, <span class="var">axes</span> = plt.subplots(<span class="nm">1</span>, <span class="nm">4</span>, figsize=(<span class="nm">16</span>, <span class="nm">4</span>))
+<span class="kw">for</span> <span class="var">ax</span>, (<span class="var">x0</span>, <span class="var">x1</span>, <span class="var">label</span>, <span class="var">corr</span>) <span class="kw">in</span> <span class="fn">zip</span>(<span class="var">axes</span>, <span class="var">bell_configs</span>):
+    <span class="var">qc</span> = <span class="fn">bell_circuit</span>(<span class="var">x0</span>, <span class="var">x1</span>)
+    <span class="var">counts</span> = <span class="var">sim</span>.run(
+        <span class="fn">transpile</span>(<span class="var">qc</span>, <span class="var">sim</span>), shots=<span class="nm">1000</span>
+    ).result().get_counts()
+    <span class="var">probs</span> = [<span class="var">counts</span>.get(s, <span class="nm">0</span>)/<span class="nm">1000</span> <span class="kw">for</span> s <span class="kw">in</span> <span class="var">states</span>]
+    <span class="var">colors</span> = [<span class="st">'#1A4FDB'</span>, <span class="st">'#C0392B'</span>, <span class="st">'#C0392B'</span>, <span class="st">'#6B3FA0'</span>]
+    <span class="var">ax</span>.bar(<span class="var">states</span>, <span class="var">probs</span>, color=<span class="var">colors</span>, alpha=<span class="nm">0.75</span>, width=<span class="nm">0.5</span>)
+    <span class="var">ax</span>.set_ylim(<span class="nm">0</span>, <span class="nm">0.7</span>)
+    <span class="var">ax</span>.set_title(<span class="st">f'{label}\n{corr}'</span>, fontsize=<span class="nm">9</span>)
+    <span class="var">ax</span>.set_ylabel(<span class="st">'Probability'</span>)
+
+plt.suptitle(<span class="st">'All four Bell states  measurement distributions'</span>, fontweight=<span class="st">'bold'</span>)
+plt.tight_layout()
+plt.savefig(<span class="st">'nb02_all_bell_states.png'</span>)
+plt.show()
+          </div>
+        </div>
+        <div class="callout-nb note"><div class="cn-lbl">📌 Key observation</div><p>|Φ+⟩ and |Φ−⟩ look identical in measurement statistics  both show ~50% for 00 and 50% for 11. The minus sign in |Φ−⟩ is a phase difference that only becomes visible when you do further quantum operations (interference). Measurement statistics alone cannot distinguish them. This is an important lesson: quantum states carry more information than their measurement probabilities alone.</p></div>
+
+        <hr class="section-sep">
+
+        <!-- NB 03  Verify correlation -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 03 · Quantum</div>
+          <div class="nb-title">Verify correlation  1000 measurements, conditional analysis</div>
+          <div class="nb-desc">Run 1000 measurements of the Bell state. Every time q₀ = 0, confirm q₁ = 0. Every time q₀ = 1, confirm q₁ = 1. Compute the correlation coefficient.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~15 min</span><span class="nb-meta-item">📊 Statistical verification</span></div>
+        </div>
+        <div class="nb-prose"><p>Build the |Φ+⟩ Bell state circuit and run it 1000 times on the Aer simulator to collect measurement counts. This generates the dataset we will analyse statistically in the next two steps.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb03_verify_correlation.py</span><span class="code-hint">step 1  build circuit + run</span></div>
+          <div class="code-body">
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>, <span class="fn">transpile</span>
+<span class="kw">from</span> <span class="var">qiskit_aer</span> <span class="kw">import</span> <span class="cls">AerSimulator</span>
+
+<span class="cm"># Create Bell state and run 1000 times</span>
+<span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="nm">2</span>, <span class="nm">2</span>)
+<span class="var">qc</span>.h(<span class="nm">0</span>); <span class="var">qc</span>.cx(<span class="nm">0</span>, <span class="nm">1</span>)
+<span class="var">qc</span>.measure([<span class="nm">0</span>,<span class="nm">1</span>], [<span class="nm">0</span>,<span class="nm">1</span>])
+
+<span class="var">sim</span> = <span class="cls">AerSimulator</span>()
+<span class="var">counts</span> = <span class="var">sim</span>.run(
+    <span class="fn">transpile</span>(<span class="var">qc</span>, <span class="var">sim</span>), shots=<span class="nm">1000</span>
+).result().get_counts()
+          </div>
+        </div>
+        <div class="nb-prose"><p>Extract the four outcome counts and compute the conditional probabilities: given q₀ measured as 0, what fraction of the time is q₁ also 0? Given q₀ is 1, what fraction is q₁ also 1? Both should be exactly 1.000 for a perfect Bell state.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb03_verify_correlation.py</span><span class="code-hint">step 2  extract counts + compute conditional probabilities</span></div>
+          <div class="code-body">
+<span class="cm"># Analyse correlation</span>
+<span class="var">c00</span> = <span class="var">counts</span>.get(<span class="st">'00'</span>, <span class="nm">0</span>)
+<span class="var">c01</span> = <span class="var">counts</span>.get(<span class="st">'01'</span>, <span class="nm">0</span>)
+<span class="var">c10</span> = <span class="var">counts</span>.get(<span class="st">'10'</span>, <span class="nm">0</span>)
+<span class="var">c11</span> = <span class="var">counts</span>.get(<span class="st">'11'</span>, <span class="nm">0</span>)
+
+<span class="fn">print</span>(<span class="st">"=== Correlation Analysis ==="</span>)
+<span class="fn">print</span>(<span class="st">f"Total measurements: 1000"</span>)
+<span class="fn">print</span>(<span class="st">f"\nWhen q₀ = 0: q₁ was 0 in {c00} cases, q₁ was 1 in {c01} cases"</span>)
+<span class="fn">print</span>(<span class="st">f"When q₀ = 1: q₁ was 0 in {c10} cases, q₁ was 1 in {c11} cases"</span>)
+
+<span class="cm"># Perfect correlation: when q0=0, q1=0 always</span>
+<span class="var">q0_is_0</span> = <span class="var">c00</span> + <span class="var">c01</span>
+<span class="var">q0_is_1</span> = <span class="var">c10</span> + <span class="var">c11</span>
+<span class="kw">if</span> <span class="var">q0_is_0</span> &gt; <span class="nm">0</span>:
+    <span class="fn">print</span>(<span class="st">f"\nGiven q₀=0: P(q₁=0) = {c00/q0_is_0:.3f} (should be 1.000)"</span>)
+<span class="kw">if</span> <span class="var">q0_is_1</span> &gt; <span class="nm">0</span>:
+    <span class="fn">print</span>(<span class="st">f"Given q₀=1: P(q₁=1) = {c11/q0_is_1:.3f} (should be 1.000)"</span>)
+          </div>
+        </div>
+        <div class="nb-prose"><p>Calculate the overall correlation coefficient as (c00 + c11 − c01 − c10) / 1000. A perfect Bell state should give +1.000. Print this final number alongside its interpretation  it is the single statistic that proves Bell's theorem cannot be replicated by any classical hidden-variable model.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb03_verify_correlation.py</span><span class="code-hint">step 3  print analysis</span></div>
+          <div class="code-body">
+<span class="cm"># Correlation coefficient</span>
+<span class="var">corr</span> = (<span class="var">c00</span> + <span class="var">c11</span> - <span class="var">c01</span> - <span class="var">c10</span>) / <span class="nm">1000</span>
+<span class="fn">print</span>(<span class="st">f"\nCorrelation coefficient: {corr:.3f} (should be +1.000 for |Φ+⟩)"</span>)
+<span class="fn">print</span>(<span class="st">"A classical hidden-variable theory cannot achieve this consistently."</span>)
+          </div>
+        </div>
+        <div class="callout-nb success"><div class="cn-lbl">✓ What to expect</div><p>The correlation coefficient will be very close to +1.000  meaning whenever q₀ is measured as 0, q₁ is always 0, and whenever q₀ is 1, q₁ is always 1. This perfect correlation across 1000 random trials is the experimental signature that Bell's theorem says cannot be replicated by any classical hidden variable theory.</p></div>
+
+        <hr class="section-sep">
+
+        <!-- NB 04  Entanglement under noise -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 04 · Reality check</div>
+          <div class="nb-title">Entanglement under noise  watching correlations degrade</div>
+          <div class="nb-desc">Run the Bell state circuit on a noisy simulator. Watch how noise introduces 01 and 10 outcomes that should be impossible. The correlation coefficient drops below 1. This is decoherence in action.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~20 min</span><span class="nb-meta-item">⚠️ NISQ reality</span></div>
+        </div>
+        <div class="nb-prose"><p>Define the bell_correlation function, which builds a Bell state circuit and attaches a depolarizing noise model to it. Single-qubit gates get the base error rate and the two-qubit CX gate gets twice that, since two-qubit gates are always noisier on real hardware.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb04_noisy_entanglement.py</span><span class="code-hint">step 1  define bell_correlation function with noise model</span></div>
+          <div class="code-body">
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>, <span class="fn">transpile</span>
+<span class="kw">from</span> <span class="var">qiskit_aer</span> <span class="kw">import</span> <span class="cls">AerSimulator</span>
+<span class="kw">from</span> <span class="var">qiskit_aer.noise</span> <span class="kw">import</span> <span class="cls">NoiseModel</span>, <span class="cls">depolarizing_error</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="kw">def</span> <span class="fn">bell_correlation</span>(<span class="var">error_rate</span>):
+    <span class="st">"""Run Bell state with given error rate. Return correlation coefficient."""</span>
+    <span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="nm">2</span>, <span class="nm">2</span>)
+    <span class="var">qc</span>.h(<span class="nm">0</span>); <span class="var">qc</span>.cx(<span class="nm">0</span>, <span class="nm">1</span>)
+    <span class="var">qc</span>.measure([<span class="nm">0</span>,<span class="nm">1</span>], [<span class="nm">0</span>,<span class="nm">1</span>])
+
+    <span class="var">noise_model</span> = <span class="cls">NoiseModel</span>()
+    <span class="var">noise_model</span>.add_all_qubit_quantum_error(
+        <span class="fn">depolarizing_error</span>(<span class="var">error_rate</span>, <span class="nm">1</span>), [<span class="st">'h'</span>]
+    )
+    <span class="var">noise_model</span>.add_all_qubit_quantum_error(
+        <span class="fn">depolarizing_error</span>(<span class="var">error_rate</span> * <span class="nm">2</span>, <span class="nm">2</span>), [<span class="st">'cx'</span>]
+    )
+    <span class="var">sim</span> = <span class="cls">AerSimulator</span>(noise_model=<span class="var">noise_model</span>)
+    <span class="var">counts</span> = <span class="var">sim</span>.run(
+        <span class="fn">transpile</span>(<span class="var">qc</span>, <span class="var">sim</span>), shots=<span class="nm">2000</span>
+    ).result().get_counts()
+
+    <span class="var">c00</span> = <span class="var">counts</span>.get(<span class="st">'00'</span>,<span class="nm">0</span>); <span class="var">c11</span> = <span class="var">counts</span>.get(<span class="st">'11'</span>,<span class="nm">0</span>)
+    <span class="var">c01</span> = <span class="var">counts</span>.get(<span class="st">'01'</span>,<span class="nm">0</span>); <span class="var">c10</span> = <span class="var">counts</span>.get(<span class="st">'10'</span>,<span class="nm">0</span>)
+    <span class="kw">return</span> (<span class="var">c00</span>+<span class="var">c11</span>-<span class="var">c01</span>-<span class="var">c10</span>) / <span class="nm">2000</span>, <span class="var">counts</span>
+          </div>
+        </div>
+        <div class="nb-prose"><p>Run the Bell state experiment at six different gate error rates  from 0% (perfect simulator) up to 10%  and print the correlation coefficient alongside a quality label. This table shows how quickly entanglement degrades as hardware imperfections increase.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb04_noisy_entanglement.py</span><span class="code-hint">step 2  test at 6 different error rates</span></div>
+          <div class="code-body">
+<span class="cm"># Test at different noise levels</span>
+<span class="var">error_rates</span> = [<span class="nm">0.0</span>, <span class="nm">0.005</span>, <span class="nm">0.01</span>, <span class="nm">0.02</span>, <span class="nm">0.05</span>, <span class="nm">0.1</span>]
+<span class="var">correlations</span> = []
+
+<span class="fn">print</span>(<span class="st">"Error rate → Correlation coefficient → Entanglement quality"</span>)
+<span class="kw">for</span> <span class="var">rate</span> <span class="kw">in</span> <span class="var">error_rates</span>:
+    <span class="var">corr</span>, <span class="var">_</span> = <span class="fn">bell_correlation</span>(<span class="var">rate</span>)
+    <span class="var">correlations</span>.append(<span class="var">corr</span>)
+    <span class="var">quality</span> = <span class="st">"Perfect"</span> <span class="kw">if</span> <span class="var">corr</span> &gt; <span class="nm">0.99</span> <span class="kw">else</span> <span class="st">"Good"</span> <span class="kw">if</span> <span class="var">corr</span> &gt; <span class="nm">0.95</span> <span class="kw">else</span> <span class="st">"Degraded"</span> <span class="kw">if</span> <span class="var">corr</span> &gt; <span class="nm">0.8</span> <span class="kw">else</span> <span class="st">"Broken"</span>
+    <span class="fn">print</span>(<span class="st">f"  {rate*100:.1f}%  → {corr:.3f}  → {quality}"</span>)
+          </div>
+        </div>
+        <div class="nb-prose"><p>Plot the correlation coefficient against the gate error rate, adding a dashed green line at 0.95 to mark the usable threshold and a dashed red line at 0.0 for classical random. The downward slope of the curve directly visualises decoherence  as noise rises, the quantum entanglement quality falls toward classical noise.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb04_noisy_entanglement.py</span><span class="code-hint">step 3  plot correlation vs error rate</span></div>
+          <div class="code-body">
+<span class="cm"># Plot correlation vs noise</span>
+<span class="var">fig</span>, <span class="var">ax</span> = plt.subplots(figsize=(<span class="nm">7</span>, <span class="nm">4</span>))
+<span class="var">ax</span>.plot([r*<span class="nm">100</span> <span class="kw">for</span> r <span class="kw">in</span> <span class="var">error_rates</span>], <span class="var">correlations</span>,
+        <span class="st">'o-'</span>, color=<span class="st">'#1A4FDB'</span>, linewidth=<span class="nm">2</span>, markersize=<span class="nm">6</span>)
+<span class="var">ax</span>.axhline(<span class="nm">0.95</span>, color=<span class="st">'#1A7A4A'</span>, linestyle=<span class="st">'--'</span>, alpha=<span class="nm">0.5</span>, label=<span class="st">'Usable threshold (0.95)'</span>)
+<span class="var">ax</span>.axhline(<span class="nm">0.0</span>,  color=<span class="st">'#C0392B'</span>, linestyle=<span class="st">'--'</span>, alpha=<span class="nm">0.3</span>, label=<span class="st">'Classical random (0.0)'</span>)
+<span class="var">ax</span>.set_xlabel(<span class="st">'Gate error rate (%)'</span>)
+<span class="var">ax</span>.set_ylabel(<span class="st">'Correlation coefficient'</span>)
+<span class="var">ax</span>.set_title(<span class="st">'Entanglement quality degrades with noise'</span>)
+<span class="var">ax</span>.legend(); <span class="var">ax</span>.set_ylim(<span class="nm">0</span>, <span class="nm">1.05</span>)
+plt.tight_layout()
+plt.savefig(<span class="st">'nb04_noisy_entanglement.png'</span>)
+plt.show()
+          </div>
+        </div>
+        <div class="callout-nb warning"><div class="cn-lbl">⚠ What to look for</div><p>At 0% error: correlation ≈ 1.000  perfect entanglement. At 1% error (IBM hardware today): correlation ≈ 0.97  still very good. At 5% error (older hardware): correlation ≈ 0.85  degraded. At 10% error: correlation ≈ 0.7  barely above classical random. This shows exactly why gate fidelity matters so much for any quantum algorithm that relies on entanglement.</p></div>
+
+        <hr class="section-sep">
+
+        <!-- NB 05  Superdense coding -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 05 · Application</div>
+          <div class="nb-title">Superdense coding  2 classical bits through 1 qubit</div>
+          <div class="nb-desc">Use entanglement to send 2 classical bits of information by transmitting only 1 qubit. The first real application of entanglement you will implement.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~25 min</span><span class="nb-meta-item">⚛️ Real application</span></div>
+        </div>
+        <div class="obj-box">
+          <div class="obj-lbl">By the end of this notebook</div>
+          <ul class="obj-list">
+            <li>You understand how superdense coding works conceptually</li>
+            <li>You have implemented it in Qiskit for all four messages (00, 01, 10, 11)</li>
+            <li>You can verify that the receiver correctly decodes each message</li>
+          </ul>
+        </div>
+        <div class="nb-prose"><p>Superdense coding is the first practical application of entanglement. The protocol: Alice and Bob share a Bell pair created in advance. Alice wants to send one of four messages  00, 01, 10, or 11  to Bob. By applying a gate to only her qubit and then sending it, Bob can decode the 2-bit message by measuring both qubits. <strong>2 bits of classical information transmitted by physically sending 1 qubit.</strong></p></div>
+
+        <div class="concept-card">
+          <div class="cc-title">The encoding table  what Alice does to her qubit</div>
+          <div class="cc-body">
+            To send <strong>00</strong>: do nothing (Identity)<br>
+            To send <strong>01</strong>: apply X gate<br>
+            To send <strong>10</strong>: apply Z gate<br>
+            To send <strong>11</strong>: apply X then Z gate<br><br>
+            Bob then applies CNOT and H to both qubits and measures. The measurement outcome tells Bob which 2-bit message Alice sent.
+          </div>
+        </div>
+
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb05_superdense_coding.py</span><span class="code-hint">python nb05_superdense_coding.py</span></div>
+          <div class="code-body">
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>, <span class="fn">transpile</span>
+<span class="kw">from</span> <span class="var">qiskit_aer</span> <span class="kw">import</span> <span class="cls">AerSimulator</span>
+
+<span class="var">sim</span> = <span class="cls">AerSimulator</span>()
+
+<span class="kw">def</span> <span class="fn">superdense_encode</span>(<span class="var">message</span>):
+    <span class="st">"""
+    Superdense coding protocol.
+    message: '00', '01', '10', or '11'
+    Returns measurement result (should match message).
+    """</span>
+    <span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="nm">2</span>, <span class="nm">2</span>)
+
+    <span class="cm"># Step 1: Create Bell pair (done in advance, shared by Alice and Bob)</span>
+    <span class="var">qc</span>.h(<span class="nm">0</span>)
+    <span class="var">qc</span>.cx(<span class="nm">0</span>, <span class="nm">1</span>)
+    <span class="var">qc</span>.barrier()  <span class="cm"># visual separator</span>
+
+    <span class="cm"># Step 2: Alice encodes her 2-bit message by operating on qubit 0 only</span>
+    <span class="kw">if</span> <span class="var">message</span> == <span class="st">'01'</span>: <span class="var">qc</span>.x(<span class="nm">0</span>)
+    <span class="kw">elif</span> <span class="var">message</span> == <span class="st">'10'</span>: <span class="var">qc</span>.z(<span class="nm">0</span>)
+    <span class="kw">elif</span> <span class="var">message</span> == <span class="st">'11'</span>: <span class="var">qc</span>.x(<span class="nm">0</span>); <span class="var">qc</span>.z(<span class="nm">0</span>)
+    <span class="cm"># '00': do nothing</span>
+    <span class="var">qc</span>.barrier()
+
+    <span class="cm"># Step 3: Bob decodes by applying CNOT then H, then measuring</span>
+    <span class="var">qc</span>.cx(<span class="nm">0</span>, <span class="nm">1</span>)
+    <span class="var">qc</span>.h(<span class="nm">0</span>)
+    <span class="var">qc</span>.measure([<span class="nm">0</span>,<span class="nm">1</span>], [<span class="nm">0</span>,<span class="nm">1</span>])
+
+    <span class="var">counts</span> = <span class="var">sim</span>.run(
+        <span class="fn">transpile</span>(<span class="var">qc</span>, <span class="var">sim</span>), shots=<span class="nm">100</span>
+    ).result().get_counts()
+    <span class="kw">return</span> <span class="fn">max</span>(<span class="var">counts</span>, key=<span class="var">counts</span>.get)  <span class="cm"># most common outcome</span>
+
+<span class="cm"># Test all four messages</span>
+<span class="fn">print</span>(<span class="st">"Superdense coding  sending 2 bits using 1 qubit:"</span>)
+<span class="fn">print</span>(<span class="st">f"{'Message sent':20} {'Message received':20} {'Correct?'}"</span>)
+<span class="fn">print</span>(<span class="st">"-" * 55</span>)
+<span class="kw">for</span> <span class="var">msg</span> <span class="kw">in</span> [<span class="st">'00'</span>, <span class="st">'01'</span>, <span class="st">'10'</span>, <span class="st">'11'</span>]:
+    <span class="var">received</span> = <span class="fn">superdense_encode</span>(<span class="var">msg</span>)
+    <span class="var">status</span> = <span class="st">'✓'</span> <span class="kw">if</span> <span class="var">received</span> == <span class="var">msg</span> <span class="kw">else</span> <span class="st">'✗'</span>
+    <span class="fn">print</span>(<span class="st">f"  Sent: {msg:18} Received: {received:18} {status}"</span>)
+          </div>
+        </div>
+        <div class="callout-nb success"><div class="cn-lbl">✓ Expected output</div><p>All four messages should be received correctly  00→00, 01→01, 10→10, 11→11. This works because the entangled Bell pair acts as a shared resource. Alice manipulates her qubit to encode the message into the joint entangled state; Bob's decoding circuit reads out both bits. The entanglement is doing the information-carrying work.</p></div>
+
+        <div style="background:linear-gradient(135deg,rgba(26,79,219,.06),rgba(107,63,160,.06));border:1px solid rgba(26,79,219,.15);border-radius:8px;padding:20px;margin-top:32px;">
+          <div style="font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">Next module</div>
+          <div style="font-family:var(--serif);font-size:17px;font-weight:600;margin-bottom:5px;">Module 04  Grover's Algorithm</div>
+          <div style="font-family:var(--sans);font-size:14px;color:var(--ink2);line-height:1.6;">You now understand the three core quantum phenomena: superposition (M01), gates and circuits (M02), and entanglement (M03). With this foundation you are ready for Grover's algorithm  the first algorithm that proves a genuine quantum speedup over classical search.</div>
+        </div>
+
+        <div class="nb-footer">
+          <button class="nb-foot-btn" onclick="showSubtab('theory',document.getElementById('tab-theory'))">← Back to Theory</button>
+          <button class="nb-foot-btn primary" onclick="alert('M03 complete  M04 unlocked!')">Complete M03 &amp; continue →</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+<script>
+function showSubtab(id, btn) {
+  document.querySelectorAll('.mod-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.subtab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+function checkQ(el, verdict, fbId) {
+  const parent = el.closest('.quiz-box');
+  parent.querySelectorAll('.quiz-opt').forEach(o => {
+    o.classList.remove('correct', 'wrong');
+    o.style.pointerEvents = 'none';
+  });
+  el.classList.add(verdict);
+  const fb = document.getElementById(fbId);
+  fb.className = 'quiz-fb ' + verdict + ' show';
+}
+</script>

@@ -1,0 +1,734 @@
+<style>
+:root {
+  --bg:       #F7F5F0;
+  --bg2:      #EFEDE7;
+  --bg3:      #E8E4DC;
+  --ink:      #1A1814;
+  --ink2:     #4A4640;
+  --ink3:     #8A8480;
+  --rule:     rgba(26,24,20,0.1);
+  --rule2:    rgba(26,24,20,0.06);
+  --accent:   #1A4FDB;
+  --accent2:  #0E35A8;
+  --gold:     #C4860A;
+  --green:    #1A7A4A;
+  --red:      #C0392B;
+  --purple:   #6B3FA0;
+  --serif:    'Lora', Georgia, serif;
+  --sans:     'DM Sans', sans-serif;
+  --mono:     'JetBrains Mono', monospace;
+  --max:      680px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--serif);background:var(--bg);color:var(--ink);line-height:1.8;font-size:17px;}
+
+/* ── SHELL ── */
+.shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  background:var(--bg2);
+  border-right:1px solid var(--rule);
+  position:sticky;top:0;height:100vh;
+  overflow-y:auto;padding:28px 0;
+  display:flex;flex-direction:column;
+}
+.sidebar::-webkit-scrollbar{width:2px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--rule);}
+
+.sidebar-logo{
+  padding:0 24px 24px;
+  border-bottom:1px solid var(--rule);
+  margin-bottom:20px;
+}
+.sidebar-logo-name{
+  font-family:var(--mono);font-size:13px;font-weight:500;
+  letter-spacing:.06em;color:var(--ink);
+  display:flex;align-items:center;gap:8px;
+}
+.sidebar-logo-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 8px rgba(26,79,219,.4);
+}
+.sidebar-logo-sub{font-size:11px;color:var(--ink3);font-family:var(--sans);margin-top:3px;}
+
+.sidebar-section-label{
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink3);padding:12px 24px 4px;
+}
+
+.sidebar-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:8px 24px;cursor:pointer;
+  border-left:2px solid transparent;
+  transition:all .15s;
+  position:relative;
+}
+.sidebar-item:hover{background:rgba(26,24,20,.04);}
+.sidebar-item.active{
+  background:rgba(26,79,219,.05);
+  border-left-color:var(--accent);
+}
+.sidebar-item.completed .si-check{
+  background:var(--green);border-color:var(--green);
+}
+.si-check{
+  width:16px;height:16px;border-radius:50%;
+  border:1.5px solid var(--rule);
+  flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.si-check svg{display:none;}
+.sidebar-item.completed .si-check svg{display:block;}
+.si-body{}
+.si-num{font-size:10px;font-family:var(--mono);color:var(--ink3);line-height:1;}
+.si-title{font-size:13px;font-family:var(--sans);font-weight:500;color:var(--ink2);line-height:1.3;margin-top:1px;}
+.sidebar-item.active .si-title{color:var(--ink);}
+.si-duration{font-size:10px;font-family:var(--mono);color:var(--ink3);margin-top:1px;}
+
+.sidebar-item.locked{opacity:.4;cursor:default;}
+.sidebar-item.locked:hover{background:transparent;}
+
+.sidebar-footer{
+  margin-top:auto;padding:16px 24px 0;
+  border-top:1px solid var(--rule);
+}
+.progress-bar-wrap{}
+.progress-label{font-size:11px;font-family:var(--sans);color:var(--ink3);margin-bottom:6px;}
+.progress-bar{height:3px;background:var(--rule);border-radius:999px;overflow:hidden;}
+.progress-fill{height:3px;background:var(--accent);border-radius:999px;transition:width .4s;}
+
+/* ── MAIN ── */
+.main{overflow-y:auto;background:var(--bg);}
+
+/* ── LESSON ── */
+.lesson{display:none;}
+.lesson.active{display:block;}
+
+/* Lesson header */
+.lesson-header{
+  padding:52px 64px 40px;
+  max-width:calc(var(--max) + 128px);
+  border-bottom:1px solid var(--rule2);
+}
+.lesson-eyebrow{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.lesson-title{
+  font-family:var(--serif);font-size:36px;font-weight:600;
+  letter-spacing:-.02em;line-height:1.15;
+  color:var(--ink);margin-bottom:12px;
+}
+.lesson-subtitle{
+  font-family:var(--sans);font-size:15px;color:var(--ink2);
+  line-height:1.65;max-width:520px;
+}
+.lesson-meta{
+  display:flex;gap:16px;margin-top:20px;
+  font-family:var(--sans);font-size:12px;color:var(--ink3);
+}
+.lesson-meta span{display:flex;align-items:center;gap:4px;}
+
+/* Lesson body  prose */
+.lesson-body{
+  padding:48px 64px;
+  max-width:calc(var(--max) + 128px);
+}
+.prose{max-width:var(--max);}
+
+/* Section heading */
+.prose h2{
+  font-family:var(--serif);font-size:24px;font-weight:600;
+  letter-spacing:-.01em;color:var(--ink);
+  margin:52px 0 16px;padding-top:0;
+  display:flex;align-items:center;gap:12px;
+}
+.prose h2:first-child{margin-top:0;}
+.prose h2 .sec-num{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  color:var(--ink3);letter-spacing:.06em;
+  min-width:28px;
+}
+.prose h3{
+  font-family:var(--sans);font-size:16px;font-weight:600;
+  color:var(--ink);margin:32px 0 10px;
+}
+
+/* Prose paragraph */
+.prose p{
+  font-family:var(--serif);font-size:17px;
+  color:var(--ink2);line-height:1.85;
+  margin-bottom:20px;
+}
+.prose p strong{color:var(--ink);font-weight:600;}
+.prose p em{font-style:italic;}
+
+/* Pull quote */
+.pullquote{
+  border-left:3px solid var(--accent);
+  padding:16px 0 16px 24px;
+  margin:32px 0;
+  font-family:var(--serif);font-size:19px;
+  font-style:italic;color:var(--ink);
+  line-height:1.6;
+}
+
+/* Callout boxes */
+.callout{
+  border-radius:8px;padding:20px 22px;
+  margin:28px 0;font-family:var(--sans);
+  font-size:14px;line-height:1.7;
+}
+.callout-label{
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:8px;display:flex;align-items:center;gap:6px;
+}
+.callout.analogy{
+  background:rgba(107,63,160,.06);
+  border:1px solid rgba(107,63,160,.15);
+}
+.callout.analogy .callout-label{color:var(--purple);}
+.callout.analogy p{color:#3D2060;margin-bottom:0;font-family:var(--sans);font-size:14px;line-height:1.7;}
+
+.callout.insight{
+  background:rgba(26,79,219,.05);
+  border:1px solid rgba(26,79,219,.14);
+}
+.callout.insight .callout-label{color:var(--accent);}
+.callout.insight p{color:#0D2865;margin-bottom:0;font-family:var(--sans);font-size:14px;line-height:1.7;}
+
+.callout.warning{
+  background:rgba(192,57,43,.05);
+  border:1px solid rgba(192,57,43,.14);
+}
+.callout.warning .callout-label{color:var(--red);}
+.callout.warning p{color:#5C1A12;margin-bottom:0;font-family:var(--sans);font-size:14px;line-height:1.7;}
+
+.callout.fact{
+  background:rgba(26,122,74,.05);
+  border:1px solid rgba(26,122,74,.14);
+}
+.callout.fact .callout-label{color:var(--green);}
+.callout.fact p{color:#0D3D22;margin-bottom:0;font-family:var(--sans);font-size:14px;line-height:1.7;}
+
+/* Comparison table */
+.compare-table{
+  width:100%;border-collapse:collapse;
+  margin:28px 0;font-family:var(--sans);
+  font-size:14px;
+}
+.compare-table th{
+  padding:10px 14px;text-align:left;
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;
+  border-bottom:2px solid var(--rule);color:var(--ink3);
+}
+.compare-table td{
+  padding:10px 14px;border-bottom:1px solid var(--rule2);
+  color:var(--ink2);vertical-align:top;line-height:1.6;
+}
+.compare-table tr:last-child td{border-bottom:none;}
+.compare-table td:first-child{font-weight:500;color:var(--ink);width:180px;}
+.compare-table .classical{color:var(--green);font-weight:600;}
+.compare-table .quantum{color:var(--accent);font-weight:600;}
+
+/* Concept card */
+.concept-card{
+  background:var(--bg2);border:1px solid var(--rule);
+  border-radius:8px;padding:20px 22px;margin:24px 0;
+}
+.concept-card-title{
+  font-family:var(--sans);font-size:13px;font-weight:600;
+  color:var(--ink);margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;
+}
+.concept-card-body{
+  font-family:var(--sans);font-size:14px;
+  color:var(--ink2);line-height:1.7;
+}
+
+/* Step list */
+.step-list{margin:24px 0;}
+.step{
+  display:flex;gap:16px;margin-bottom:20px;
+  align-items:flex-start;
+}
+.step-num{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--accent);color:#fff;
+  font-family:var(--mono);font-size:12px;font-weight:500;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+}
+.step-body{}
+.step-title{font-family:var(--sans);font-weight:600;font-size:15px;color:var(--ink);margin-bottom:4px;}
+.step-text{font-family:var(--sans);font-size:14px;color:var(--ink2);line-height:1.65;}
+
+/* Visual diagram */
+.diagram-box{
+  background:var(--bg2);border:1px solid var(--rule);
+  border-radius:8px;padding:28px;margin:28px 0;
+  display:flex;align-items:center;justify-content:center;
+}
+.diagram-caption{
+  font-family:var(--sans);font-size:12px;color:var(--ink3);
+  text-align:center;margin-top:10px;font-style:italic;
+}
+
+/* Code block */
+.code-wrap{margin:28px 0;}
+.code-header{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--ink);padding:10px 16px;
+  border-radius:8px 8px 0 0;
+}
+.code-lang{font-family:var(--mono);font-size:11px;color:#666;letter-spacing:.04em;}
+.code-title{font-family:var(--sans);font-size:12px;color:#999;}
+.code-block{
+  background:#1E1E1E;padding:20px;
+  border-radius:0 0 8px 8px;
+  font-family:var(--mono);font-size:12px;
+  line-height:2;overflow-x:auto;
+  margin:0;
+}
+.code-block .kw {color:#C792EA;}
+.code-block .fn {color:#82AAFF;}
+.code-block .st {color:#C3E88D;}
+.code-block .cm {color:#546E7A;}
+.code-block .nm {color:#F78C6C;}
+.code-block .op {color:#89DDFF;}
+
+/* Output box */
+.output-box{
+  background:#0D1117;border:1px solid #30363D;
+  border-radius:8px;padding:16px;margin:0 0 28px;
+  font-family:var(--mono);font-size:12px;color:#8B949E;line-height:1.8;
+}
+.output-box .out-label{
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  color:#484F58;margin-bottom:8px;
+}
+.output-box .out-val{color:#C9D1D9;}
+.output-box .out-explain{color:#8B949E;font-size:11px;margin-top:8px;font-style:italic;}
+
+/* Misconception box */
+.misconception{
+  background:rgba(196,134,10,.06);
+  border:1px solid rgba(196,134,10,.2);
+  border-radius:8px;padding:18px 20px;margin:28px 0;
+}
+.misconception-label{
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:8px;
+}
+.misconception-wrong{
+  font-family:var(--sans);font-size:14px;color:var(--red);
+  margin-bottom:6px;display:flex;gap:8px;align-items:flex-start;
+}
+.misconception-right{
+  font-family:var(--sans);font-size:14px;color:var(--green);
+  display:flex;gap:8px;align-items:flex-start;
+}
+
+/* Divider */
+.prose-divider{
+  border:none;border-top:1px solid var(--rule2);
+  margin:44px 0;
+}
+
+/* Check your understanding */
+.check-box{
+  background:var(--bg2);border:1px solid var(--rule);
+  border-radius:8px;padding:22px;margin:36px 0;
+}
+.check-label{
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:14px;
+}
+.check-q{
+  font-family:var(--sans);font-size:15px;font-weight:500;
+  color:var(--ink);margin-bottom:12px;
+}
+.check-options{display:flex;flex-direction:column;gap:8px;}
+.check-opt{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 14px;border-radius:6px;
+  border:1px solid var(--rule);background:var(--bg);
+  cursor:pointer;transition:all .15s;
+  font-family:var(--sans);font-size:14px;color:var(--ink2);
+}
+.check-opt:hover{border-color:var(--accent);color:var(--ink);}
+.check-opt.correct{background:rgba(26,122,74,.08);border-color:var(--green);color:var(--green);}
+.check-opt.wrong{background:rgba(192,57,43,.06);border-color:var(--red);color:var(--red);}
+.check-opt .opt-label{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  min-width:20px;color:var(--ink3);
+}
+.check-feedback{
+  margin-top:12px;font-family:var(--sans);font-size:13px;
+  line-height:1.6;display:none;padding:10px 12px;
+  border-radius:6px;
+}
+.check-feedback.show{display:block;}
+.check-feedback.correct{background:rgba(26,122,74,.08);color:var(--green);}
+.check-feedback.wrong{background:rgba(192,57,43,.06);color:var(--red);}
+
+/* What's next */
+.whats-next{
+  background:linear-gradient(135deg,rgba(26,79,219,.06),rgba(107,63,160,.06));
+  border:1px solid rgba(26,79,219,.15);
+  border-radius:8px;padding:24px;margin:44px 0 0;
+}
+.wn-label{
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:12px;
+}
+.wn-title{font-family:var(--serif);font-size:18px;font-weight:600;margin-bottom:6px;}
+.wn-desc{font-family:var(--sans);font-size:14px;color:var(--ink2);line-height:1.6;}
+
+/* Lesson footer */
+.lesson-footer{
+  padding:32px 64px 52px;
+  max-width:calc(var(--max) + 128px);
+  border-top:1px solid var(--rule2);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.foot-btn{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--sans);font-size:14px;font-weight:500;
+  padding:10px 20px;border-radius:6px;cursor:pointer;
+  border:1px solid var(--rule);background:var(--bg2);
+  color:var(--ink2);transition:all .15s;
+}
+.foot-btn:hover{border-color:var(--ink3);color:var(--ink);}
+.foot-btn.primary{
+  background:var(--accent);border-color:var(--accent);
+  color:#fff;
+}
+.foot-btn.primary:hover{background:var(--accent2);}
+.foot-btn:disabled{opacity:.3;cursor:default;}
+.foot-progress{
+  font-family:var(--sans);font-size:12px;color:var(--ink3);text-align:center;
+}
+
+/* Reading progress bar */
+.reading-bar{
+  position:fixed;top:0;left:260px;right:0;height:2px;
+  background:var(--rule);z-index:100;
+}
+.reading-bar-fill{height:2px;background:var(--accent);width:0%;transition:width .1s;}
+</style>
+<style>
+.ql-adapted{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100%;}
+.ql-adapted .sidebar,.ql-adapted .reading-bar{display:none!important;}
+.ql-adapted .main{background:var(--bg);overflow:visible;}
+.ql-adapted .lesson-footer,.ql-adapted .theory-footer,.ql-adapted .nb-footer{display:none!important;}
+.ql-adapted .lesson,.ql-adapted .mod-section{display:block;}
+.ql-adapted .lesson:not(.active){display:none;}
+.ql-adapted .mod-section:not(.active){display:none;}
+.ql-adapted .code-wrap{margin:18px 0;border:1px solid #D7D0C6;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 10px 28px rgba(26,24,20,.06);}
+.ql-adapted .code-header,.ql-adapted .code-hdr{background:#F3F4F6!important;padding:8px 14px!important;border-radius:0!important;border-bottom:1px solid #D7D0C6;display:flex;align-items:center;justify-content:space-between;}
+.ql-adapted .code-lang,.ql-adapted .code-title,.ql-adapted .code-fn,.ql-adapted .code-filename,.ql-adapted .code-hint,.ql-adapted .code-run-hint{color:#4A4640!important;font-family:var(--mono);}
+.ql-adapted .code-fn::before,.ql-adapted .code-filename::before{content:'PY'!important;font-size:10px;color:#1A4FDB;font-weight:600;}
+.ql-adapted .code-block,.ql-adapted .code-body{background:#fff!important;color:#1F2937!important;border:0!important;border-left:3px solid #E8F0FF!important;border-radius:0!important;padding:18px 18px 18px 78px!important;font-family:var(--mono);font-size:12px;line-height:2;overflow-x:auto;white-space:pre;position:relative;}
+.ql-adapted .code-block::before,.ql-adapted .code-body::before{content:'In [ ]:';position:absolute;left:14px;top:18px;font-family:var(--mono);font-size:10px;color:#1A4FDB;}
+.ql-adapted .code-block .kw,.ql-adapted .code-body .kw{color:#7C3AED!important;}
+.ql-adapted .code-block .fn,.ql-adapted .code-body .fn{color:#1A4FDB!important;}
+.ql-adapted .code-block .st,.ql-adapted .code-body .st{color:#1A7A4A!important;}
+.ql-adapted .code-block .cm,.ql-adapted .code-body .cm{color:#6B625B!important;}
+.ql-adapted .code-block .nm,.ql-adapted .code-body .nm{color:#C0392B!important;}
+.ql-adapted .code-block .cls,.ql-adapted .code-body .cls{color:#C4860A!important;}
+.ql-adapted .code-block .var,.ql-adapted .code-body .var{color:#1A1814!important;}
+.ql-adapted .output-box{background:#FBFBFB!important;border:1px solid #E3DED6!important;color:#1A1814!important;}
+.ql-adapted .terminal-header,.ql-adapted .term-hdr{background:#F3F4F6!important;border:1px solid #D7D0C6;border-bottom:0;}
+.ql-adapted .terminal-body,.ql-adapted .term-body{background:#fff!important;color:#1A1814!important;border:1px solid #D7D0C6;border-left:3px solid #E8F0FF;}
+.ql-adapted .terminal-body .cmd,.ql-adapted .term-body .cmd{color:#1A1814!important;}
+.ql-adapted .terminal-body .prompt,.ql-adapted .term-body .pr{color:#1A4FDB!important;}
+.ql-adapted.module-01-handson .nb-page{display:block!important;max-width:760px;padding:44px 52px 48px;border-top:1px solid var(--rule2);}
+.ql-adapted.module-01-handson .nb-page:first-child{border-top:0;}
+.ql-adapted.module-01-handson .nb-page:not(.active){display:block!important;}
+.ql-adapted.module-01-handson .nb-header{margin-bottom:28px;}
+.ql-adapted.module-01-handson .quiz-fb{display:block;}
+</style>
+<div class="ql-adapted module-00"><div class="lesson active" id="lesson-0">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Module 00 · Foundation</div>
+        <h1 class="lesson-title">Why Quantum Computing?</h1>
+        <p class="lesson-subtitle">Before writing a single line of quantum code, you need to understand what problem quantum computing actually solves and why classical computers hit a wall.</p>
+        <div class="lesson-meta">
+          <span>⏱ ~45 minutes</span>
+          <span>📖 Reading only  no code</span>
+          <span>🎯 Beginner</span>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+        <div class="prose">
+
+          <!-- SECTION 1 -->
+          <h2><span class="sec-num">01</span> Start with a problem classical computers cannot solve</h2>
+
+          <p>Let's say you need to find the shortest route connecting 20 cities visiting each city exactly once. Simple enough, right?</p>
+
+          <p>Here's the uncomfortable truth: <strong>the fastest classical computers on Earth cannot reliably solve this problem</strong> if the number of cities gets large enough. Not because the computers are slow. Because the number of possible routes grows so explosively that even checking one route per nanosecond would take longer than the age of the universe.</p>
+
+          <p>With 20 cities, there are approximately 1.2 quadrillion possible routes. With 50 cities? The number of routes exceeds the number of atoms in the observable universe.</p>
+
+          <div class="callout insight">
+            <div class="callout-label">💡 Key insight</div>
+            <p>This is not a hardware problem. You cannot solve it by buying a faster CPU or more RAM. The problem grows <em>exponentially</em> and no classical machine, however fast, can outrun exponential growth.</p>
+          </div>
+
+          <p>This class of problem  where the difficulty explodes exponentially with size is exactly where quantum computing is designed to help. Not for every problem. Not even for most problems. But for specific problems with this exponential structure, quantum computers offer a fundamentally different approach.</p>
+
+          <!-- SECTION 2 -->
+          <h2><span class="sec-num">02</span> What makes a classical computer "classical"?</h2>
+
+          <p>Before understanding what quantum computing is, you need a clear picture of what classical computing is. And the answer is simpler than you think.</p>
+
+          <p><strong>Every classical computer  from your phone to the world's fastest supercomputer  processes information using bits.</strong> A bit is a switch. It is either off (0) or on (1). That's it. The entire complexity of modern computing  every app, every website, every AI model  is built on billions of these switches flipping on and off, millions of times per second.</p>
+
+          <div class="callout analogy">
+            <div class="callout-label">🧠 Analogy</div>
+            <p>Imagine a light switch. It can be off or on  nothing in between. A classical computer is a city of billions of light switches, all flipping incredibly fast according to carefully designed rules. The rules are your software. The switches are your hardware.</p>
+          </div>
+
+          <p>The key property of a classical bit: <strong>it always has a definite value.</strong> It is 0. Or it is 1. There is no in-between. This seems obvious  even trivial  but it is the fundamental limitation we will later contrast with quantum computing.</p>
+
+          <p>Here is the constraint this creates: to find the best answer among many possible answers, a classical computer must <strong>check answers one at a time</strong> (or a few at a time with parallelism). For small problems, this is fine. For exponentially large problems, it becomes impossible.</p>
+
+          <!-- SECTION 3 -->
+          <h2><span class="sec-num">03</span> The classical wall  a concrete example</h2>
+
+          <p>Let's make this concrete. Suppose you have a combination lock with 4 digits, each 0–9. That's 10,000 possible combinations. A classical computer can try all 10,000 in microseconds. No problem.</p>
+
+          <p>Now suppose the lock has 300 digits. The number of combinations is 10³⁰⁰  a number with 300 zeros after it. If every atom in the universe was a computer checking one billion combinations per second since the Big Bang, you would not have tried a fraction of the possible combinations.</p>
+
+          <p><strong>This is the classical wall.</strong> It is not a wall we can break through by building faster chips. It is a mathematical wall built into the structure of how classical information works.</p>
+
+          <div class="concept-card">
+            <div class="concept-card-title">📌 The core problem: sequential search</div>
+            <div class="concept-card-body">Classical computers check possibilities <em>sequentially</em>. Even with billions of parallel processors, the exponential growth of problem space always eventually wins. Quantum computing offers a different strategy: explore many possibilities <em>simultaneously</em> by exploiting the physics of quantum mechanics.</div>
+          </div>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 4 -->
+          <h2><span class="sec-num">04</span> What is "quantum"  the physical basis</h2>
+
+          <p>The word "quantum" comes from physics. It refers to the behaviour of matter and energy at the scale of individual atoms and particles <strong>a scale where physics works very differently from our everyday experience.</strong></p>
+
+          <p>At the quantum scale, particles do not behave like billiard balls. They behave like waves. And waves can do something billiard balls cannot: they can be in multiple states at the same time.</p>
+
+          <p>This is not science fiction or metaphor. It is an experimentally verified fact about the physical world. An electron, for example, can genuinely be spinning in two directions simultaneously  not "we don't know which direction", but actually both, until we observe it.</p>
+
+          <div class="callout analogy">
+            <div class="callout-label">🧠 Analogy  the wave</div>
+            <p>Drop a stone in a pond. The ripple spreads outward in all directions simultaneously  it does not pick one direction and go there. An electron in superposition is like that ripple: it genuinely exists across multiple states at once. Only when you measure it  like putting your hand in the pond  does it "choose" a definite position.</p>
+          </div>
+
+          <p>Quantum computing is the engineering project of <strong>harnessing this quantum behaviour to process information.</strong> Instead of bits that are definitely 0 or 1, we use <em>qubits</em>  quantum bits  that can be in a superposition of 0 and 1 simultaneously.</p>
+
+          <p>This is not just a philosophical curiosity. It has a practical consequence: a system of n qubits can represent 2ⁿ states simultaneously. Ten qubits: 1,024 states. Fifty qubits: over one quadrillion states. Three hundred qubits: more states than there are atoms in the observable universe  all held in superposition at once.</p>
+
+          <!-- SECTION 5 -->
+          <h2><span class="sec-num">05</span> The quantum strategy  a different way of computing</h2>
+
+          <p>Here is the key shift in thinking: a classical computer solves problems by <strong>searching through possibilities one at a time.</strong> A quantum computer, in the right circumstances, can set up a superposition across all possibilities simultaneously  and then use quantum interference to make the right answer more likely to appear when measured.</p>
+
+          <div class="step-list">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-body">
+                <div class="step-title">Superposition explore everything at once</div>
+                <div class="step-text">Put qubits into a superposition of all possible answers. Now the system is "trying" every answer simultaneously.</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-body">
+                <div class="step-title">Interference  amplify the right answer</div>
+                <div class="step-text">Apply quantum operations that increase the probability of correct answers and decrease the probability of wrong ones. Like noise-cancelling headphones, but for incorrect solutions.</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-body">
+                <div class="step-title">Measurement  read out the result</div>
+                <div class="step-text">Measure the system. The superposition collapses to a single answer  and because of step 2, it is probably the right one. Run many times to build confidence.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout warning">
+            <div class="callout-label">⚠ Important  this is not magic</div>
+            <p>Quantum computers do not simply try all answers simultaneously and magically pick the best one. The interference step (step 2) is the hard part designing quantum circuits that actually amplify correct answers is a research problem. This is why quantum algorithms are difficult to design, and why quantum computers do not outperform classical computers on most problems.</p>
+          </div>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 6 -->
+          <h2><span class="sec-num">06</span> What quantum computing is NOT</h2>
+
+          <p>Before going further, let's clear up the misconceptions  because the hype around quantum computing has created a lot of them.</p>
+
+          <div class="misconception">
+            <div class="misconception-label">🚫 Common misconceptions</div>
+            <div class="misconception-wrong">✗ &nbsp;"Quantum computers are just faster classical computers"</div>
+            <div class="misconception-right">✓ &nbsp;They are fundamentally different in how they compute  faster on specific problems, completely useless on others</div>
+          </div>
+
+          <div class="misconception">
+            <div class="misconception-label">🚫 Common misconceptions</div>
+            <div class="misconception-wrong">✗ &nbsp;"Quantum computers will replace classical computers"</div>
+            <div class="misconception-right">✓ &nbsp;They will coexist as specialised coprocessors  like GPUs. Classical computers will still run your apps, websites, and most software</div>
+          </div>
+
+          <div class="misconception">
+            <div class="misconception-label">🚫 Common misconceptions</div>
+            <div class="misconception-wrong">✗ &nbsp;"Quantum supremacy means quantum computers are better than classical"</div>
+            <div class="misconception-right">✓ &nbsp;"Supremacy" meant a quantum computer did one specific artificially constructed task faster  not that it was generally better at anything useful</div>
+          </div>
+
+          <div class="misconception">
+            <div class="misconception-label">🚫 Common misconceptions</div>
+            <div class="misconception-wrong">✗ &nbsp;"Quantum computers can crack all encryption right now"</div>
+            <div class="misconception-right">✓ &nbsp;Shor's algorithm theoretically breaks RSA encryption  but requires millions of error-corrected qubits. Today's machines have hundreds of noisy qubits. This threat is decades away at minimum</div>
+          </div>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 7 -->
+          <h2><span class="sec-num">07</span> The honest picture where quantum helps and where it doesn't</h2>
+
+          <p>Quantum computing has demonstrated or strongly theoretical advantages in four areas. It is important to be precise about this not "quantum will help with everything" but specific, honest claims.</p>
+
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>Problem type</th>
+                <th>Classical</th>
+                <th>Quantum advantage</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Unstructured search</td>
+                <td>O(N)</td>
+                <td>O(√N)  Grover's</td>
+                <td style="color:var(--gold)">Proven, limited by noise</td>
+              </tr>
+              <tr>
+                <td>Integer factoring</td>
+                <td>Exponential</td>
+                <td>Polynomial  Shor's</td>
+                <td style="color:var(--red)">Proven theory, hardware decades away</td>
+              </tr>
+              <tr>
+                <td>Quantum simulation</td>
+                <td>Exponential</td>
+                <td>Polynomial  VQE</td>
+                <td style="color:var(--gold)">Small molecules today</td>
+              </tr>
+              <tr>
+                <td>Combinatorial optimisation</td>
+                <td>Heuristics</td>
+                <td>Approximate  QAOA</td>
+                <td style="color:var(--red)">Classical still wins today</td>
+              </tr>
+              <tr>
+                <td>Machine learning</td>
+                <td>Deep learning dominates</td>
+                <td>Unclear  research active</td>
+                <td style="color:var(--red)">No demonstrated advantage</td>
+              </tr>
+              <tr>
+                <td>Most software tasks</td>
+                <td>Excellent</td>
+                <td>None</td>
+                <td style="color:var(--green)">Classical wins, full stop</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout fact">
+            <div class="callout-label">✓ The honest summary</div>
+            <p>We are in the NISQ era  Noisy Intermediate-Scale Quantum. Machines with 100–1000 qubits exist today but they are noisy, error-prone, and limited in circuit depth. Real quantum advantage on practical problems remains years away for most applications. Learning quantum computing now means building expertise before the hardware catches up  not because it will help you solve problems today.</p>
+          </div>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 8 -->
+          <h2><span class="sec-num">08</span> The two paradigms you will encounter</h2>
+
+          <p>Quantum computing is not one thing  there are two fundamentally different hardware approaches, and this course covers both.</p>
+
+          <div class="concept-card">
+            <div class="concept-card-title">⚛️ Gate-model quantum computing</div>
+            <div class="concept-card-body">Used by IBM, Google, IonQ, Rigetti. Applies sequences of quantum gates (like logic gates in classical computing) to qubits. Programmable for any quantum algorithm. Tools: Qiskit, PennyLane, Cirq. This is the main paradigm in this course.</div>
+          </div>
+
+          <div class="concept-card">
+            <div class="concept-card-title">🌊 Quantum annealing</div>
+            <div class="concept-card-body">Used by D-Wave. Physically evolves a quantum system toward minimum energy  which corresponds to the optimal solution of a problem. Not universal, but useful for specific optimisation problems. Tools: D-Wave Ocean SDK. Covered in Module 07.</div>
+          </div>
+
+          <p>You do not need to understand either of these deeply right now. Just know that they exist, they are different, and this course will teach you when to use which.</p>
+
+          <hr class="prose-divider">
+
+          <!-- CHECK YOUR UNDERSTANDING -->
+          <div class="check-box">
+            <div class="check-label">✓ Check your understanding</div>
+            <div class="check-q">Why can't we solve the 300-digit combination lock problem by building a faster classical computer?</div>
+            <div class="check-options">
+              <div class="check-opt" onclick="checkAnswer(this,'wrong','feedback-1')">
+                <span class="opt-label">A</span>
+                Classical computers are too slow for this type of problem
+              </div>
+              <div class="check-opt" onclick="checkAnswer(this,'correct','feedback-1')">
+                <span class="opt-label">B</span>
+                The number of combinations grows exponentially  no speed increase can overcome exponential growth
+              </div>
+              <div class="check-opt" onclick="checkAnswer(this,'wrong','feedback-1')">
+                <span class="opt-label">C</span>
+                We need more RAM to store the combinations
+              </div>
+              <div class="check-opt" onclick="checkAnswer(this,'wrong','feedback-1')">
+                <span class="opt-label">D</span>
+                Quantum computers have already solved this problem
+              </div>
+            </div>
+            <div class="check-feedback correct" id="feedback-1">
+              ✓ Correct. Exponential growth cannot be outrun by faster hardware  10³⁰⁰ remains impossibly large regardless of CPU speed. This is the fundamental limitation that motivates quantum computing.
+            </div>
+          </div>
+
+          <!-- WHAT'S NEXT -->
+          <div class="whats-next">
+            <div class="wn-label">Next module</div>
+            <div class="wn-title">Module 01  Qubits &amp; Superposition</div>
+            <div class="wn-desc">Now that you understand <em>why</em> quantum computing exists, it's time to understand its most fundamental building block: the qubit. You will write your first quantum code and observe  with real output  why a qubit behaves nothing like a classical bit.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="foot-btn" disabled="">← Previous</button>
+        <div class="foot-progress">Module 1 of 11</div>
+        <button class="foot-btn primary" onclick="completeAndNext(0)">Mark complete &amp; continue →</button>
+      </div>
+    </div></div>

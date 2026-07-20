@@ -1,0 +1,903 @@
+<style>
+:root {
+  --bg:       #F7F5F0;
+  --bg2:      #EFEDE7;
+  --bg3:      #E8E4DC;
+  --ink:      #1A1814;
+  --ink2:     #4A4640;
+  --ink3:     #8A8480;
+  --rule:     rgba(26,24,20,0.1);
+  --rule2:    rgba(26,24,20,0.06);
+  --accent:   #1A4FDB;
+  --accent2:  #0E35A8;
+  --gold:     #C4860A;
+  --green:    #1A7A4A;
+  --red:      #C0392B;
+  --purple:   #6B3FA0;
+  --serif:    'Lora', Georgia, serif;
+  --sans:     'DM Sans', sans-serif;
+  --mono:     'JetBrains Mono', monospace;
+  --max:      680px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--serif);background:var(--bg);color:var(--ink);line-height:1.8;font-size:17px;}
+
+/* ── SHELL ── */
+.shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  background:var(--bg2);
+  border-right:1px solid var(--rule);
+  position:sticky;top:0;height:100vh;
+  overflow-y:auto;padding:28px 0;
+  display:flex;flex-direction:column;
+}
+.sidebar::-webkit-scrollbar{width:2px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--rule);}
+
+.sidebar-logo{
+  padding:0 24px 24px;
+  border-bottom:1px solid var(--rule);
+  margin-bottom:20px;
+}
+.sidebar-logo-name{
+  font-family:var(--mono);font-size:13px;font-weight:500;
+  letter-spacing:.06em;color:var(--ink);
+  display:flex;align-items:center;gap:8px;
+}
+.sidebar-logo-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 8px rgba(26,79,219,.4);
+}
+.sidebar-logo-sub{font-size:11px;color:var(--ink3);font-family:var(--sans);margin-top:3px;}
+
+.sidebar-section-label{
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink3);padding:12px 24px 4px;
+}
+
+.sidebar-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:8px 24px;cursor:pointer;
+  border-left:2px solid transparent;
+  transition:all .15s;
+  position:relative;
+}
+.sidebar-item:hover{background:rgba(26,24,20,.04);}
+.sidebar-item.active{
+  background:rgba(26,79,219,.05);
+  border-left-color:var(--accent);
+}
+.sidebar-item.completed .si-check{
+  background:var(--green);border-color:var(--green);
+}
+.si-check{
+  width:16px;height:16px;border-radius:50%;
+  border:1.5px solid var(--rule);
+  flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.si-check svg{display:none;}
+.sidebar-item.completed .si-check svg{display:block;}
+.si-body{}
+.si-num{font-size:10px;font-family:var(--mono);color:var(--ink3);line-height:1;}
+.si-title{font-size:13px;font-family:var(--sans);font-weight:500;color:var(--ink2);line-height:1.3;margin-top:1px;}
+.sidebar-item.active .si-title{color:var(--ink);}
+.si-duration{font-size:10px;font-family:var(--mono);color:var(--ink3);margin-top:1px;}
+
+.sidebar-item.locked{opacity:.4;cursor:default;}
+.sidebar-item.locked:hover{background:transparent;}
+
+.sidebar-footer{
+  margin-top:auto;padding:16px 24px 0;
+  border-top:1px solid var(--rule);
+}
+.progress-bar-wrap{}
+.progress-label{font-size:11px;font-family:var(--sans);color:var(--ink3);margin-bottom:6px;}
+.progress-bar{height:3px;background:var(--rule);border-radius:999px;overflow:hidden;}
+.progress-fill{height:3px;background:var(--accent);border-radius:999px;transition:width .4s;}
+
+/* ── MAIN ── */
+.main{overflow-y:auto;background:var(--bg);}
+
+/* ── LESSON ── */
+.lesson{display:none;}
+.lesson.active{display:block;}
+
+/* Lesson header */
+.lesson-header{
+  padding:52px 64px 40px;
+  max-width:calc(var(--max) + 128px);
+  border-bottom:1px solid var(--rule2);
+}
+.lesson-eyebrow{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.lesson-title{
+  font-family:var(--serif);font-size:36px;font-weight:600;
+  letter-spacing:-.02em;line-height:1.15;
+  color:var(--ink);margin-bottom:12px;
+}
+.lesson-subtitle{
+  font-family:var(--sans);font-size:15px;color:var(--ink2);
+  line-height:1.65;max-width:520px;
+}
+.lesson-meta{
+  display:flex;gap:16px;margin-top:20px;
+  font-family:var(--sans);font-size:12px;color:var(--ink3);
+}
+.lesson-meta span{display:flex;align-items:center;gap:4px;}
+
+/* Lesson body  prose */
+.lesson-body{
+  padding:48px 64px;
+  max-width:calc(var(--max) + 128px);
+}
+.prose{max-width:var(--max);}
+
+/* Section heading */
+.prose h2{
+  font-family:var(--serif);font-size:24px;font-weight:600;
+  letter-spacing:-.01em;color:var(--ink);
+  margin:52px 0 16px;padding-top:0;
+  display:flex;align-items:center;gap:12px;
+}
+.prose h2:first-child{margin-top:0;}
+.prose h2 .sec-num{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  color:var(--ink3);letter-spacing:.06em;
+  min-width:28px;
+}
+.prose h3{
+  font-family:var(--sans);font-size:16px;font-weight:600;
+  color:var(--ink);margin:32px 0 10px;
+}
+
+/* Prose paragraph */
+.prose p{
+  font-family:var(--serif);font-size:17px;
+  color:var(--ink2);line-height:1.85;
+  margin-bottom:20px;
+}
+.prose p strong{color:var(--ink);font-weight:600;}
+.prose p em{font-style:italic;}
+
+/* Pull quote */
+.pullquote{
+  border-left:3px solid var(--accent);
+  padding:16px 0 16px 24px;
+  margin:32px 0;
+  font-family:var(--serif);font-size:19px;
+  font-style:italic;color:var(--ink);
+  line-height:1.6;
+}
+
+/* Callout boxes */
+.callout{
+  border-radius:8px;padding:20px 22px;
+  margin:28px 0;font-family:var(--sans);
+  font-size:14px;line-height:1.7;
+}
+.callout-label{
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:8px;display:flex;align-items:center;gap:6px;
+}
+.callout.analogy{
+  background:rgba(107,63,160,.06);
+  border:1px solid rgba(107,63,160,.15);
+}
+.callout.analogy .callout-label{color:var(--purple);}
+.callout.analogy p{color:#3D2060;margin-bottom:0;font-family:var(--sans);font-size:14px;line-height:1.7;}
+
+.callout.insight{
+  background:rgba(26,79,219,.05);
+  border:1px solid rgba(26,79,219,.14);
+}
+.callout.insight .callout-label{color:var(--accent);}
+.callout.insight p{color:#0D2865;margin-bottom:0;font-family:var(--sans);font-size:14px;line-height:1.7;}
+
+.callout.warning{
+  background:rgba(192,57,43,.05);
+  border:1px solid rgba(192,57,43,.14);
+}
+.callout.warning .callout-label{color:var(--red);}
+.callout.warning p{color:#5C1A12;margin-bottom:0;font-family:var(--sans);font-size:14px;line-height:1.7;}
+
+.callout.fact{
+  background:rgba(26,122,74,.05);
+  border:1px solid rgba(26,122,74,.14);
+}
+.callout.fact .callout-label{color:var(--green);}
+.callout.fact p{color:#0D3D22;margin-bottom:0;font-family:var(--sans);font-size:14px;line-height:1.7;}
+
+/* Comparison table */
+.compare-table{
+  width:100%;border-collapse:collapse;
+  margin:28px 0;font-family:var(--sans);
+  font-size:14px;
+}
+.compare-table th{
+  padding:10px 14px;text-align:left;
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;
+  border-bottom:2px solid var(--rule);color:var(--ink3);
+}
+.compare-table td{
+  padding:10px 14px;border-bottom:1px solid var(--rule2);
+  color:var(--ink2);vertical-align:top;line-height:1.6;
+}
+.compare-table tr:last-child td{border-bottom:none;}
+.compare-table td:first-child{font-weight:500;color:var(--ink);width:180px;}
+.compare-table .classical{color:var(--green);font-weight:600;}
+.compare-table .quantum{color:var(--accent);font-weight:600;}
+
+/* Concept card */
+.concept-card{
+  background:var(--bg2);border:1px solid var(--rule);
+  border-radius:8px;padding:20px 22px;margin:24px 0;
+}
+.concept-card-title{
+  font-family:var(--sans);font-size:13px;font-weight:600;
+  color:var(--ink);margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;
+}
+.concept-card-body{
+  font-family:var(--sans);font-size:14px;
+  color:var(--ink2);line-height:1.7;
+}
+
+/* Step list */
+.step-list{margin:24px 0;}
+.step{
+  display:flex;gap:16px;margin-bottom:20px;
+  align-items:flex-start;
+}
+.step-num{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--accent);color:#fff;
+  font-family:var(--mono);font-size:12px;font-weight:500;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+}
+.step-body{}
+.step-title{font-family:var(--sans);font-weight:600;font-size:15px;color:var(--ink);margin-bottom:4px;}
+.step-text{font-family:var(--sans);font-size:14px;color:var(--ink2);line-height:1.65;}
+
+/* Visual diagram */
+.diagram-box{
+  background:var(--bg2);border:1px solid var(--rule);
+  border-radius:8px;padding:28px;margin:28px 0;
+  display:flex;align-items:center;justify-content:center;
+}
+.diagram-caption{
+  font-family:var(--sans);font-size:12px;color:var(--ink3);
+  text-align:center;margin-top:10px;font-style:italic;
+}
+
+/* Code block */
+.code-wrap{margin:28px 0;}
+.code-header{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--ink);padding:10px 16px;
+  border-radius:8px 8px 0 0;
+}
+.code-lang{font-family:var(--mono);font-size:11px;color:#666;letter-spacing:.04em;}
+.code-title{font-family:var(--sans);font-size:12px;color:#999;}
+.code-block{
+  background:#1E1E1E;padding:20px;
+  border-radius:0 0 8px 8px;
+  font-family:var(--mono);font-size:12px;
+  line-height:2;overflow-x:auto;
+  margin:0;
+}
+.code-block .kw {color:#C792EA;}
+.code-block .fn {color:#82AAFF;}
+.code-block .st {color:#C3E88D;}
+.code-block .cm {color:#546E7A;}
+.code-block .nm {color:#F78C6C;}
+.code-block .op {color:#89DDFF;}
+
+/* Output box */
+.output-box{
+  background:#0D1117;border:1px solid #30363D;
+  border-radius:8px;padding:16px;margin:0 0 28px;
+  font-family:var(--mono);font-size:12px;color:#8B949E;line-height:1.8;
+}
+.output-box .out-label{
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  color:#484F58;margin-bottom:8px;
+}
+.output-box .out-val{color:#C9D1D9;}
+.output-box .out-explain{color:#8B949E;font-size:11px;margin-top:8px;font-style:italic;}
+
+/* Misconception box */
+.misconception{
+  background:rgba(196,134,10,.06);
+  border:1px solid rgba(196,134,10,.2);
+  border-radius:8px;padding:18px 20px;margin:28px 0;
+}
+.misconception-label{
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:8px;
+}
+.misconception-wrong{
+  font-family:var(--sans);font-size:14px;color:var(--red);
+  margin-bottom:6px;display:flex;gap:8px;align-items:flex-start;
+}
+.misconception-right{
+  font-family:var(--sans);font-size:14px;color:var(--green);
+  display:flex;gap:8px;align-items:flex-start;
+}
+
+/* Divider */
+.prose-divider{
+  border:none;border-top:1px solid var(--rule2);
+  margin:44px 0;
+}
+
+/* Check your understanding */
+.check-box{
+  background:var(--bg2);border:1px solid var(--rule);
+  border-radius:8px;padding:22px;margin:36px 0;
+}
+.check-label{
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:14px;
+}
+.check-q{
+  font-family:var(--sans);font-size:15px;font-weight:500;
+  color:var(--ink);margin-bottom:12px;
+}
+.check-options{display:flex;flex-direction:column;gap:8px;}
+.check-opt{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 14px;border-radius:6px;
+  border:1px solid var(--rule);background:var(--bg);
+  cursor:pointer;transition:all .15s;
+  font-family:var(--sans);font-size:14px;color:var(--ink2);
+}
+.check-opt:hover{border-color:var(--accent);color:var(--ink);}
+.check-opt.correct{background:rgba(26,122,74,.08);border-color:var(--green);color:var(--green);}
+.check-opt.wrong{background:rgba(192,57,43,.06);border-color:var(--red);color:var(--red);}
+.check-opt .opt-label{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  min-width:20px;color:var(--ink3);
+}
+.check-feedback{
+  margin-top:12px;font-family:var(--sans);font-size:13px;
+  line-height:1.6;display:none;padding:10px 12px;
+  border-radius:6px;
+}
+.check-feedback.show{display:block;}
+.check-feedback.correct{background:rgba(26,122,74,.08);color:var(--green);}
+.check-feedback.wrong{background:rgba(192,57,43,.06);color:var(--red);}
+
+/* What's next */
+.whats-next{
+  background:linear-gradient(135deg,rgba(26,79,219,.06),rgba(107,63,160,.06));
+  border:1px solid rgba(26,79,219,.15);
+  border-radius:8px;padding:24px;margin:44px 0 0;
+}
+.wn-label{
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:12px;
+}
+.wn-title{font-family:var(--serif);font-size:18px;font-weight:600;margin-bottom:6px;}
+.wn-desc{font-family:var(--sans);font-size:14px;color:var(--ink2);line-height:1.6;}
+
+/* Lesson footer */
+.lesson-footer{
+  padding:32px 64px 52px;
+  max-width:calc(var(--max) + 128px);
+  border-top:1px solid var(--rule2);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.foot-btn{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--sans);font-size:14px;font-weight:500;
+  padding:10px 20px;border-radius:6px;cursor:pointer;
+  border:1px solid var(--rule);background:var(--bg2);
+  color:var(--ink2);transition:all .15s;
+}
+.foot-btn:hover{border-color:var(--ink3);color:var(--ink);}
+.foot-btn.primary{
+  background:var(--accent);border-color:var(--accent);
+  color:#fff;
+}
+.foot-btn.primary:hover{background:var(--accent2);}
+.foot-btn:disabled{opacity:.3;cursor:default;}
+.foot-progress{
+  font-family:var(--sans);font-size:12px;color:var(--ink3);text-align:center;
+}
+
+/* Reading progress bar */
+.reading-bar{
+  position:fixed;top:0;left:260px;right:0;height:2px;
+  background:var(--rule);z-index:100;
+}
+.reading-bar-fill{height:2px;background:var(--accent);width:0%;transition:width .1s;}
+</style>
+<style>
+.ql-adapted{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100%;}
+.ql-adapted .sidebar,.ql-adapted .reading-bar{display:none!important;}
+.ql-adapted .main{background:var(--bg);overflow:visible;}
+.ql-adapted .lesson-footer,.ql-adapted .theory-footer,.ql-adapted .nb-footer{display:none!important;}
+.ql-adapted .lesson,.ql-adapted .mod-section{display:block;}
+.ql-adapted .lesson:not(.active){display:none;}
+.ql-adapted .mod-section:not(.active){display:none;}
+.ql-adapted .code-wrap{margin:18px 0;border:1px solid #D7D0C6;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 10px 28px rgba(26,24,20,.06);}
+.ql-adapted .code-header,.ql-adapted .code-hdr{background:#F3F4F6!important;padding:8px 14px!important;border-radius:0!important;border-bottom:1px solid #D7D0C6;display:flex;align-items:center;justify-content:space-between;}
+.ql-adapted .code-lang,.ql-adapted .code-title,.ql-adapted .code-fn,.ql-adapted .code-filename,.ql-adapted .code-hint,.ql-adapted .code-run-hint{color:#4A4640!important;font-family:var(--mono);}
+.ql-adapted .code-fn::before,.ql-adapted .code-filename::before{content:'PY'!important;font-size:10px;color:#1A4FDB;font-weight:600;}
+.ql-adapted .code-block,.ql-adapted .code-body{background:#fff!important;color:#1F2937!important;border:0!important;border-left:3px solid #E8F0FF!important;border-radius:0!important;padding:18px 18px 18px 78px!important;font-family:var(--mono);font-size:12px;line-height:2;overflow-x:auto;white-space:pre;position:relative;}
+.ql-adapted .code-block::before,.ql-adapted .code-body::before{content:'In [ ]:';position:absolute;left:14px;top:18px;font-family:var(--mono);font-size:10px;color:#1A4FDB;}
+.ql-adapted .code-block .kw,.ql-adapted .code-body .kw{color:#7C3AED!important;}
+.ql-adapted .code-block .fn,.ql-adapted .code-body .fn{color:#1A4FDB!important;}
+.ql-adapted .code-block .st,.ql-adapted .code-body .st{color:#1A7A4A!important;}
+.ql-adapted .code-block .cm,.ql-adapted .code-body .cm{color:#6B625B!important;}
+.ql-adapted .code-block .nm,.ql-adapted .code-body .nm{color:#C0392B!important;}
+.ql-adapted .code-block .cls,.ql-adapted .code-body .cls{color:#C4860A!important;}
+.ql-adapted .code-block .var,.ql-adapted .code-body .var{color:#1A1814!important;}
+.ql-adapted .output-box{background:#FBFBFB!important;border:1px solid #E3DED6!important;color:#1A1814!important;}
+.ql-adapted .terminal-header,.ql-adapted .term-hdr{background:#F3F4F6!important;border:1px solid #D7D0C6;border-bottom:0;}
+.ql-adapted .terminal-body,.ql-adapted .term-body{background:#fff!important;color:#1A1814!important;border:1px solid #D7D0C6;border-left:3px solid #E8F0FF;}
+.ql-adapted .terminal-body .cmd,.ql-adapted .term-body .cmd{color:#1A1814!important;}
+.ql-adapted .terminal-body .prompt,.ql-adapted .term-body .pr{color:#1A4FDB!important;}
+.ql-adapted.module-01-handson .nb-page{display:block!important;max-width:760px;padding:44px 52px 48px;border-top:1px solid var(--rule2);}
+.ql-adapted.module-01-handson .nb-page:first-child{border-top:0;}
+.ql-adapted.module-01-handson .nb-page:not(.active){display:block!important;}
+.ql-adapted.module-01-handson .nb-header{margin-bottom:28px;}
+.ql-adapted.module-01-handson .quiz-fb{display:block;}
+</style>
+<div class="ql-adapted module-01-theory"><div class="lesson active" id="lesson-1">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">Module 01 · Foundation</div>
+        <h1 class="lesson-title">Qubits &amp; Superposition</h1>
+        <p class="lesson-subtitle">The qubit is the fundamental unit of quantum information. By the end of this module you will have written a qubit, put it in superposition, measured it 1000 times, and genuinely understood why the output is random.</p>
+        <div class="lesson-meta">
+          <span>⏱ ~2 hours</span>
+          <span>💻 Code included</span>
+          <span>🎯 Beginner</span>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+        <div class="prose">
+
+          <!-- SECTION 1 -->
+          <h2><span class="sec-num">01</span> Start with something you already know  the classical bit</h2>
+
+          <p>Before we talk about qubits, let's make sure we truly understand the classical bit  because the contrast is everything.</p>
+
+          <p>A classical bit is a physical object. In a modern computer, it is usually a tiny capacitor: charged means 1, discharged means 0. The bit has exactly one property that matters: its value. And that value is always either 0 or 1. There is no in-between. There is no uncertainty. There is no "both".</p>
+
+          <div class="callout analogy">
+            <div class="callout-label">🧠 Analogy  the light switch</div>
+            <p>A classical bit is a light switch. It is either off (0) or on (1). You can look at it right now and know exactly what it is. Flipping it takes energy and changes its state permanently. You can copy its state to another switch for free. You can read it as many times as you like without changing it.</p>
+          </div>
+
+          <p>These properties  <strong>definite value, freely readable, freely copyable</strong>  seem so obvious that we never think about them. But every single one of them breaks down at the quantum scale. And that is exactly what makes a qubit interesting.</p>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 2 -->
+          <h2><span class="sec-num">02</span> What is a qubit, physically?</h2>
+
+          <p>A qubit is any two-level quantum system  a physical object that has exactly two distinguishable states, which we call |0⟩ and |1⟩. The angle brackets and the vertical bar are called <em>Dirac notation</em>  we will use this throughout the course. For now, just read |0⟩ as "the zero state" and |1⟩ as "the one state".</p>
+
+          <p>Different quantum computers implement qubits in different physical ways:</p>
+
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>Physical implementation</th>
+                <th>What the qubit is</th>
+                <th>Who uses it</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Superconducting circuits</td>
+                <td>Direction of current in a tiny superconducting loop</td>
+                <td>IBM, Google, Rigetti</td>
+              </tr>
+              <tr>
+                <td>Trapped ions</td>
+                <td>Energy levels of a single charged atom held by lasers</td>
+                <td>IonQ, Quantinuum</td>
+              </tr>
+              <tr>
+                <td>Photonic</td>
+                <td>Polarisation of a single photon</td>
+                <td>Xanadu, PsiQuantum</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>The physical implementation does not change the mathematics or the code. When you write Qiskit code, you do not care whether the qubit is a current loop or a trapped ion  the quantum operations work the same way. This is one of the beautiful things about quantum computing: the abstraction is clean.</p>
+
+          <div class="callout insight">
+            <div class="callout-label">💡 For this course</div>
+            <p>We will use superconducting qubits via IBM's Qiskit library. IBM provides free cloud access to real quantum hardware. But we will run most code on simulators first  faster, noiseless, and free.</p>
+          </div>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 3 -->
+          <h2><span class="sec-num">03</span> Superposition  the idea, not the hype</h2>
+
+          <p>Here is the property that makes a qubit different from a classical bit: <strong>a qubit can be in a superposition of |0⟩ and |1⟩ simultaneously.</strong></p>
+
+          <p>Before you've seen this before and thought "I don't really understand that"  good. Most explanations skip the part that makes it actually click. Let's go slower.</p>
+
+          <p>A qubit's state is described by two numbers  call them α and β  such that:</p>
+
+          <div class="diagram-box" style="background:var(--bg2);padding:24px;">
+            <div style="text-align:center;font-family:var(--mono);font-size:18px;color:var(--ink);">
+              |ψ⟩ = α|0⟩ + β|1⟩
+            </div>
+          </div>
+          <div class="diagram-caption">The general state of a qubit. α and β are complex numbers.</div>
+
+          <p>α is the "amount of |0⟩" and β is the "amount of |1⟩". When you <em>measure</em> the qubit, you get 0 with probability |α|² and 1 with probability |β|². The only rule is that |α|² + |β|² = 1 (probabilities must sum to 1).</p>
+
+          <div class="callout analogy">
+            <div class="callout-label">🧠 Analogy  the spinning coin</div>
+            <p>A coin lying flat is a classical bit: definitely heads (0) or definitely tails (1). A coin <em>spinning in the air</em> is a qubit: it is in some combination of heads and tails simultaneously. The moment it lands  the moment you <em>measure</em> it  it becomes definitely heads or definitely tails. The probability of which outcome depends on the spin state.</p>
+          </div>
+
+          <p>This is not just an analogy. The mathematics is the same. The coin spinning is a genuine physical superposition. When you measure it (it lands), the superposition collapses to a definite outcome. This is called <strong>wavefunction collapse</strong>.</p>
+
+          <div class="misconception">
+            <div class="misconception-label">⚠ The most common misconception</div>
+            <div class="misconception-wrong">✗ &nbsp;"Superposition means we don't know which state the qubit is in"</div>
+            <div class="misconception-right">✓ &nbsp;Superposition means the qubit is genuinely in both states simultaneously  it is not ignorance, it is physics. The qubit has no definite value until measured.</div>
+          </div>
+
+          <p>This distinction matters. "We don't know" is a statement about our knowledge. "Both simultaneously" is a statement about physical reality. Quantum mechanics  verified by thousands of experiments  says qubits are genuinely in superposition, not just unknown.</p>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 4 -->
+          <h2><span class="sec-num">04</span> The Bloch sphere  visualising a qubit</h2>
+
+          <p>Any pure qubit state can be represented as a point on the surface of a sphere called the <strong>Bloch sphere</strong>. The north pole is |0⟩. The south pole is |1⟩. Every other point on the sphere is a superposition.</p>
+
+          <div class="diagram-box">
+            <svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Sphere outline -->
+              <circle cx="110" cy="110" r="80" stroke="#CBD5E1" stroke-width="1" fill="rgba(26,79,219,0.03)"></circle>
+              <!-- Equator ellipse -->
+              <ellipse cx="110" cy="110" rx="80" ry="22" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="3 3" fill="none"></ellipse>
+              <!-- Vertical axis -->
+              <line x1="110" y1="20" x2="110" y2="200" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="3 3"></line>
+              <!-- Horizontal axis -->
+              <line x1="30" y1="110" x2="190" y2="110" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="3 3"></line>
+              <!-- |0> pole -->
+              <circle cx="110" cy="30" r="5" fill="#1A4FDB"></circle>
+              <text x="118" y="34" font-size="13" fill="#1A4FDB" font-family="JetBrains Mono">|0⟩</text>
+              <!-- |1> pole -->
+              <circle cx="110" cy="190" r="5" fill="#6B3FA0"></circle>
+              <text x="118" y="194" font-size="13" fill="#6B3FA0" font-family="JetBrains Mono">|1⟩</text>
+              <!-- |+> state -->
+              <circle cx="190" cy="110" r="4" fill="#1A7A4A"></circle>
+              <text x="194" y="114" font-size="11" fill="#1A7A4A" font-family="JetBrains Mono">|+⟩</text>
+              <!-- State vector -->
+              <line x1="110" y1="110" x2="148" y2="58" stroke="#C4860A" stroke-width="2" stroke-linecap="round"></line>
+              <circle cx="148" cy="58" r="5" fill="#C4860A"></circle>
+              <text x="154" y="54" font-size="11" fill="#C4860A" font-family="JetBrains Mono">|ψ⟩</text>
+              <!-- Labels -->
+              <text x="88" y="16" font-size="10" fill="#8A8480" font-family="DM Sans">Z axis</text>
+              <text x="168" y="108" font-size="10" fill="#8A8480" font-family="DM Sans">X</text>
+            </svg>
+          </div>
+          <div class="diagram-caption">The Bloch sphere. Every qubit state is a point on its surface. The state vector |ψ⟩ points from the centre to that point.</div>
+
+          <p>The equator of the Bloch sphere represents states that are exactly half |0⟩ and half |1⟩  equal probability of each outcome when measured. The most important of these is the <strong>|+⟩ state</strong>, which is the state you get after applying a Hadamard gate to |0⟩. You will see this constantly.</p>
+
+          <p>For now, the main thing to understand from the Bloch sphere: <strong>a qubit's state is a direction, not a value.</strong> That direction encodes both the probability of each outcome and a phase relationship between the two states (which we will cover later in gates).</p>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 5  FIRST CODE -->
+          <h2><span class="sec-num">05</span> Your first quantum code  create a qubit and measure it</h2>
+
+          <p>Enough theory. Let's write quantum code. We will do three things:</p>
+          <p>1. Create a qubit in the |0⟩ state<br>2. Measure it immediately without doing anything<br>3. Observe what happens</p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-lang">python</span>
+              <span class="code-title">01_classical_qubit.py  measure |0⟩ directly</span>
+            </div>
+            <div class="code-block">
+<span class="kw">from</span> qiskit <span class="kw">import</span> QuantumCircuit, transpile
+<span class="kw">from</span> qiskit_aer <span class="kw">import</span> AerSimulator
+
+<span class="cm"># Create a circuit: 1 qubit, 1 classical bit for the result</span>
+qc = QuantumCircuit(<span class="nm">1</span>, <span class="nm">1</span>)
+
+<span class="cm"># Measure the qubit into the classical bit</span>
+qc.measure(<span class="nm">0</span>, <span class="nm">0</span>)
+
+<span class="cm"># Run on a simulator, 1000 times</span>
+sim = AerSimulator()
+job = sim.run(transpile(qc, sim), shots=<span class="nm">1000</span>)
+counts = job.result().get_counts()
+
+<span class="fn">print</span>(counts)
+            </div>
+          </div>
+
+          <div class="output-box">
+            <div class="out-label">Output</div>
+            <div class="out-val">{'0': 1000}</div>
+            <div class="out-explain">The qubit starts in |0⟩ by default. Every measurement gives 0. All 1000 times. No randomness.</div>
+          </div>
+
+          <p>This is the classical-like behaviour of a qubit. When it is in a definite state  |0⟩ or |1⟩  it behaves like a classical bit. Measuring it gives the same answer every time.</p>
+
+          <p>Now let's create superposition.</p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-lang">python</span>
+              <span class="code-title">02_superposition.py  the Hadamard gate creates superposition</span>
+            </div>
+            <div class="code-block">
+<span class="kw">from</span> qiskit <span class="kw">import</span> QuantumCircuit, transpile
+<span class="kw">from</span> qiskit_aer <span class="kw">import</span> AerSimulator
+
+qc = QuantumCircuit(<span class="nm">1</span>, <span class="nm">1</span>)
+
+<span class="cm"># The Hadamard gate H puts a qubit into equal superposition</span>
+<span class="cm"># |0⟩ becomes (|0⟩ + |1⟩) / √2  exactly 50% chance of each</span>
+qc.h(<span class="nm">0</span>)
+
+qc.measure(<span class="nm">0</span>, <span class="nm">0</span>)
+
+sim = AerSimulator()
+counts = sim.run(transpile(qc, sim), shots=<span class="nm">1000</span>).result().get_counts()
+
+<span class="fn">print</span>(counts)
+            </div>
+          </div>
+
+          <div class="output-box">
+            <div class="out-label">Output  run 1</div>
+            <div class="out-val">{'0': 503, '1': 497}</div>
+            <div class="out-label" style="margin-top:12px">Output  run 2 (same code, run again)</div>
+            <div class="out-val">{'0': 489, '1': 511}</div>
+            <div class="out-label" style="margin-top:12px">Output  run 3</div>
+            <div class="out-val">{'0': 512, '1': 488}</div>
+            <div class="out-explain">Every run gives a different split  but always close to 50/50. This is quantum randomness. Not because we don't know the answer  but because the qubit genuinely had no definite value until measured.</div>
+          </div>
+
+          <p>This is the key result. <strong>The randomness is not a bug. It is not imprecision in the hardware. It is a fundamental property of quantum mechanics.</strong> The Hadamard gate put the qubit into an equal superposition of |0⟩ and |1⟩. Measuring it collapsed the superposition to a random outcome with equal probability.</p>
+
+          <div class="callout insight">
+            <div class="callout-label">💡 Why this matters for quantum computing</div>
+            <p>If measuring always gives a random result, how is this useful? The answer is: by itself, it is not. The power comes from <em>controlled</em> superposition  setting up a quantum state where the right answer has a high probability, and the wrong answers have low probability. That is what quantum algorithms do. You will see exactly how in Module 04 (Grover's algorithm).</p>
+          </div>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 6 -->
+          <h2><span class="sec-num">06</span> Visualise the difference  1000 measurements</h2>
+
+          <p>Let's visualise what is happening. We will measure both the classical bit and the qubit 1000 times and compare the distributions.</p>
+
+          <div class="code-wrap">
+            <div class="code-header">
+              <span class="code-lang">python</span>
+              <span class="code-title">03_visualise.py  classical vs quantum measurement</span>
+            </div>
+            <div class="code-block">
+<span class="kw">from</span> qiskit <span class="kw">import</span> QuantumCircuit, transpile
+<span class="kw">from</span> qiskit_aer <span class="kw">import</span> AerSimulator
+<span class="kw">from</span> qiskit.visualization <span class="kw">import</span> plot_histogram
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+sim = AerSimulator()
+
+<span class="cm"># Classical-like: no superposition</span>
+qc_classical = QuantumCircuit(<span class="nm">1</span>, <span class="nm">1</span>)
+qc_classical.measure(<span class="nm">0</span>, <span class="nm">0</span>)
+counts_classical = sim.run(transpile(qc_classical, sim), shots=<span class="nm">1000</span>).result().get_counts()
+
+<span class="cm"># Quantum: Hadamard superposition</span>
+qc_quantum = QuantumCircuit(<span class="nm">1</span>, <span class="nm">1</span>)
+qc_quantum.h(<span class="nm">0</span>)
+qc_quantum.measure(<span class="nm">0</span>, <span class="nm">0</span>)
+counts_quantum = sim.run(transpile(qc_quantum, sim), shots=<span class="nm">1000</span>).result().get_counts()
+
+<span class="fn">print</span>(<span class="st">"Classical-like |0⟩:"</span>, counts_classical)
+<span class="fn">print</span>(<span class="st">"Quantum superposition:"</span>, counts_quantum)
+
+<span class="cm"># Plot both histograms side by side</span>
+fig, (ax1, ax2) = plt.subplots(<span class="nm">1</span>, <span class="nm">2</span>, figsize=(<span class="nm">10</span>, <span class="nm">4</span>))
+plot_histogram(counts_classical, ax=ax1, title=<span class="st">"Classical-like: |0⟩"</span>)
+plot_histogram(counts_quantum,   ax=ax2, title=<span class="st">"Quantum superposition: H|0⟩"</span>)
+plt.tight_layout()
+plt.savefig(<span class="st">"qubit_comparison.png"</span>)
+plt.show()
+            </div>
+          </div>
+
+          <div class="output-box">
+            <div class="out-label">Expected output</div>
+            <div class="out-val">Classical-like |0⟩: {'0': 1000}<br>Quantum superposition: {'0': 502, '1': 498}</div>
+            <div class="out-explain">Left histogram: one bar at 0. Right histogram: two equal bars. This visual captures the entire difference between classical and quantum measurement.</div>
+          </div>
+
+          <hr class="prose-divider">
+
+          <!-- SECTION 7 -->
+          <h2><span class="sec-num">07</span> Three properties that break your intuition</h2>
+
+          <p>Before ending this module, there are three properties of qubits you must understand  because they seem paradoxical but are absolutely true, and they will come up constantly.</p>
+
+          <div class="concept-card">
+            <div class="concept-card-title">1. Measurement destroys superposition  permanently</div>
+            <div class="concept-card-body">Once you measure a qubit, its superposition collapses to a definite |0⟩ or |1⟩. The superposition is gone. You cannot measure it again to get the "other" value  you will just get the same definite value you already have. This is why quantum algorithms must be carefully designed around when and how measurement happens.</div>
+          </div>
+
+          <div class="concept-card">
+            <div class="concept-card-title">2. You cannot copy a qubit  the no-cloning theorem</div>
+            <div class="concept-card-body">In classical computing, copying a bit is trivial. In quantum computing, it is <em>impossible</em>. You cannot create a perfect copy of an unknown quantum state. This is a proven theorem  not a hardware limitation. It is one reason quantum communication is inherently secure, and one reason quantum algorithms cannot simply "check and discard" like classical algorithms.</div>
+          </div>
+
+          <div class="concept-card">
+            <div class="concept-card-title">3. Quantum randomness is fundamentally different from classical randomness</div>
+            <div class="concept-card-body">When you flip a classical coin, the outcome is technically determined by physics  air resistance, force, angle. In principle, if you knew all the variables, you could predict the outcome. Quantum measurement randomness is <em>not</em> like this. There is no hidden information that determines the outcome. The randomness is irreducible  it is built into the structure of physical reality. Bell's theorem (1964) proved this experimentally.</div>
+          </div>
+
+          <hr class="prose-divider">
+
+          <!-- COIN VS QUBIT INTERACTIVE VISUALIZATION -->
+          <div style="background:var(--bg2);border:1px solid var(--rule);border-radius:10px;padding:24px;margin:28px 0;">
+            <div style="font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:16px;">Interactive  Coin vs Qubit</div>
+            <div style="display:flex;gap:0;align-items:stretch;max-height:250px;">
+
+              <!-- LEFT: Classical bit panel -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:0 20px 0 4px;">
+                <div style="font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.04em;text-transform:uppercase;">Classical bit</div>
+                <!-- Coin icon -->
+                <div id="cv-coin" style="width:72px;height:72px;border-radius:50%;background:var(--gold);border:3px solid #a07000;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:28px;font-weight:700;color:#fff;box-shadow:0 2px 10px rgba(196,134,10,.3);transition:background .3s;">?</div>
+                <div style="display:flex;gap:8px;">
+                  <button onclick="cvSetBit(0)" style="font-family:var(--sans);font-size:12px;font-weight:500;padding:6px 13px;border-radius:5px;border:1px solid var(--rule);background:var(--bg);color:var(--ink2);cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--rule)'">Set to 0</button>
+                  <button onclick="cvSetBit(1)" style="font-family:var(--sans);font-size:12px;font-weight:500;padding:6px 13px;border-radius:5px;border:1px solid var(--rule);background:var(--bg);color:var(--ink2);cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--rule)'">Set to 1</button>
+                </div>
+                <div id="cv-coin-label" style="font-family:var(--sans);font-size:12px;color:var(--ink3);text-align:center;line-height:1.5;">Always definite.<br>You decide.</div>
+              </div>
+
+              <!-- DIVIDER -->
+              <div style="width:1px;background:var(--rule);flex-shrink:0;align-self:stretch;margin:0 4px;"></div>
+
+              <!-- RIGHT: Qubit panel -->
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:0 4px 0 20px;">
+                <div style="font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.04em;text-transform:uppercase;">Qubit in superposition</div>
+                <!-- Qubit circle -->
+                <div id="cv-qubit" style="width:72px;height:72px;border-radius:50%;background:conic-gradient(#1A4FDB 0deg 180deg,#6B3FA0 180deg 360deg);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:20px;font-weight:700;color:#fff;box-shadow:0 0 18px rgba(26,79,219,.35),0 0 6px rgba(107,63,160,.35);transition:background .3s,box-shadow .3s;position:relative;">
+                  <span id="cv-qubit-val" style="text-shadow:0 1px 3px rgba(0,0,0,.4);">⟨ψ⟩</span>
+                </div>
+                <div id="cv-measure-btns">
+                  <button onclick="cvMeasure()" style="font-family:var(--sans);font-size:12px;font-weight:500;padding:6px 18px;border-radius:5px;border:1px solid var(--accent);background:rgba(26,79,219,.07);color:var(--accent);cursor:pointer;transition:all .15s;" onmouseover="this.style.background='rgba(26,79,219,.14)'" onmouseout="this.style.background='rgba(26,79,219,.07)'">Measure it</button>
+                </div>
+                <div id="cv-qubit-label" style="font-family:var(--sans);font-size:12px;color:var(--ink3);text-align:center;line-height:1.5;">Before measurement:<br>both at once</div>
+              </div>
+            </div>
+          </div>
+          <script>
+          function cvSetBit(val) {
+            var coin = document.getElementById('cv-coin');
+            var label = document.getElementById('cv-coin-label');
+            if (val === 0) {
+              coin.style.background = 'linear-gradient(135deg,#1A4FDB,#0E35A8)';
+              coin.textContent = '0';
+              label.textContent = 'Set to 0. Always 0 until you change it.';
+            } else {
+              coin.style.background = 'linear-gradient(135deg,#6B3FA0,#4a2a72)';
+              coin.textContent = '1';
+              label.textContent = 'Set to 1. Always 1 until you change it.';
+            }
+          }
+          function cvMeasure() {
+            var qubit = document.getElementById('cv-qubit');
+            var val = document.getElementById('cv-qubit-val');
+            var label = document.getElementById('cv-qubit-label');
+            var btns = document.getElementById('cv-measure-btns');
+            var result = Math.random() < 0.5 ? 0 : 1;
+            if (result === 0) {
+              qubit.style.background = '#1A4FDB';
+              qubit.style.boxShadow = '0 0 18px rgba(26,79,219,.55)';
+              val.textContent = '|0⟩';
+              label.innerHTML = 'Collapsed! Got <strong>0</strong>.<br>Was 50/50 before.';
+            } else {
+              qubit.style.background = '#6B3FA0';
+              qubit.style.boxShadow = '0 0 18px rgba(107,63,160,.55)';
+              val.textContent = '|1⟩';
+              label.innerHTML = 'Collapsed! Got <strong>1</strong>.<br>Was 50/50 before.';
+            }
+            btns.innerHTML = '<button onclick="cvReset()" style="font-family:var(--sans);font-size:12px;font-weight:500;padding:6px 14px;border-radius:5px;border:1px solid var(--rule);background:var(--bg);color:var(--ink2);cursor:pointer;" onmouseover="this.style.borderColor=\'var(--ink3)\'" onmouseout="this.style.borderColor=\'var(--rule)\'">Reset superposition</button>';
+          }
+          function cvReset() {
+            var qubit = document.getElementById('cv-qubit');
+            var val = document.getElementById('cv-qubit-val');
+            var label = document.getElementById('cv-qubit-label');
+            var btns = document.getElementById('cv-measure-btns');
+            qubit.style.background = 'conic-gradient(#1A4FDB 0deg 180deg,#6B3FA0 180deg 360deg)';
+            qubit.style.boxShadow = '0 0 18px rgba(26,79,219,.35),0 0 6px rgba(107,63,160,.35)';
+            val.textContent = '⟨ψ⟩';
+            label.innerHTML = 'Before measurement:<br>both at once';
+            btns.innerHTML = '<button onclick="cvMeasure()" style="font-family:var(--sans);font-size:12px;font-weight:500;padding:6px 18px;border-radius:5px;border:1px solid var(--accent);background:rgba(26,79,219,.07);color:var(--accent);cursor:pointer;" onmouseover="this.style.background=\'rgba(26,79,219,.14)\'" onmouseout="this.style.background=\'rgba(26,79,219,.07)\'">Measure it</button>';
+          }
+          </script>
+
+          <!-- CHECK YOUR UNDERSTANDING -->
+          <div class="check-box">
+            <div class="check-label">✓ Check your understanding</div>
+            <div class="check-q">You apply a Hadamard gate to a qubit in |0⟩ and measure it. You get 0. You apply the Hadamard gate again and measure again. What do you expect?</div>
+            <div class="check-options">
+              <div class="check-opt" onclick="checkAnswer(this,'wrong','feedback-2')">
+                <span class="opt-label">A</span>
+                You will get 0 again, because you got 0 the first time
+              </div>
+              <div class="check-opt" onclick="checkAnswer(this,'wrong','feedback-2')">
+                <span class="opt-label">B</span>
+                You will get 1, because the qubit remembers the first measurement
+              </div>
+              <div class="check-opt" onclick="checkAnswer(this,'correct','feedback-2')">
+                <span class="opt-label">C</span>
+                You will get 0 or 1 with equal probability  the first measurement collapsed it, but the second Hadamard creates new superposition
+              </div>
+              <div class="check-opt" onclick="checkAnswer(this,'wrong','feedback-2')">
+                <span class="opt-label">D</span>
+                The qubit cannot be measured twice
+              </div>
+            </div>
+            <div class="check-feedback correct" id="feedback-2">
+              ✓ Correct. After the first measurement, the qubit is in a definite state (|0⟩ in this case). The second Hadamard gate creates a new superposition from that definite state. Each Hadamard + measurement is independent. The qubit has no memory of previous measurements.
+            </div>
+          </div>
+
+          <!-- WHAT'S NEXT -->
+          <div class="whats-next">
+            <div class="wn-label">Next module</div>
+            <div class="wn-title">Module 02  Quantum Gates &amp; Circuits</div>
+            <div class="wn-desc">You now understand what a qubit is and how superposition works. Next, you will learn about quantum gates  the operations that manipulate qubits. You will build circuits that do something useful, and understand how gate errors accumulate with circuit depth.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="lesson-footer">
+        <button class="foot-btn" onclick="showLesson(0, document.querySelectorAll('.sidebar-item')[0])">← Module 00</button>
+        <div class="foot-progress">Module 2 of 11</div>
+        <button class="foot-btn primary" onclick="completeAndNext(1)">Mark complete &amp; continue →</button>
+      </div>
+    </div></div>
+<script>
+function checkAnswer(el, verdict, fbId) {
+  const box = el.closest('.check-options');
+  box.querySelectorAll('.check-opt').forEach(o => {
+    o.style.pointerEvents = 'none';
+    o.classList.remove('correct', 'wrong');
+  });
+  el.classList.add(verdict);
+  const fb = document.getElementById(fbId);
+  if (fb) fb.classList.add('show');
+}
+</script>

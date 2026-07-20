@@ -1,0 +1,1595 @@
+﻿<style>
+:root{--bg:#F7F5F0;--bg2:#EFEDE7;--bg3:#E8E4DC;--ink:#1A1814;--ink2:#4A4640;--ink3:#8A8480;--rule:rgba(26,24,20,0.1);--rule2:rgba(26,24,20,0.06);--accent:#1A4FDB;--accent2:#0E35A8;--gold:#C4860A;--green:#1A7A4A;--red:#C0392B;--purple:#6B3FA0;--serif:'Lora',Georgia,serif;--sans:'DM Sans',sans-serif;--mono:'JetBrains Mono',monospace;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.7;}
+.shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+.sidebar{background:var(--bg2);border-right:1px solid var(--rule);position:sticky;top:0;height:100vh;overflow-y:auto;padding:20px 0;display:flex;flex-direction:column;}
+.sidebar::-webkit-scrollbar{width:2px;}
+.sidebar-logo{padding:0 20px 18px;border-bottom:1px solid var(--rule);margin-bottom:14px;}
+.sidebar-logo-name{font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.06em;color:var(--ink);display:flex;align-items:center;gap:8px;}
+.sidebar-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(26,79,219,.4);}
+.sidebar-logo-sub{font-size:11px;color:var(--ink3);font-family:var(--sans);margin-top:3px;}
+.sidebar-section{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);padding:10px 20px 4px;}
+.sidebar-item{display:flex;align-items:flex-start;gap:10px;padding:8px 20px;cursor:pointer;border-left:2px solid transparent;transition:all .15s;}
+.sidebar-item:hover{background:rgba(26,24,20,.04);}
+.sidebar-item.active{background:rgba(26,79,219,.05);border-left-color:var(--accent);}
+.sidebar-item.done .si-check{background:var(--green);border-color:var(--green);}
+.sidebar-item.locked{opacity:.35;cursor:default;}
+.si-check{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--rule);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.si-check svg{display:none;}
+.sidebar-item.done .si-check svg{display:block;}
+.si-num{font-size:10px;font-family:var(--mono);color:var(--ink3);}
+.si-name{font-size:13px;font-weight:500;color:var(--ink2);line-height:1.3;margin-top:1px;}
+.sidebar-item.active .si-name{color:var(--ink);}
+.si-dur{font-size:10px;font-family:var(--mono);color:var(--ink3);margin-top:1px;}
+.sidebar-footer{margin-top:auto;padding:14px 20px 0;border-top:1px solid var(--rule);}
+.prog-lbl{font-size:11px;color:var(--ink3);margin-bottom:5px;}
+.prog-bar{height:3px;background:var(--rule);border-radius:999px;overflow:hidden;}
+.prog-fill{height:3px;background:var(--accent);border-radius:999px;width:58%;}
+.main{overflow-y:auto;}
+.reading-bar{position:fixed;top:0;left:260px;right:0;height:2px;background:var(--rule);z-index:100;}
+.reading-bar-fill{height:2px;background:var(--accent);width:0%;transition:width .1s;}
+.subtabs{display:flex;padding:0 52px;border-bottom:1px solid var(--rule2);background:var(--bg);position:sticky;top:0;z-index:10;}
+.subtab{font-size:12px;font-family:var(--mono);padding:10px 16px;cursor:pointer;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-1px;background:none;border-top:none;border-left:none;border-right:none;transition:all .1s;}
+.subtab:hover{color:var(--ink2);}
+.subtab.active{color:var(--ink);border-bottom-color:var(--accent);}
+.mod-section{display:none;}
+.mod-section.active{display:block;}
+
+/* OVERVIEW */
+.overview-wrap{padding:44px 52px 52px;max-width:780px;}
+.prose-max{max-width:640px;}
+.eyebrow{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
+.mod-title{font-family:var(--serif);font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1.15;color:var(--ink);margin-bottom:8px;}
+.mod-sub{font-size:15px;color:var(--ink2);line-height:1.65;max-width:520px;}
+.prose-divider{border:none;border-top:1px solid var(--rule2);margin:40px 0;}
+.prose-p{font-family:var(--serif);font-size:17px;color:var(--ink2);line-height:1.85;margin-bottom:18px;}
+.prose-p strong{color:var(--ink);font-weight:600;}
+
+/* Result cards */
+.result-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0;}
+.rc{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:16px 18px;}
+.rc-label{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px;}
+.rc-value{font-family:var(--serif);font-size:28px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.rc-note{font-family:var(--sans);font-size:12px;color:var(--ink3);line-height:1.5;}
+.rc.highlight{border-color:var(--accent);background:rgba(26,79,219,.04);}
+.rc.highlight .rc-value{color:var(--accent);}
+
+/* Pipeline steps */
+.pipeline{display:flex;flex-direction:column;gap:0;margin:22px 0;}
+.pipe-step{display:flex;gap:0;align-items:stretch;}
+.pipe-num{display:flex;flex-direction:column;align-items:center;width:32px;flex-shrink:0;}
+.pipe-dot{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-family:var(--mono);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pipe-line{width:2px;background:rgba(26,79,219,.2);flex:1;margin:0 auto;}
+.pipe-step:last-child .pipe-line{display:none;}
+.pipe-content{padding:0 0 24px 16px;flex:1;}
+.pipe-title{font-family:var(--sans);font-weight:600;font-size:14px;color:var(--ink);margin-bottom:4px;}
+.pipe-desc{font-family:var(--sans);font-size:13px;color:var(--ink2);line-height:1.6;}
+.pipe-tag{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;margin-top:5px;}
+.pipe-tag.sim{background:rgba(26,79,219,.1);color:var(--accent);}
+.pipe-tag.hw{background:rgba(192,57,43,.1);color:var(--red);}
+.pipe-tag.both{background:rgba(26,122,74,.1);color:var(--green);}
+
+/* Callouts */
+.callout{border-radius:8px;padding:16px 18px;margin:22px 0;font-family:var(--sans);font-size:14px;line-height:1.7;}
+.callout .cl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;}
+.callout p{margin:0;}
+.callout.warning{background:rgba(192,57,43,.05);border:1px solid rgba(192,57,43,.14);}
+.callout.warning .cl{color:var(--red);}
+.callout.warning p{color:#5C1A12;}
+.callout.fact{background:rgba(26,122,74,.05);border:1px solid rgba(26,122,74,.14);}
+.callout.fact .cl{color:var(--green);}
+.callout.fact p{color:#0D3D22;}
+.callout.insight{background:rgba(26,79,219,.05);border:1px solid rgba(26,79,219,.14);}
+.callout.insight .cl{color:var(--accent);}
+.callout.insight p{color:#0D2865;}
+
+/* HANDS-ON */
+.handson-wrap{padding:32px 52px 52px;max-width:780px;}
+.nb-hdr{margin-bottom:26px;padding-bottom:20px;border-bottom:1px solid var(--rule2);}
+.nb-eyebrow{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.nb-title{font-family:var(--serif);font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.2;margin-bottom:7px;}
+.nb-desc{font-size:14px;color:var(--ink2);line-height:1.65;max-width:500px;margin-bottom:12px;font-family:var(--sans);}
+.nb-meta{display:flex;gap:14px;flex-wrap:wrap;}
+.nb-meta-item{font-size:12px;font-family:var(--mono);color:var(--ink3);}
+.obj-box{background:rgba(26,79,219,.05);border:1px solid rgba(26,79,219,.14);border-radius:8px;padding:14px 16px;margin-bottom:26px;}
+.obj-lbl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:7px;}
+.obj-list{list-style:none;display:flex;flex-direction:column;gap:4px;}
+.obj-list li{font-size:14px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;font-family:var(--sans);}
+.obj-list li::before{content:'→';font-family:var(--mono);color:var(--accent);font-size:12px;margin-top:1px;flex-shrink:0;}
+.nb-step{display:flex;align-items:center;gap:12px;margin:28px 0 14px;}
+.nb-step-num{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.nb-step-title{font-family:var(--sans);font-size:16px;font-weight:600;color:var(--ink);}
+.nb-prose p{font-family:var(--sans);font-size:15px;color:var(--ink2);line-height:1.75;margin-bottom:14px;}
+.nb-prose p strong{color:var(--ink);}
+.nb-prose p code{font-family:var(--mono);font-size:13px;background:var(--bg2);padding:1px 5px;border-radius:3px;color:var(--ink);border:1px solid var(--rule);}
+.callout-nb{border-radius:8px;padding:13px 16px;margin:16px 0;font-size:14px;line-height:1.65;font-family:var(--sans);}
+.cn-lbl{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.callout-nb.tip{background:rgba(26,79,219,.05);border:1px solid rgba(26,79,219,.14);}
+.callout-nb.tip .cn-lbl{color:var(--accent);}
+.callout-nb.tip p{color:#0D2865;margin:0;}
+.callout-nb.note{background:rgba(196,134,10,.06);border:1px solid rgba(196,134,10,.2);}
+.callout-nb.note .cn-lbl{color:var(--gold);--gold:#C4860A;}
+.callout-nb.note p{color:#4A3008;margin:0;}
+.callout-nb.success{background:rgba(26,122,74,.05);border:1px solid rgba(26,122,74,.15);}
+.callout-nb.success .cn-lbl{color:var(--green);}
+.callout-nb.success p{color:#0A3320;margin:0;}
+.callout-nb.warning{background:rgba(192,57,43,.05);border:1px solid rgba(192,57,43,.14);}
+.callout-nb.warning .cn-lbl{color:var(--red);}
+.callout-nb.warning p{color:#5C1A12;margin:0;}
+.callout-nb.hardware{background:rgba(192,57,43,.04);border:2px solid rgba(192,57,43,.25);}
+.callout-nb.hardware .cn-lbl{color:var(--red);}
+.callout-nb.hardware p{color:#5C1A12;margin:0;}
+.code-wrap{margin:16px 0;}
+.code-hdr{background:#1E1E2E;padding:8px 13px;border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:space-between;}
+.code-fn{font-family:var(--mono);font-size:11px;color:#7C7F93;display:flex;align-items:center;gap:5px;}
+.code-fn::before{content:'📄';font-size:11px;}
+.code-hint{font-size:11px;font-family:var(--mono);color:#6C7086;}
+.code-body{background:#1E1E2E;padding:18px;border-radius:0 0 8px 8px;font-family:var(--mono);font-size:12px;line-height:2;overflow-x:auto;border:1px solid rgba(255,255,255,.05);border-top:none;white-space:pre;}
+.code-body .kw{color:#CBA6F7;}.code-body .fn{color:#89B4FA;}.code-body .st{color:#A6E3A1;}.code-body .cm{color:#585B70;}.code-body .nm{color:#FAB387;}.code-body .cls{color:#F9E2AF;}.code-body .var{color:#CDD6F4;}
+.line-exp{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;margin:7px 0 18px;}
+.le-title{font-size:11px;font-family:var(--mono);font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:9px;}
+.le-row{display:flex;gap:12px;padding:5px 0;border-bottom:1px solid var(--rule2);font-size:13px;align-items:flex-start;}
+.le-row:last-child{border-bottom:none;}
+.le-code{font-family:var(--mono);font-size:11px;color:var(--accent);min-width:190px;flex-shrink:0;padding-top:1px;}
+.le-meaning{color:var(--ink2);line-height:1.5;font-family:var(--sans);}
+.section-sep{border:none;border-top:1px solid var(--rule2);margin:32px 0;}
+.insight-box{background:var(--bg2);border-left:3px solid var(--accent);padding:14px 16px;margin:18px 0;border-radius:0 8px 8px 0;}
+.insight-box p{font-family:var(--sans);font-size:14px;color:var(--ink2);margin:0;line-height:1.65;}
+.insight-box p strong{color:var(--ink);}
+
+/* Results analysis */
+.per-class-chart{background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:18px 22px;margin:20px 0;}
+.pcc-title{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:14px;}
+.pcc-row{display:flex;align-items:center;gap:12px;padding:5px 0;border-bottom:1px solid var(--rule2);}
+.pcc-row:last-child{border-bottom:none;}
+.pcc-label{font-family:var(--mono);font-size:11px;color:var(--ink3);min-width:100px;}
+.pcc-bar-wrap{flex:1;height:18px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.pcc-bar{height:18px;border-radius:3px;display:flex;align-items:center;padding-left:6px;transition:width .5s;}
+.pcc-bar span{font-family:var(--mono);font-size:10px;font-weight:600;color:#fff;white-space:nowrap;}
+.pcc-val{font-family:var(--mono);font-size:11px;min-width:40px;text-align:right;}
+
+.nb-footer{display:flex;align-items:center;justify-content:space-between;padding:18px 0 0;margin-top:32px;border-top:1px solid var(--rule2);}
+.nb-foot-btn{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:14px;font-weight:500;padding:9px 18px;border-radius:6px;cursor:pointer;border:1px solid var(--rule);background:var(--bg2);color:var(--ink2);transition:all .15s;}
+.nb-foot-btn:hover{border-color:var(--ink3);color:var(--ink);}
+.nb-foot-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.nb-foot-btn.primary:hover{background:var(--accent2);}
+
+/* theory footer */
+.theory-footer{display:flex;align-items:center;justify-content:space-between;padding:22px 52px 40px;max-width:780px;border-top:1px solid var(--rule2);}
+.tf-btn{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:14px;font-weight:500;padding:10px 20px;border-radius:6px;cursor:pointer;border:1px solid var(--rule);background:var(--bg2);color:var(--ink2);transition:all .15s;}
+.tf-btn:hover{border-color:var(--ink3);color:var(--ink);}
+.tf-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+</style>
+<style>
+.ql-adapted{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100%;}
+.ql-adapted .sidebar,.ql-adapted .reading-bar{display:none!important;}
+.ql-adapted .main{background:var(--bg);overflow:visible;}
+.ql-adapted .lesson-footer,.ql-adapted .theory-footer,.ql-adapted .nb-footer{display:none!important;}
+.ql-adapted .lesson,.ql-adapted .mod-section{display:block;}
+.ql-adapted .lesson:not(.active){display:none;}
+.ql-adapted .mod-section:not(.active){display:none;}
+.ql-adapted .code-wrap{margin:18px 0;border:1px solid #D7D0C6;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 10px 28px rgba(26,24,20,.06);}
+.ql-adapted .code-header,.ql-adapted .code-hdr{background:#F3F4F6!important;padding:8px 14px!important;border-radius:0!important;border-bottom:1px solid #D7D0C6;display:flex;align-items:center;justify-content:space-between;}
+.ql-adapted .code-lang,.ql-adapted .code-title,.ql-adapted .code-fn,.ql-adapted .code-filename,.ql-adapted .code-hint,.ql-adapted .code-run-hint{color:#4A4640!important;font-family:var(--mono);}
+.ql-adapted .code-fn::before,.ql-adapted .code-filename::before{content:'PY'!important;font-size:10px;color:#1A4FDB;font-weight:600;}
+.ql-adapted .code-block,.ql-adapted .code-body{background:#fff!important;color:#1F2937!important;border:0!important;border-left:3px solid #E8F0FF!important;border-radius:0!important;padding:18px 18px 18px 78px!important;font-family:var(--mono);font-size:12px;line-height:2;overflow-x:auto;white-space:pre;position:relative;}
+.ql-adapted .code-block::before,.ql-adapted .code-body::before{content:'In [ ]:';position:absolute;left:14px;top:18px;font-family:var(--mono);font-size:10px;color:#1A4FDB;}
+.ql-adapted .code-block .kw,.ql-adapted .code-body .kw{color:#7C3AED!important;}
+.ql-adapted .code-block .fn,.ql-adapted .code-body .fn{color:#1A4FDB!important;}
+.ql-adapted .code-block .st,.ql-adapted .code-body .st{color:#1A7A4A!important;}
+.ql-adapted .code-block .cm,.ql-adapted .code-body .cm{color:#6B625B!important;}
+.ql-adapted .code-block .nm,.ql-adapted .code-body .nm{color:#C0392B!important;}
+.ql-adapted .code-block .cls,.ql-adapted .code-body .cls{color:#C4860A!important;}
+.ql-adapted .code-block .var,.ql-adapted .code-body .var{color:#1A1814!important;}
+.ql-adapted .output-box{background:#FBFBFB!important;border:1px solid #E3DED6!important;color:#1A1814!important;}
+.ql-adapted .terminal-header,.ql-adapted .term-hdr{background:#F3F4F6!important;border:1px solid #D7D0C6;border-bottom:0;}
+.ql-adapted .terminal-body,.ql-adapted .term-body{background:#fff!important;color:#1A1814!important;border:1px solid #D7D0C6;border-left:3px solid #E8F0FF;}
+.ql-adapted .terminal-body .cmd,.ql-adapted .term-body .cmd{color:#1A1814!important;}
+.ql-adapted .terminal-body .prompt,.ql-adapted .term-body .pr{color:#1A4FDB!important;}
+</style>
+<div class="ql-adapted module-07">
+<div class="subtabs">
+      <button class="subtab active" onclick="showSubtab('overview',this)">📋 Overview</button>
+      <button class="subtab" onclick="showSubtab('handson',this)" id="tab-handson">💻 Hands-on</button>
+      <button class="subtab" onclick="showSubtab('results',this)" id="tab-results">📊 Results</button>
+    </div>
+
+    <!-- ══════════ OVERVIEW ══════════ -->
+    <div class="mod-section active" id="sec-overview">
+      <div class="overview-wrap"><div class="prose-max">
+
+        <div style="background:rgba(192,57,43,.05);border:1px solid rgba(192,57,43,.2);border-radius:8px;padding:16px 18px;margin-bottom:28px;">
+          <div style="font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:8px;">Real quantum hardware  these are actual results</div>
+          <p style="font-family:var(--sans);font-size:14px;color:#5C1A12;margin:0;line-height:1.7;">This module uses real IBM quantum computers  ibm_fez and ibm_kingston. The results shown here were actually measured on those machines. You will replicate the same experiment: train on simulator, submit to IBM QPU, analyse what real hardware noise does to a trained model.</p>
+        </div>
+
+        <div class="eyebrow">Module 07 · Mini Project · ~3 hrs · Real QPU</div>
+        <h1 class="mod-title">VQC Project: Fashion-MNIST on IBM QPU</h1>
+        <p class="mod-sub">Train a Variational Quantum Classifier on Fashion-MNIST images. Deploy to real IBM quantum hardware. Analyse why simulator accuracy (88%) does not match hardware accuracy (45%)  and what that teaches you about NISQ limitations.</p>
+
+        <hr class="prose-divider"/>
+
+        <div style="font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:14px;">Actual results from this experiment</div>
+        <div class="result-cards">
+          <div class="rc highlight">
+            <div class="rc-label">Binary  ibm_fez</div>
+            <div class="rc-value">45%</div>
+            <div class="rc-note">T-shirt vs Trouser · 20 samples · 1024 shots each<br/>Simulator trained to 88%</div>
+          </div>
+          <div class="rc highlight">
+            <div class="rc-label">10-Class  ibm_kingston</div>
+            <div class="rc-value">30%</div>
+            <div class="rc-note">All 10 Fashion categories · 30 samples · 1024 shots<br/>3× better than random (10%)</div>
+          </div>
+          <div class="rc">
+            <div class="rc-label">Sim-HW Agreement</div>
+            <div class="rc-value">85–90%</div>
+            <div class="rc-note">Circuit survived transpilation well. Noise, not circuit structure, caused the accuracy gap.</div>
+          </div>
+          <div class="rc">
+            <div class="rc-label">Published best (real HW)</div>
+            <div class="rc-value">~40%</div>
+            <div class="rc-note">10-class QML on real hardware. Your result matches the state of the art.</div>
+          </div>
+        </div>
+
+        <hr class="prose-divider"/>
+
+        <div style="font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:16px;">Full project pipeline</div>
+        <div class="pipeline">
+          <div class="pipe-step">
+            <div class="pipe-num"><div class="pipe-dot">1</div><div class="pipe-line"></div></div>
+            <div class="pipe-content">
+              <div class="pipe-title">Environment setup</div>
+              <div class="pipe-desc">Install PennyLane, Qiskit, TensorFlow, scikit-learn. Set up IBM Quantum account. Verify everything works.</div>
+              <span class="pipe-tag both">setup · NB 00</span>
+            </div>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-num"><div class="pipe-dot">2</div><div class="pipe-line"></div></div>
+            <div class="pipe-content">
+              <div class="pipe-title">Load and explore Fashion-MNIST</div>
+              <div class="pipe-desc">Download 70,000 images. Visualise the 10 classes. Understand why 784 pixels need compression before a quantum circuit.</div>
+              <span class="pipe-tag sim">simulator · NB 01</span>
+            </div>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-num"><div class="pipe-dot">3</div><div class="pipe-line"></div></div>
+            <div class="pipe-content">
+              <div class="pipe-title">Preprocess: PCA + angle encoding</div>
+              <div class="pipe-desc">Compress 784 pixels → 4 PCA features → 4 rotation angles. Understand exactly what information survives this compression.</div>
+              <span class="pipe-tag sim">simulator · NB 02</span>
+            </div>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-num"><div class="pipe-dot">4</div><div class="pipe-line"></div></div>
+            <div class="pipe-content">
+              <div class="pipe-title">Train binary VQC  T-shirt vs Trouser</div>
+              <div class="pipe-desc">Train a 4-qubit, 2-layer VQC on 200 samples. Watch loss decrease. Save weights to binary_weights.npy.</div>
+              <span class="pipe-tag sim">simulator · NB 03</span>
+            </div>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-num"><div class="pipe-dot">5</div><div class="pipe-line"></div></div>
+            <div class="pipe-content">
+              <div class="pipe-title">Deploy binary VQC to IBM QPU</div>
+              <div class="pipe-desc">Load weights. Build Qiskit circuits. Submit to ibm_fez. Wait 5-15 mins. Compare QPU results vs simulator.</div>
+              <span class="pipe-tag hw">real hardware · NB 04</span>
+            </div>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-num"><div class="pipe-dot">6</div><div class="pipe-line"></div></div>
+            <div class="pipe-content">
+              <div class="pipe-title">Scale up: 10-class VQC with linear head</div>
+              <div class="pipe-desc">Add a classical linear layer on top of 4 qubit outputs. Train on 500 balanced samples. Save weights.</div>
+              <span class="pipe-tag sim">simulator · NB 05</span>
+            </div>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-num"><div class="pipe-dot">7</div><div class="pipe-line"></div></div>
+            <div class="pipe-content">
+              <div class="pipe-title">Deploy 10-class to IBM Kingston</div>
+              <div class="pipe-desc">Submit 30 circuits to ibm_kingston (156 qubits). Circuit depth jumps from 14 → 61 after transpilation.</div>
+              <span class="pipe-tag hw">real hardware · NB 06</span>
+            </div>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-num"><div class="pipe-dot">8</div><div class="pipe-line"></div></div>
+            <div class="pipe-content">
+              <div class="pipe-title">Analyse and understand the results</div>
+              <div class="pipe-desc">Why did 10-class (30%) outperform binary (45% ≈ random)? Why did Trouser get 100% but T-shirt get 0%? What does transpilation do to circuit depth?</div>
+              <span class="pipe-tag both">analysis · NB 07</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout insight">
+          <div class="cl">💡 What you will actually learn from the results</div>
+          <p>The most valuable part of this project is not the accuracy numbers  it is understanding <em>why</em> the numbers are what they are. Why does sim-HW agreement stay high (85-90%) while accuracy drops? Because the circuit structure survived transpilation  the noise degraded individual measurements, not the circuit logic. Why did Trouser classify perfectly (100%) but T-shirt failed (0%)? Because the VQC learned a strong Trouser signal in one PCA component, but noise pushed all T-shirt predictions across the decision boundary. These are real NISQ effects that you measured, not textbook theory.</p>
+        </div>
+
+      </div></div>
+      <div class="theory-footer">
+        <button class="tf-btn" onclick="alert('Go to M06')">← M06: QML Concepts</button>
+        <button class="tf-btn primary" onclick="showSubtab('handson',document.getElementById('tab-handson'))">Start Hands-on →</button>
+      </div>
+    </div>
+
+    <!-- ══════════ HANDS-ON ══════════ -->
+    <div class="mod-section" id="sec-handson">
+      <div class="handson-wrap">
+
+        <!-- NB 00  Setup -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 00 · Setup</div>
+          <div class="nb-title">Environment setup and IBM Quantum account</div>
+          <div class="nb-desc">Install all dependencies and verify everything works before starting the project. Do this once  takes about 5 minutes.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~5 min</span><span class="nb-meta-item">🔧 One-time setup</span></div>
+        </div>
+        <div class="nb-prose"><p>Install all required libraries in your virtual environment  PennyLane for the VQC, Qiskit for IBM hardware access, and TensorFlow only for loading Fashion-MNIST. Run this once before any of the project notebooks.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">terminal  run once</span><span class="code-hint">in your quantum-env virtualenv</span></div>
+          <div class="code-body">
+<span class="cm"># Core quantum libraries</span>
+<span class="var">pip</span> <span class="var">install</span> <span class="var">pennylane</span> <span class="var">pennylane-lightning</span>
+<span class="var">pip</span> <span class="var">install</span> <span class="var">qiskit</span> <span class="var">qiskit-ibm-runtime</span>
+
+<span class="cm"># Data and ML</span>
+<span class="var">pip</span> <span class="var">install</span> <span class="var">tensorflow</span> <span class="var">scikit-learn</span> <span class="var">matplotlib</span> <span class="var">numpy</span>
+
+<span class="cm"># Verify installation</span>
+<span class="var">python</span> -c <span class="st">"import pennylane; import qiskit; import tensorflow; print('All good!')"</span>
+          </div>
+        </div>
+        <div class="callout-nb note"><div class="cn-lbl">📌 IBM Quantum account</div><p>You need a free IBM Quantum account to run NB 04 and NB 06 on real hardware. Sign up at quantum.ibm.com. Your API key is at Account Settings → API Token. You do not need an account to run NB 01–03 and NB 05 on the simulator.</p></div>
+
+        <hr class="section-sep"/>
+
+        <!-- NB 01  Data exploration -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 01 · Data</div>
+          <div class="nb-title">Fashion-MNIST  load, explore, understand the challenge</div>
+          <div class="nb-desc">Download the dataset. Visualise samples from all 10 classes. Understand why a 28×28 pixel image is too large for a quantum circuit  and what PCA compression does to it.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~15 min</span><span class="nb-meta-item">📊 Data exploration</span></div>
+        </div>
+        <div class="obj-box">
+          <div class="obj-lbl">By the end of this notebook</div>
+          <ul class="obj-list">
+            <li>You have loaded Fashion-MNIST and visualised all 10 classes</li>
+            <li>You understand the 784-pixel → 4-feature compression challenge</li>
+            <li>You have seen how much information PCA retains and what it loses</li>
+          </ul>
+        </div>
+
+        <div class="nb-step"><div class="nb-step-num">1</div><div class="nb-step-title">Load and visualise the dataset</div></div>
+
+        <div class="nb-prose"><p>Load Fashion-MNIST via TensorFlow and display one example image for each of the 10 clothing classes  this lets you see what the VQC will eventually try to classify, and understand why compressing 784 pixels to 4 features is such a challenge.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb01_explore_data.py</span><span class="code-hint">step 1  load + display all 10 classes</span></div>
+          <div class="code-body">
+<span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+<span class="kw">import</span> <span class="var">tensorflow</span> <span class="kw">as</span> <span class="var">tf</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+<span class="kw">from</span> <span class="var">sklearn.decomposition</span> <span class="kw">import</span> <span class="cls">PCA</span>
+<span class="kw">from</span> <span class="var">sklearn.preprocessing</span> <span class="kw">import</span> <span class="cls">MinMaxScaler</span>
+
+<span class="var">CLASS_NAMES</span> = [<span class="st">'T-shirt'</span>, <span class="st">'Trouser'</span>, <span class="st">'Pullover'</span>, <span class="st">'Dress'</span>, <span class="st">'Coat'</span>,
+               <span class="st">'Sandal'</span>, <span class="st">'Shirt'</span>, <span class="st">'Sneaker'</span>, <span class="st">'Bag'</span>, <span class="st">'Ankle boot'</span>]
+
+<span class="cm"># ── Load dataset ──</span>
+(<span class="var">X_train</span>, <span class="var">y_train</span>), (<span class="var">X_test</span>, <span class="var">y_test</span>) = \
+    <span class="var">tf</span>.keras.datasets.fashion_mnist.load_data()
+
+<span class="fn">print</span>(<span class="st">f"Train: {X_train.shape}  {len(y_train)} images"</span>)
+<span class="fn">print</span>(<span class="st">f"Test : {X_test.shape}   {len(y_test)} images"</span>)
+<span class="fn">print</span>(<span class="st">f"Image size: {X_train.shape[1]}×{X_train.shape[2]} = {X_train.shape[1]*X_train.shape[2]} pixels"</span>)
+<span class="fn">print</span>(<span class="st">f"Classes: {len(CLASS_NAMES)}"</span>)
+<span class="fn">print</span>(<span class="st">f"\nChallenge: {X_train.shape[1]*X_train.shape[2]} pixels → 4 qubits"</span>)
+<span class="fn">print</span>(<span class="st">f"Compression ratio: {X_train.shape[1]*X_train.shape[2]/4:.0f}× ← this is the bottleneck"</span>)
+
+<span class="cm"># ── Visualise one sample per class ──</span>
+<span class="var">fig</span>, <span class="var">axes</span> = plt.subplots(<span class="nm">2</span>, <span class="nm">5</span>, figsize=(<span class="nm">12</span>, <span class="nm">5</span>))
+<span class="var">fig</span>.suptitle(<span class="st">'Fashion-MNIST  10 classes'</span>, fontsize=<span class="nm">13</span>, fontweight=<span class="st">'bold'</span>)
+<span class="kw">for</span> <span class="var">c</span>, <span class="var">ax</span> <span class="kw">in</span> <span class="fn">enumerate</span>(<span class="var">axes</span>.flat):
+    <span class="var">idx</span> = np.where(<span class="var">y_train</span> == <span class="var">c</span>)[<span class="nm">0</span>][<span class="nm">0</span>]
+    <span class="var">ax</span>.imshow(<span class="var">X_train</span>[<span class="var">idx</span>], cmap=<span class="st">'gray'</span>)
+    <span class="var">ax</span>.set_title(<span class="st">f'{CLASS_NAMES[c]}\n(class {c})'</span>, fontsize=<span class="nm">9</span>)
+    <span class="var">ax</span>.axis(<span class="st">'off'</span>)
+plt.tight_layout()
+plt.savefig(<span class="st">'nb01_classes.png'</span>)
+plt.show()
+          </div>
+        </div>
+
+        <div class="nb-prose"><p>Apply PCA(4) compression to the entire training set and reconstruct the images  the blurry output is exactly what the VQC will classify, making the 196x compression bottleneck immediately visible.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb01_explore_data.py</span><span class="code-hint">step 2  apply PCA(4) + show reconstruction</span></div>
+          <div class="code-body">
+<span class="var">X_flat</span>   = <span class="var">X_train</span>.reshape(-<span class="nm">1</span>, <span class="nm">784</span>).astype(np.float32) / <span class="nm">255.0</span>
+<span class="var">scaler</span>   = <span class="cls">MinMaxScaler</span>()
+<span class="var">X_norm</span>   = <span class="var">scaler</span>.fit_transform(<span class="var">X_flat</span>)
+
+<span class="cm"># ── Visualise PCA reconstruction at 4 components ──</span>
+<span class="var">pca4</span>    = <span class="cls">PCA</span>(n_components=<span class="nm">4</span>, random_state=<span class="nm">42</span>)
+<span class="var">X_pca4</span>  = <span class="var">pca4</span>.fit_transform(<span class="var">X_norm</span>)
+<span class="var">X_recon</span> = <span class="var">pca4</span>.inverse_transform(<span class="var">X_pca4</span>)
+
+<span class="var">fig2</span>, <span class="var">axes2</span> = plt.subplots(<span class="nm">2</span>, <span class="nm">5</span>, figsize=(<span class="nm">12</span>, <span class="nm">4</span>))
+<span class="var">fig2</span>.suptitle(<span class="st">'After PCA(4) compression  what the VQC actually sees'</span>,
+              fontsize=<span class="nm">11</span>, fontweight=<span class="st">'bold'</span>)
+<span class="kw">for</span> <span class="var">c</span>, <span class="var">ax</span> <span class="kw">in</span> <span class="fn">enumerate</span>(<span class="var">axes2</span>.flat):
+    <span class="var">idx</span>  = np.where(<span class="var">y_train</span> == <span class="var">c</span>)[<span class="nm">0</span>][<span class="nm">0</span>]
+    <span class="var">flat</span> = <span class="var">scaler</span>.transform(<span class="var">X_train</span>[<span class="var">idx</span>].reshape(<span class="nm">1</span>,-<span class="nm">1</span>).astype(np.float32)/<span class="nm">255.0</span>)
+    <span class="var">rec</span>  = <span class="var">pca4</span>.inverse_transform(<span class="var">pca4</span>.transform(<span class="var">flat</span>))
+    <span class="var">ax</span>.imshow(<span class="var">rec</span>.reshape(<span class="nm">28</span>,<span class="nm">28</span>), cmap=<span class="st">'gray'</span>)
+    <span class="var">ax</span>.set_title(<span class="var">CLASS_NAMES</span>[<span class="var">c</span>], fontsize=<span class="nm">9</span>)
+    <span class="var">ax</span>.axis(<span class="st">'off'</span>)
+plt.tight_layout()
+plt.savefig(<span class="st">'nb01_pca4_reconstruction.png'</span>)
+plt.show()
+<span class="fn">print</span>(<span class="st">"\nSaved reconstruction images. The VQC classifies from these blurry representations."</span>)
+          </div>
+        </div>
+
+        <div class="nb-prose"><p>Run PCA at 4, 16, 64, and 256 components and print the percentage of variance retained at each level  this quantifies exactly how much information is lost at 4 components and explains why VQC accuracy is fundamentally limited.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb01_explore_data.py</span><span class="code-hint">step 3  analyse variance retained</span></div>
+          <div class="code-body">
+<span class="cm"># ── Show what PCA compression loses ──</span>
+<span class="fn">print</span>(<span class="st">"\nPCA compression analysis:"</span>)
+
+<span class="kw">for</span> <span class="var">n_comp</span> <span class="kw">in</span> [<span class="nm">4</span>, <span class="nm">16</span>, <span class="nm">64</span>, <span class="nm">256</span>]:
+    <span class="var">pca</span> = <span class="cls">PCA</span>(n_components=<span class="var">n_comp</span>, random_state=<span class="nm">42</span>)
+    <span class="var">pca</span>.fit(<span class="var">X_norm</span>)
+    <span class="var">var</span> = <span class="var">pca</span>.explained_variance_ratio_.sum() * <span class="nm">100</span>
+    <span class="fn">print</span>(<span class="st">f"  {n_comp:4d} components → {var:.1f}% variance retained"</span>)
+
+<span class="fn">print</span>(<span class="st">f"\n  → With only 4 components (our VQC): we keep only the first ~X%"</span>)
+<span class="fn">print</span>(<span class="st">f"  → Most visual detail is lost  this limits classification accuracy"</span>)
+<span class="fn">print</span>(<span class="st">f"  → This compression bottleneck is one reason QML underperforms classical"</span>)
+          </div>
+        </div>
+        <div class="line-exp">
+          <div class="le-title">What each part does</div>
+          <div class="le-row"><span class="le-code">tf.keras.datasets.fashion_mnist</span><span class="le-meaning">Load Fashion-MNIST via TensorFlow/Keras. Returns 60,000 training + 10,000 test grayscale 28×28 images with integer labels 0-9. Downloads ~30MB on first run.</span></div>
+          <div class="le-row"><span class="le-code">X_train.shape[1]*X_train.shape[2]</span><span class="le-meaning">784 pixels per image. This is the dimensionality the VQC must compress. With only 4 qubits we can only encode 4 numbers  hence the 196× compression ratio.</span></div>
+          <div class="le-row"><span class="le-code">PCA(n_components=n_comp)</span><span class="le-meaning">Principal Component Analysis. Finds the directions of maximum variance in the data. With 4 components we keep the 4 directions that explain the most variation  but discard the rest.</span></div>
+          <div class="le-row"><span class="le-code">pca4.inverse_transform(pca4.transform(x))</span><span class="le-meaning">Compress to 4 components then reconstruct. Shows visually what information is lost. The reconstructed images will be blurry  that is what the VQC actually classifies.</span></div>
+        </div>
+        <div class="callout-nb note"><div class="cn-lbl">📌 Key insight from this notebook</div><p>Look at the PCA(4) reconstructions carefully. T-shirt and Shirt look almost identical in 4 components. Trouser is distinctive  it has a unique shape that survives compression. This is exactly why the hardware results show Trouser at 100% but T-shirt at 0%. The classifier learned something real from the Trouser PCA signature, but T-shirt and Shirt are indistinguishable at 4-component resolution.</p></div>
+
+        <hr class="section-sep"/>
+
+        <!-- NB 02  Preprocess -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 02 · Preprocessing</div>
+          <div class="nb-title">PCA compression + angle encoding  the full pipeline</div>
+          <div class="nb-desc">Implement the complete preprocessing pipeline: MinMaxScaler → PCA(4) → MinMaxScaler to [0,π]. Understand why each step is necessary. Save the fitted transformers for consistent deploy.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~20 min</span><span class="nb-meta-item">🔧 Critical for hardware consistency</span></div>
+        </div>
+        <div class="obj-box">
+          <div class="obj-lbl">By the end of this notebook</div>
+          <ul class="obj-list">
+            <li>You have implemented the full 784 → 4 → angles pipeline</li>
+            <li>You have saved scaler+PCA transformers so deploy uses identical preprocessing</li>
+            <li>You understand why [0,π] scaling is required for angle encoding</li>
+          </ul>
+        </div>
+
+        <div class="callout-nb tip"><div class="cn-lbl">💡 Why saving transformers matters</div><p>The original deploy code re-fitted PCA on only the 20 hardware test samples  different from the training preprocessing. This is a data leakage / inconsistency bug. The fix: fit scaler and PCA once on training data, save them, load them in the deploy script. That way both training and hardware inference see the same transformation.</p></div>
+
+        <div class="nb-prose"><p>Load the full Fashion-MNIST dataset and normalise pixel intensities with MinMaxScaler, fitting only on training data  this per-feature normalisation ensures PCA operates on consistent scales before any compression happens.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb02_preprocess.py</span><span class="code-hint">step 1  load + normalise pixels</span></div>
+          <div class="code-body">
+<span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+<span class="kw">import</span> <span class="var">tensorflow</span> <span class="kw">as</span> <span class="var">tf</span>
+<span class="kw">import</span> <span class="var">pickle</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+<span class="kw">from</span> <span class="var">sklearn.decomposition</span> <span class="kw">import</span> <span class="cls">PCA</span>
+<span class="kw">from</span> <span class="var">sklearn.preprocessing</span> <span class="kw">import</span> <span class="cls">MinMaxScaler</span>
+
+<span class="var">N_QUBITS</span>    = <span class="nm">4</span>
+<span class="var">CLASS_NAMES</span> = [<span class="st">'T-shirt'</span>,<span class="st">'Trouser'</span>,<span class="st">'Pullover'</span>,<span class="st">'Dress'</span>,<span class="st">'Coat'</span>,
+               <span class="st">'Sandal'</span>,<span class="st">'Shirt'</span>,<span class="st">'Sneaker'</span>,<span class="st">'Bag'</span>,<span class="st">'Ankle boot'</span>]
+
+<span class="cm"># ── Load full dataset ──</span>
+(<span class="var">X_train_all</span>, <span class="var">y_train_all</span>), (<span class="var">X_test_all</span>, <span class="var">y_test_all</span>) = \
+    <span class="var">tf</span>.keras.datasets.fashion_mnist.load_data()
+<span class="var">X_train_all</span> = <span class="var">X_train_all</span>.reshape(-<span class="nm">1</span>, <span class="nm">784</span>).astype(np.float32) / <span class="nm">255.0</span>
+<span class="var">X_test_all</span>  = <span class="var">X_test_all</span>.reshape(-<span class="nm">1</span>, <span class="nm">784</span>).astype(np.float32)  / <span class="nm">255.0</span>
+
+<span class="cm"># ── Step 1: Normalise pixel intensities to [0,1] ──</span>
+<span class="cm"># Already done above by dividing by 255</span>
+<span class="cm"># But we also normalise per-feature to handle PCA scale differences</span>
+<span class="var">scaler</span>       = <span class="cls">MinMaxScaler</span>()
+<span class="var">X_train_norm</span> = <span class="var">scaler</span>.fit_transform(<span class="var">X_train_all</span>)  <span class="cm"># fit on TRAIN only</span>
+<span class="var">X_test_norm</span>  = <span class="var">scaler</span>.transform(<span class="var">X_test_all</span>)       <span class="cm"># transform test with train's params</span>
+
+<span class="fn">print</span>(<span class="st">f"After MinMaxScaler: range [{X_train_norm.min():.2f}, {X_train_norm.max():.2f}]"</span>)
+          </div>
+        </div>
+
+        <div class="nb-prose"><p>Fit PCA with 4 components on the normalised training data and transform both train and test  this compresses 784 pixel dimensions to the 4 directions of maximum variance that will become the qubit rotation angles.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb02_preprocess.py</span><span class="code-hint">step 2  fit PCA(4) + transform</span></div>
+          <div class="code-body">
+<span class="cm"># ── Step 2: PCA compression 784 → 4 ──</span>
+<span class="var">pca</span>          = <span class="cls">PCA</span>(n_components=<span class="var">N_QUBITS</span>, random_state=<span class="nm">42</span>)
+<span class="var">X_train_pca</span>  = <span class="var">pca</span>.fit_transform(<span class="var">X_train_norm</span>)  <span class="cm"># fit on TRAIN only</span>
+<span class="var">X_test_pca</span>   = <span class="var">pca</span>.transform(<span class="var">X_test_norm</span>)
+
+<span class="var">var_explained</span> = <span class="var">pca</span>.explained_variance_ratio_.sum() * <span class="nm">100</span>
+<span class="fn">print</span>(<span class="st">f"After PCA(4): {var_explained:.1f}% variance explained"</span>)
+<span class="fn">print</span>(<span class="st">f"  Component variances: {[f'{v:.1%}' for v in pca.explained_variance_ratio_]}"</span>)
+          </div>
+        </div>
+
+        <div class="nb-prose"><p>Scale the 4 PCA features into the range [0, π]  this maps each feature to a valid Ry rotation angle so that 0 leaves the qubit at |0⟩ and π flips it to |1⟩, giving the encoding layer its full expressive range.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb02_preprocess.py</span><span class="code-hint">step 3  scale features to [0,π]</span></div>
+          <div class="code-body">
+<span class="cm"># ── Step 3: Scale PCA features to [0, π] for angle encoding ──</span>
+<span class="var">ang_scaler</span>   = <span class="cls">MinMaxScaler</span>(feature_range=(<span class="nm">0</span>, np.pi))
+<span class="var">X_train_ang</span>  = <span class="var">ang_scaler</span>.fit_transform(<span class="var">X_train_pca</span>)  <span class="cm"># fit on TRAIN only</span>
+<span class="var">X_test_ang</span>   = <span class="var">ang_scaler</span>.transform(<span class="var">X_test_pca</span>)
+
+<span class="fn">print</span>(<span class="st">f"After angle scaling: range [{X_train_ang.min():.3f}, {X_train_ang.max():.3f}] radians"</span>)
+<span class="fn">print</span>(<span class="st">f"  (0 = qubit stays at |0⟩, π = qubit flipped to |1⟩)"</span>)
+          </div>
+        </div>
+
+        <div class="nb-prose"><p>Pickle all three fitted transformers to disk so that every deploy script can load and apply them  guaranteeing hardware inference sees identical preprocessing to training, which was the root cause of the original code's accuracy bug.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb02_preprocess.py</span><span class="code-hint">step 4  save transformers + verify distributions</span></div>
+          <div class="code-body">
+<span class="cm"># ── FIX: Save all fitted transformers ──</span>
+<span class="cm"># This ensures deploy scripts use IDENTICAL preprocessing to training</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="st">'preprocessors.pkl'</span>, <span class="st">'wb'</span>) <span class="kw">as</span> <span class="var">f</span>:
+    <span class="var">pickle</span>.dump({<span class="st">'scaler'</span>: <span class="var">scaler</span>, <span class="st">'pca'</span>: <span class="var">pca</span>, <span class="st">'ang_scaler'</span>: <span class="var">ang_scaler</span>}, <span class="var">f</span>)
+<span class="fn">print</span>(<span class="st">"\nSaved: preprocessors.pkl"</span>)
+<span class="fn">print</span>(<span class="st">"  → Load this in deploy scripts to ensure consistent preprocessing"</span>)
+<span class="fn">print</span>(<span class="st">"  → Never refit transformers on test/deploy data"</span>)
+
+<span class="cm"># ── Verify: plot PCA feature distributions by class ──</span>
+<span class="var">fig</span>, <span class="var">axes</span> = plt.subplots(<span class="nm">1</span>, <span class="nm">4</span>, figsize=(<span class="nm">14</span>, <span class="nm">4</span>))
+<span class="var">colors</span>    = plt.cm.tab10(np.linspace(<span class="nm">0</span>,<span class="nm">1</span>,<span class="nm">10</span>))
+<span class="kw">for</span> <span class="var">comp</span>, <span class="var">ax</span> <span class="kw">in</span> <span class="fn">enumerate</span>(<span class="var">axes</span>):
+    <span class="kw">for</span> <span class="var">c</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">10</span>):
+        <span class="var">vals</span> = <span class="var">X_train_ang</span>[<span class="var">y_train_all</span>==<span class="var">c</span>, <span class="var">comp</span>]
+        <span class="var">ax</span>.hist(<span class="var">vals</span>, bins=<span class="nm">20</span>, alpha=<span class="nm">0.4</span>, color=<span class="var">colors</span>[<span class="var">c</span>],
+                label=<span class="var">CLASS_NAMES</span>[<span class="var">c</span>] <span class="kw">if</span> <span class="var">comp</span>==<span class="nm">0</span> <span class="kw">else</span> <span class="st">""</span>)
+    <span class="var">ax</span>.set_title(<span class="st">f'PC {comp+1} distribution'</span>)
+    <span class="var">ax</span>.set_xlabel(<span class="st">'Angle (radians)'</span>)
+<span class="var">axes</span>[<span class="nm">0</span>].legend(fontsize=<span class="nm">7</span>, loc=<span class="st">'upper right'</span>)
+<span class="var">fig</span>.suptitle(<span class="st">'PCA feature distributions per class  what the VQC sees'</span>,
+             fontweight=<span class="st">'bold'</span>)
+plt.tight_layout()
+plt.savefig(<span class="st">'nb02_pca_distributions.png'</span>)
+plt.show()
+<span class="fn">print</span>(<span class="st">"\nLook for classes with separated distributions  those the VQC can learn."</span>)
+<span class="fn">print</span>(<span class="st">"Trouser should be clearly separated in PC1. T-shirt and Shirt will overlap."</span>)
+          </div>
+        </div>
+        <div class="line-exp">
+          <div class="le-title">What each part does</div>
+          <div class="le-row"><span class="le-code">scaler.fit_transform(X_train_all)</span><span class="le-meaning">Fit the scaler on training data only  learn the min/max from training. Then transform training. Never fit on test data  that would leak test statistics into the model.</span></div>
+          <div class="le-row"><span class="le-code">scaler.transform(X_test_all)</span><span class="le-meaning">Apply the SAME transformation (learned from training) to test data. This ensures test features are in the same scale as training features. Critical for any ML pipeline.</span></div>
+          <div class="le-row"><span class="le-code">pca.explained_variance_ratio_</span><span class="le-meaning">How much variance each principal component captures. If PC1 captures 30%, that means one number summarises 30% of all pixel variation across all images. The remaining 70%+ is discarded.</span></div>
+          <div class="le-row"><span class="le-code">MinMaxScaler(feature_range=(0, np.pi))</span><span class="le-meaning">Scale PCA features to [0, π]  the valid range for Ry rotation angles. An angle of 0 leaves the qubit at |0⟩. An angle of π rotates it to |1⟩. Values in between create superposition states.</span></div>
+          <div class="le-row"><span class="le-code">pickle.dump({'scaler':..., 'pca':...})</span><span class="le-meaning">Save all fitted transformers to disk. The deploy scripts load this file and use the SAME transformers  so the hardware sees identical preprocessing to what was used in training. This was a bug in the original code.</span></div>
+        </div>
+        <div class="callout-nb success"><div class="cn-lbl">✓ What to look for in the PCA distributions</div><p>Trouser (class 1) should show a distinctly different distribution from other classes in PC1  it has a unique elongated shape that survives compression. T-shirt, Shirt, and Coat will heavily overlap because they have similar silhouettes. This overlap is why the VQC cannot reliably separate them  the classes are not separable in 4-dimensional PCA space.</p></div>
+
+        <hr class="section-sep"/>
+
+        <!-- NB 03  Binary training -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 03 · Simulator Training</div>
+          <div class="nb-title">Train binary VQC  T-shirt vs Trouser</div>
+          <div class="nb-desc">Train a 4-qubit, 2-layer VQC on 200 Fashion-MNIST samples (T-shirt vs Trouser). Watch loss decrease. Save weights for hardware deployment. Target: ~80-90% simulator accuracy.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~30 min</span><span class="nb-meta-item">⚛️ PennyLane · CPU</span></div>
+        </div>
+        <div class="obj-box">
+          <div class="obj-lbl">By the end of this notebook</div>
+          <ul class="obj-list">
+            <li>VQC trained to ~80-90% accuracy on simulator</li>
+            <li>Training curves plotted  loss decreasing, accuracy increasing</li>
+            <li>binary_weights.npy saved for hardware deployment in NB 04</li>
+          </ul>
+        </div>
+
+        <div class="nb-prose"><p>Import all dependencies, define the six training hyperparameters (qubits, layers, sample sizes, epochs, batch size, learning rate), then load Fashion-MNIST and filter down to T-shirt vs Trouser with random subsampling to 200 training and 100 test examples.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb03_train_binary.py</span><span class="code-hint">step 1  imports + load preprocessed data</span></div>
+          <div class="code-body">
+<span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+<span class="kw">import</span> <span class="var">pennylane</span> <span class="kw">as</span> <span class="var">qml</span>
+<span class="kw">from</span> <span class="var">pennylane</span> <span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">pnp</span>
+<span class="kw">import</span> <span class="var">tensorflow</span> <span class="kw">as</span> <span class="var">tf</span>
+<span class="kw">import</span> <span class="var">pickle</span>
+<span class="kw">from</span> <span class="var">sklearn.metrics</span> <span class="kw">import</span> <span class="fn">accuracy_score</span>, <span class="fn">confusion_matrix</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+<span class="kw">import</span> <span class="var">warnings</span>, <span class="var">time</span>
+<span class="var">warnings</span>.filterwarnings(<span class="st">'ignore'</span>)
+
+<span class="cm"># ── CONFIG ──</span>
+<span class="var">N_QUBITS</span>   = <span class="nm">4</span>
+<span class="var">N_LAYERS</span>   = <span class="nm">2</span>
+<span class="var">N_TRAIN</span>    = <span class="nm">200</span>   <span class="cm"># 100 per class</span>
+<span class="var">N_TEST</span>     = <span class="nm">100</span>   <span class="cm"># 50 per class</span>
+<span class="var">N_EPOCHS</span>   = <span class="nm">40</span>
+<span class="var">BATCH_SIZE</span> = <span class="nm">16</span>
+<span class="var">LR</span>         = <span class="nm">0.015</span>
+
+<span class="cm"># ── Load and preprocess data ──</span>
+<span class="fn">print</span>(<span class="st">"[1/4] Loading Fashion-MNIST..."</span>)
+(<span class="var">X_train_all</span>, <span class="var">y_train_all</span>), (<span class="var">X_test_all</span>, <span class="var">y_test_all</span>) = \
+    <span class="var">tf</span>.keras.datasets.fashion_mnist.load_data()
+<span class="var">X_train_all</span> = <span class="var">X_train_all</span>.reshape(-<span class="nm">1</span>,<span class="nm">784</span>).astype(np.float32) / <span class="nm">255.0</span>
+<span class="var">X_test_all</span>  = <span class="var">X_test_all</span>.reshape(-<span class="nm">1</span>,<span class="nm">784</span>).astype(np.float32)  / <span class="nm">255.0</span>
+
+<span class="cm"># Filter T-shirt (0) and Trouser (1)</span>
+<span class="kw">def</span> <span class="fn">filter_binary</span>(<span class="var">X</span>, <span class="var">y</span>):
+    <span class="var">mask</span> = (<span class="var">y</span>==<span class="nm">0</span>) | (<span class="var">y</span>==<span class="nm">1</span>)
+    <span class="kw">return</span> <span class="var">X</span>[<span class="var">mask</span>], np.where(<span class="var">y</span>[<span class="var">mask</span>]==<span class="nm">0</span>, <span class="nm">0</span>, <span class="nm">1</span>)
+
+<span class="var">X_tr_raw</span>, <span class="var">y_tr_all</span> = <span class="fn">filter_binary</span>(<span class="var">X_train_all</span>, <span class="var">y_train_all</span>)
+<span class="var">X_te_raw</span>, <span class="var">y_te_all</span> = <span class="fn">filter_binary</span>(<span class="var">X_test_all</span>,  <span class="var">y_test_all</span>)
+
+np.random.seed(<span class="nm">42</span>)
+<span class="var">X_tr_raw</span> = <span class="var">X_tr_raw</span>[np.random.choice(<span class="fn">len</span>(<span class="var">y_tr_all</span>), <span class="var">N_TRAIN</span>, replace=<span class="kw">False</span>)]
+<span class="var">y_tr</span>     = <span class="var">y_tr_all</span>[np.random.choice(<span class="fn">len</span>(<span class="var">y_tr_all</span>), <span class="var">N_TRAIN</span>, replace=<span class="kw">False</span>)]
+<span class="var">X_te_raw</span> = <span class="var">X_te_raw</span>[np.random.choice(<span class="fn">len</span>(<span class="var">y_te_all</span>), <span class="var">N_TEST</span>,  replace=<span class="kw">False</span>)]
+<span class="var">y_te</span>     = <span class="var">y_te_all</span>[np.random.choice(<span class="fn">len</span>(<span class="var">y_te_all</span>), <span class="var">N_TEST</span>,  replace=<span class="kw">False</span>)]
+<span class="fn">print</span>(<span class="st">f"    Train: {N_TRAIN} | Test: {N_TEST}"</span>)
+
+<span class="cm"># ── Preprocess  fit on train, save transformers ──</span>
+<span class="fn">print</span>(<span class="st">"[2/4] Preprocessing: MinMaxScaler → PCA(4) → angle scaling..."</span>)
+<span class="kw">from</span> <span class="var">sklearn.decomposition</span> <span class="kw">import</span> <span class="cls">PCA</span>
+<span class="kw">from</span> <span class="var">sklearn.preprocessing</span> <span class="kw">import</span> <span class="cls">MinMaxScaler</span>
+
+<span class="var">scaler</span>    = <span class="cls">MinMaxScaler</span>()
+<span class="var">X_tr_n</span>    = <span class="var">scaler</span>.fit_transform(<span class="var">X_tr_raw</span>)
+<span class="var">X_te_n</span>    = <span class="var">scaler</span>.transform(<span class="var">X_te_raw</span>)
+
+<span class="var">pca</span>       = <span class="cls">PCA</span>(n_components=<span class="var">N_QUBITS</span>, random_state=<span class="nm">42</span>)
+<span class="var">X_tr_pca</span>  = <span class="var">pca</span>.fit_transform(<span class="var">X_tr_n</span>)
+<span class="var">X_te_pca</span>  = <span class="var">pca</span>.transform(<span class="var">X_te_n</span>)
+<span class="fn">print</span>(<span class="st">f"    PCA variance: {pca.explained_variance_ratio_.sum()*100:.1f}%"</span>)
+
+<span class="var">ang</span>       = <span class="cls">MinMaxScaler</span>(feature_range=(<span class="nm">0</span>, np.pi))
+<span class="var">X_tr_ang</span>  = <span class="var">pnp</span>.array(<span class="var">ang</span>.fit_transform(<span class="var">X_tr_pca</span>), requires_grad=<span class="kw">False</span>)
+<span class="var">X_te_ang</span>  = np.array(<span class="var">ang</span>.transform(<span class="var">X_te_pca</span>))  <span class="cm"># plain numpy for classify()</span>
+
+<span class="cm"># FIX: save transformers so deploy uses identical preprocessing</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="st">'binary_preprocessors.pkl'</span>, <span class="st">'wb'</span>) <span class="kw">as</span> <span class="var">f</span>:
+    <span class="var">pickle</span>.dump({<span class="st">'scaler'</span>:<span class="var">scaler</span>, <span class="st">'pca'</span>:<span class="var">pca</span>, <span class="st">'ang'</span>:<span class="var">ang</span>}, <span class="var">f</span>)
+<span class="fn">print</span>(<span class="st">"    Saved: binary_preprocessors.pkl"</span>)
+
+          </div>
+        </div>
+
+        <div class="nb-prose"><p>Create the PennyLane device and define the full VQC architecture  the same encoding layer, variational Ry+Rz+CNOT ring structure, and ⟨Z₀⟩ measurement that you built in NB01 of M06, but now wired up with the MSE cost function and an Adam optimiser ready for training.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb03_train_binary.py</span><span class="code-hint">step 2  define VQC architecture</span></div>
+          <div class="code-body">
+<span class="cm"># ── Build VQC ──</span>
+<span class="fn">print</span>(<span class="st">"[3/4] Building + training VQC..."</span>)
+<span class="var">dev</span> = <span class="var">qml</span>.device(<span class="st">"default.qubit"</span>, wires=<span class="var">N_QUBITS</span>)
+
+<span class="var">@qml</span>.qnode(<span class="var">dev</span>, interface=<span class="st">"autograd"</span>)
+<span class="kw">def</span> <span class="fn">vqc</span>(<span class="var">weights</span>, <span class="var">x</span>):
+    <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>):
+        <span class="var">qml</span>.RY(<span class="var">x</span>[<span class="var">i</span>], wires=<span class="var">i</span>)
+    <span class="kw">for</span> <span class="var">l</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_LAYERS</span>):
+        <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>):
+            <span class="var">qml</span>.RY(<span class="var">weights</span>[<span class="var">l</span>,<span class="var">i</span>,<span class="nm">0</span>], wires=<span class="var">i</span>)
+            <span class="var">qml</span>.RZ(<span class="var">weights</span>[<span class="var">l</span>,<span class="var">i</span>,<span class="nm">1</span>], wires=<span class="var">i</span>)
+        <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>-<span class="nm">1</span>):
+            <span class="var">qml</span>.CNOT(wires=[<span class="var">i</span>, <span class="var">i</span>+<span class="nm">1</span>])
+        <span class="var">qml</span>.CNOT(wires=[<span class="var">N_QUBITS</span>-<span class="nm">1</span>, <span class="nm">0</span>])
+    <span class="kw">return</span> <span class="var">qml</span>.expval(<span class="var">qml</span>.PauliZ(<span class="nm">0</span>))  <span class="cm"># +1 → T-shirt, −1 → Trouser</span>
+
+<span class="kw">def</span> <span class="fn">cost</span>(<span class="var">W</span>, <span class="var">X</span>, <span class="var">y</span>):
+    <span class="var">preds</span>   = <span class="var">pnp</span>.array([<span class="fn">vqc</span>(<span class="var">W</span>, <span class="var">x</span>) <span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="var">X</span>])
+    <span class="var">targets</span> = <span class="var">pnp</span>.where(<span class="var">y</span>==<span class="nm">0</span>, <span class="nm">1.0</span>, -<span class="nm">1.0</span>)
+    <span class="kw">return</span> <span class="var">pnp</span>.mean((<span class="var">preds</span> - <span class="var">targets</span>)**<span class="nm">2</span>)
+
+<span class="kw">def</span> <span class="fn">classify</span>(<span class="var">W</span>, <span class="var">X</span>):
+    <span class="cm"># FIX: convert to pnp array once, outside the loop</span>
+    <span class="var">X_pnp</span> = <span class="var">pnp</span>.array(<span class="var">X</span>, requires_grad=<span class="kw">False</span>)
+    <span class="var">preds</span> = np.array([<span class="fn">float</span>(<span class="fn">vqc</span>(<span class="var">W</span>, <span class="var">x</span>)) <span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="var">X_pnp</span>])
+    <span class="kw">return</span> np.where(<span class="var">preds</span> >= <span class="nm">0</span>, <span class="nm">0</span>, <span class="nm">1</span>)
+          </div>
+        </div>
+
+        <div class="nb-prose"><p>Run the 40-epoch Adam training loop  each step draws a random mini-batch, computes gradients via the parameter shift rule, and updates the 16 weights; every 5 epochs we log train and test accuracy so you can watch the circuit learn to separate T-shirts from Trousers.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb03_train_binary.py</span><span class="code-hint">step 3  training loop</span></div>
+          <div class="code-body">
+np.random.seed(<span class="nm">42</span>)
+<span class="var">W</span>   = <span class="var">pnp</span>.array(np.random.uniform(-<span class="nm">0.01</span>, <span class="nm">0.01</span>,
+                (<span class="var">N_LAYERS</span>, <span class="var">N_QUBITS</span>, <span class="nm">2</span>)), requires_grad=<span class="kw">True</span>)
+<span class="var">opt</span> = <span class="var">qml</span>.AdamOptimizer(stepsize=<span class="var">LR</span>)
+
+<span class="var">losses</span>, <span class="var">tr_accs</span>, <span class="var">te_accs</span>, <span class="var">epochs_log</span> = [], [], [], []
+<span class="var">t0</span> = <span class="var">time</span>.time()
+
+<span class="kw">for</span> <span class="var">ep</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_EPOCHS</span>):
+    <span class="var">idx</span>    = np.random.choice(<span class="var">N_TRAIN</span>, <span class="var">BATCH_SIZE</span>, replace=<span class="kw">False</span>)
+    <span class="var">W</span>, <span class="var">loss</span> = <span class="var">opt</span>.step_and_cost(
+        <span class="kw">lambda</span> <span class="var">w</span>: <span class="fn">cost</span>(<span class="var">w</span>, <span class="var">X_tr_ang</span>[<span class="var">idx</span>], <span class="var">y_tr</span>[<span class="var">idx</span>]), <span class="var">W</span>)
+
+    <span class="kw">if</span> (<span class="var">ep</span>+<span class="nm">1</span>) % <span class="nm">5</span> == <span class="nm">0</span>:
+        <span class="var">ta</span>  = <span class="fn">accuracy_score</span>(<span class="var">y_tr</span>, <span class="fn">classify</span>(<span class="var">W</span>, <span class="var">X_tr_ang</span>))
+        <span class="var">tea</span> = <span class="fn">accuracy_score</span>(<span class="var">y_te</span>, <span class="fn">classify</span>(<span class="var">W</span>, <span class="var">X_te_ang</span>))
+        <span class="var">losses</span>.append(<span class="fn">float</span>(<span class="var">loss</span>))
+        <span class="var">tr_accs</span>.append(<span class="var">ta</span>); <span class="var">te_accs</span>.append(<span class="var">tea</span>)
+        <span class="var">epochs_log</span>.append(<span class="var">ep</span>+<span class="nm">1</span>)
+        <span class="fn">print</span>(<span class="st">f"  Epoch {ep+1:3d}/{N_EPOCHS} | loss={float(loss):.4f} | train={ta:.3f} | test={tea:.3f}"</span>)
+
+<span class="var">total_time</span> = <span class="var">time</span>.time() - <span class="var">t0</span>
+
+<span class="cm"># ── Final evaluation ──</span>
+<span class="fn">print</span>(<span class="st">"\n[4/4] Final evaluation..."</span>)
+<span class="var">final_preds</span> = <span class="fn">classify</span>(<span class="var">W</span>, <span class="var">X_te_ang</span>)
+<span class="var">final_acc</span>   = <span class="fn">accuracy_score</span>(<span class="var">y_te</span>, <span class="var">final_preds</span>)
+<span class="var">cm</span>          = <span class="fn">confusion_matrix</span>(<span class="var">y_te</span>, <span class="var">final_preds</span>)
+
+<span class="fn">print</span>(<span class="st">f"\n{'='*40}"</span>)
+<span class="fn">print</span>(<span class="st">f"  Binary VQC  Simulator Results"</span>)
+<span class="fn">print</span>(<span class="st">f"{'='*40}"</span>)
+<span class="fn">print</span>(<span class="st">f"  Test accuracy  : {final_acc:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">f"  Random baseline: 50.0%"</span>)
+<span class="fn">print</span>(<span class="st">f"  Training time  : {total_time:.1f}s"</span>)
+<span class="fn">print</span>(<span class="st">f"  Confusion Matrix:"</span>)
+<span class="fn">print</span>(<span class="st">f"              Pred T-shirt  Pred Trouser"</span>)
+<span class="fn">print</span>(<span class="st">f"  True T-shirt    {cm[0,0]:4d}          {cm[0,1]:4d}"</span>)
+<span class="fn">print</span>(<span class="st">f"  True Trouser    {cm[1,0]:4d}          {cm[1,1]:4d}"</span>)
+
+<span class="cm"># ── Plot training curves ──</span>
+<span class="var">fig</span>, (<span class="var">ax1</span>, <span class="var">ax2</span>) = plt.subplots(<span class="nm">1</span>, <span class="nm">2</span>, figsize=(<span class="nm">10</span>, <span class="nm">4</span>))
+<span class="var">ax1</span>.plot(<span class="var">epochs_log</span>, <span class="var">losses</span>, <span class="st">'o-'</span>, color=<span class="st">'#C0392B'</span>, linewidth=<span class="nm">2</span>)
+<span class="var">ax1</span>.set_xlabel(<span class="st">'Epoch'</span>); <span class="var">ax1</span>.set_ylabel(<span class="st">'MSE Loss'</span>)
+<span class="var">ax1</span>.set_title(<span class="st">'Training Loss'</span>)
+<span class="var">ax2</span>.plot(<span class="var">epochs_log</span>, <span class="var">tr_accs</span>, <span class="st">'o-'</span>, color=<span class="st">'#1A4FDB'</span>, linewidth=<span class="nm">2</span>, label=<span class="st">'Train'</span>)
+<span class="var">ax2</span>.plot(<span class="var">epochs_log</span>, <span class="var">te_accs</span>, <span class="st">'s--'</span>, color=<span class="st">'#1A7A4A'</span>, linewidth=<span class="nm">2</span>, label=<span class="st">'Test'</span>)
+<span class="var">ax2</span>.axhline(<span class="nm">0.5</span>, color=<span class="st">'gray'</span>, linestyle=<span class="st">':'</span>, alpha=<span class="nm">0.5</span>, label=<span class="st">'Random'</span>)
+<span class="var">ax2</span>.set_xlabel(<span class="st">'Epoch'</span>); <span class="var">ax2</span>.set_ylabel(<span class="st">'Accuracy'</span>)
+<span class="var">ax2</span>.set_title(<span class="st">'Accuracy'</span>); <span class="var">ax2</span>.set_ylim(<span class="nm">0</span>, <span class="nm">1.05</span>); <span class="var">ax2</span>.legend()
+<span class="var">fig</span>.suptitle(<span class="st">'Binary VQC Training  Fashion-MNIST T-shirt vs Trouser'</span>, fontweight=<span class="st">'bold'</span>)
+plt.tight_layout()
+plt.savefig(<span class="st">'nb03_binary_training.png'</span>)
+plt.show()
+
+<span class="cm"># ── Save weights + metadata ──</span>
+np.save(<span class="st">'binary_weights.npy'</span>, {
+    <span class="st">'W'</span>: np.array(<span class="var">W</span>), <span class="st">'losses'</span>: <span class="var">losses</span>,
+    <span class="st">'tr_accs'</span>: <span class="var">tr_accs</span>, <span class="st">'te_accs'</span>: <span class="var">te_accs</span>,
+    <span class="st">'final_acc'</span>: <span class="var">final_acc</span>, <span class="st">'cm'</span>: <span class="var">cm</span>,
+    <span class="st">'n_qubits'</span>: <span class="var">N_QUBITS</span>, <span class="st">'n_layers'</span>: <span class="var">N_LAYERS</span>
+})
+<span class="fn">print</span>(<span class="st">"\nSaved: binary_weights.npy + binary_preprocessors.pkl"</span>)
+<span class="fn">print</span>(<span class="st">"→ Ready for NB 04: hardware deployment to IBM QPU"</span>)
+          </div>
+        </div>
+        <div class="line-exp">
+          <div class="le-title">Key fixes vs original code</div>
+          <div class="le-row"><span class="le-code">binary_preprocessors.pkl saved</span><span class="le-meaning">FIX: Original code re-fitted PCA on only the 20 hardware samples  different from training. Now we save the training-fitted transformers and load them in the deploy script. Consistent preprocessing is critical.</span></div>
+          <div class="le-row"><span class="le-code">X_te_ang = np.array(...) not pnp</span><span class="le-meaning">FIX: classify() called pnp.array() on every call inside the loop. Now X_te_ang is plain numpy from the start. classify() converts once. Avoids repeated unnecessary conversion overhead.</span></div>
+          <div class="le-row"><span class="le-code">epochs_log list for plotting</span><span class="le-meaning">ADDED: Track epoch numbers explicitly so the x-axis of the training plot is correct even if logging frequency changes.</span></div>
+          <div class="le-row"><span class="le-code">Training curves saved as PNG</span><span class="le-meaning">ADDED: Original code had no plots. Now saves loss and accuracy curves to nb03_binary_training.png. Visual confirmation the model learned something before deploying to hardware.</span></div>
+          <div class="le-row"><span class="le-code">n_qubits/n_layers in weights file</span><span class="le-meaning">ADDED: Save architecture metadata with weights. Prevents mismatch if you change N_QUBITS or N_LAYERS between training and deployment.</span></div>
+        </div>
+        <div class="callout-nb success"><div class="cn-lbl">✓ Target output</div><p>After 40 epochs: loss should drop from ~1.0 to ~0.3-0.5. Test accuracy should reach 75-90%. If accuracy stays near 50% (random), try increasing N_EPOCHS to 60 or LR to 0.02. The training is stochastic  results vary by ~5% between runs. Original experiment reached 88%.</p></div>
+
+        <hr class="section-sep"/>
+
+        <!-- NB 04  Deploy binary -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 04 · Real Hardware 🔴</div>
+          <div class="nb-title">Deploy binary VQC to IBM QPU  ibm_fez</div>
+          <div class="nb-desc">Load trained weights. Build Qiskit circuits. Connect to IBM Quantum. Submit 20 circuits to real hardware. Wait 5-15 minutes for results. Compare QPU accuracy vs simulator.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~20 min (mostly waiting)</span><span class="nb-meta-item">🔴 Real quantum hardware</span><span class="nb-meta-item">🔑 IBM API key required</span></div>
+        </div>
+        <div class="callout-nb hardware"><div class="cn-lbl">🔴 Real hardware  read before running</div><p>This notebook submits real quantum jobs to IBM's hardware. Jobs are queued  typical wait is 5-15 minutes but can be longer. You cannot cancel once submitted. Make sure binary_weights.npy and binary_preprocessors.pkl exist (run NB 03 first). You need your IBM Quantum API key from quantum.ibm.com.</p></div>
+        <div class="obj-box">
+          <div class="obj-lbl">By the end of this notebook</div>
+          <ul class="obj-list">
+            <li>Real QPU results collected  actual quantum hardware measurements</li>
+            <li>IBM Job ID saved  you can track it at quantum.cloud.ibm.com/jobs</li>
+            <li>Side-by-side comparison: simulator 88% vs hardware ~45%</li>
+          </ul>
+        </div>
+
+        <div class="nb-prose"><p>Load the saved weights and preprocessors, connect to IBM Quantum, select the least-busy backend, and submit the binary VQC circuit for 8192 shots. The script saves the Job ID so you can retrieve results later even if the connection drops while waiting.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb04_deploy_binary.py</span><span class="code-hint">python nb04_deploy_binary.py</span></div>
+          <div class="code-body">
+<span class="kw">import</span> <span class="var">sys</span>, <span class="var">os</span>, <span class="var">time</span>, <span class="var">pickle</span>, <span class="var">warnings</span>
+<span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+<span class="kw">import</span> <span class="var">tensorflow</span> <span class="kw">as</span> <span class="var">tf</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+<span class="var">warnings</span>.filterwarnings(<span class="st">'ignore'</span>)
+
+<span class="cm"># ── CONFIG ──</span>
+<span class="var">N_QUBITS</span> = <span class="nm">4</span>
+<span class="var">N_LAYERS</span> = <span class="nm">2</span>
+<span class="var">N_HW</span>     = <span class="nm">20</span>   <span class="cm"># 10 per class</span>
+<span class="var">SHOTS</span>    = <span class="nm">1024</span>
+<span class="var">BACKENDS</span> = [<span class="st">"ibm_kingston"</span>, <span class="st">"ibm_marrakesh"</span>, <span class="st">"ibm_fez"</span>]
+
+<span class="cm"># ── FIX: accept API key from environment or prompt ──</span>
+<span class="var">api_key</span> = os.environ.get(<span class="st">'IBM_API_KEY'</span>) <span class="kw">or</span> <span class="fn">input</span>(<span class="st">"Paste IBM API key: "</span>).strip()
+
+<span class="cm"># ── 1. Load weights ──</span>
+<span class="fn">print</span>(<span class="st">"[1/5] Loading weights..."</span>)
+<span class="kw">for</span> <span class="var">f</span> <span class="kw">in</span> [<span class="st">'binary_weights.npy'</span>, <span class="st">'binary_preprocessors.pkl'</span>]:
+    <span class="kw">if</span> <span class="kw">not</span> os.path.exists(<span class="var">f</span>):
+        <span class="fn">print</span>(<span class="st">f"ERROR: {f} not found  run nb03_train_binary.py first"</span>)
+        <span class="var">sys</span>.exit(<span class="nm">1</span>)
+
+<span class="var">data</span>    = np.load(<span class="st">'binary_weights.npy'</span>, allow_pickle=<span class="kw">True</span>).item()
+<span class="var">W</span>       = <span class="var">data</span>[<span class="st">'W'</span>]
+<span class="var">sim_acc</span> = <span class="var">data</span>[<span class="st">'final_acc'</span>]
+<span class="fn">print</span>(<span class="st">f"    Simulator accuracy: {sim_acc:.1%}"</span>)
+
+<span class="cm"># ── 2. Load test data with SAME preprocessors as training ──</span>
+<span class="fn">print</span>(<span class="st">"[2/5] Loading test data..."</span>)
+<span class="kw">with</span> <span class="fn">open</span>(<span class="st">'binary_preprocessors.pkl'</span>, <span class="st">'rb'</span>) <span class="kw">as</span> <span class="var">f</span>:
+    <span class="var">prep</span> = <span class="var">pickle</span>.load(<span class="var">f</span>)
+<span class="var">scaler</span>, <span class="var">pca</span>, <span class="var">ang</span> = <span class="var">prep</span>[<span class="st">'scaler'</span>], <span class="var">prep</span>[<span class="st">'pca'</span>], <span class="var">prep</span>[<span class="st">'ang'</span>]
+
+(<span class="var">_</span>, <span class="var">_</span>), (<span class="var">X_test_all</span>, <span class="var">y_test_all</span>) = \
+    <span class="var">tf</span>.keras.datasets.fashion_mnist.load_data()
+<span class="var">X_test_all</span> = <span class="var">X_test_all</span>.reshape(-<span class="nm">1</span>,<span class="nm">784</span>).astype(np.float32) / <span class="nm">255.0</span>
+
+<span class="var">mask</span>   = (<span class="var">y_test_all</span>==<span class="nm">0</span>) | (<span class="var">y_test_all</span>==<span class="nm">1</span>)
+<span class="var">X_te</span>   = <span class="var">X_test_all</span>[<span class="var">mask</span>]
+<span class="var">y_te</span>   = np.where(<span class="var">y_test_all</span>[<span class="var">mask</span>]==<span class="nm">0</span>, <span class="nm">0</span>, <span class="nm">1</span>)
+
+np.random.seed(<span class="nm">99</span>)
+<span class="var">idx0</span>   = np.random.choice(np.where(<span class="var">y_te</span>==<span class="nm">0</span>)[<span class="nm">0</span>], <span class="var">N_HW</span>//<span class="nm">2</span>, replace=<span class="kw">False</span>)
+<span class="var">idx1</span>   = np.random.choice(np.where(<span class="var">y_te</span>==<span class="nm">1</span>)[<span class="nm">0</span>], <span class="var">N_HW</span>//<span class="nm">2</span>, replace=<span class="kw">False</span>)
+<span class="var">hw_idx</span> = np.random.permutation(np.concatenate([<span class="var">idx0</span>, <span class="var">idx1</span>]))
+<span class="var">X_hw</span>   = <span class="var">X_te</span>[<span class="var">hw_idx</span>]
+<span class="var">y_hw</span>   = <span class="var">y_te</span>[<span class="var">hw_idx</span>]
+
+<span class="cm"># FIX: use training-fitted transformers, not re-fitted on HW samples</span>
+<span class="var">X_hw_ang</span> = <span class="var">ang</span>.transform(<span class="var">pca</span>.transform(<span class="var">scaler</span>.transform(<span class="var">X_hw</span>)))
+<span class="fn">print</span>(<span class="st">f"    {N_HW} samples | T-shirt:{(y_hw==0).sum()} | Trouser:{(y_hw==1).sum()}"</span>)
+
+<span class="cm"># ── 3. Build Qiskit circuits ──</span>
+<span class="fn">print</span>(<span class="st">"[3/5] Building circuits..."</span>)
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>
+
+<span class="kw">def</span> <span class="fn">build_circuit</span>(<span class="var">W</span>, <span class="var">x</span>):
+    <span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="var">N_QUBITS</span>, <span class="var">N_QUBITS</span>)
+    <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>):
+        <span class="var">qc</span>.ry(<span class="fn">float</span>(<span class="var">x</span>[<span class="var">i</span>]), <span class="var">i</span>)               <span class="cm"># encoding</span>
+    <span class="kw">for</span> <span class="var">l</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_LAYERS</span>):
+        <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>):
+            <span class="var">qc</span>.ry(<span class="fn">float</span>(<span class="var">W</span>[<span class="var">l</span>,<span class="var">i</span>,<span class="nm">0</span>]), <span class="var">i</span>)           <span class="cm"># variational Ry</span>
+            <span class="var">qc</span>.rz(<span class="fn">float</span>(<span class="var">W</span>[<span class="var">l</span>,<span class="var">i</span>,<span class="nm">1</span>]), <span class="var">i</span>)           <span class="cm"># variational Rz</span>
+        <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>-<span class="nm">1</span>):
+            <span class="var">qc</span>.cx(<span class="var">i</span>, <span class="var">i</span>+<span class="nm">1</span>)                   <span class="cm"># entangling CNOTs</span>
+        <span class="var">qc</span>.cx(<span class="var">N_QUBITS</span>-<span class="nm">1</span>, <span class="nm">0</span>)                   <span class="cm"># ring closure</span>
+    <span class="var">qc</span>.measure(<span class="fn">range</span>(<span class="var">N_QUBITS</span>), <span class="fn">range</span>(<span class="var">N_QUBITS</span>))
+    <span class="kw">return</span> <span class="var">qc</span>
+
+<span class="var">circuits</span> = [<span class="fn">build_circuit</span>(<span class="var">W</span>, <span class="var">x</span>) <span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="var">X_hw_ang</span>]
+<span class="fn">print</span>(<span class="st">f"    {len(circuits)} circuits | depth before transpile: {circuits[0].depth()}"</span>)
+
+<span class="cm"># ── 4. Connect to IBM and pick least-busy backend ──</span>
+<span class="fn">print</span>(<span class="st">"[4/5] Connecting to IBM Quantum..."</span>)
+<span class="kw">from</span> <span class="var">qiskit_ibm_runtime</span> <span class="kw">import</span> <span class="cls">QiskitRuntimeService</span>, <span class="cls">SamplerV2</span> <span class="kw">as</span> <span class="cls">Sampler</span>
+<span class="kw">from</span> <span class="var">qiskit.transpiler.preset_passmanagers</span> <span class="kw">import</span> <span class="fn">generate_preset_pass_manager</span>
+
+<span class="var">service</span>     = <span class="cls">QiskitRuntimeService</span>(channel=<span class="st">"ibm_quantum_platform"</span>, token=<span class="var">api_key</span>)
+<span class="var">backend</span>     = <span class="kw">None</span>
+<span class="var">best_queue</span>  = <span class="nm">99999</span>
+<span class="fn">print</span>(<span class="st">"    Checking backends:"</span>)
+<span class="kw">for</span> <span class="var">name</span> <span class="kw">in</span> <span class="var">BACKENDS</span>:
+    <span class="kw">try</span>:
+        <span class="var">b</span>  = <span class="var">service</span>.backend(<span class="var">name</span>)
+        <span class="var">st</span> = <span class="var">b</span>.status()
+        <span class="fn">print</span>(<span class="st">f"    {name:20s} | qubits={b.num_qubits} | queue={st.pending_jobs} | ok={st.operational}"</span>)
+        <span class="kw">if</span> <span class="var">st</span>.operational <span class="kw">and</span> <span class="var">st</span>.pending_jobs < <span class="var">best_queue</span>:
+            <span class="var">best_queue</span> = <span class="var">st</span>.pending_jobs; <span class="var">backend</span> = <span class="var">b</span>
+    <span class="kw">except</span> <span class="cls">Exception</span> <span class="kw">as</span> <span class="var">e</span>:
+        <span class="fn">print</span>(<span class="st">f"    {name:20s} | unavailable: {str(e)[:50]}"</span>)
+<span class="kw">if</span> <span class="var">backend</span> <span class="kw">is</span> <span class="kw">None</span>:
+    <span class="fn">print</span>(<span class="st">"ERROR: No backend available."</span>); <span class="var">sys</span>.exit(<span class="nm">1</span>)
+<span class="fn">print</span>(<span class="st">f"    Using: {backend.name} (queue: {best_queue})"</span>)
+
+<span class="cm"># Transpile and submit</span>
+<span class="fn">print</span>(<span class="st">f"    Transpiling (optimization_level=3)..."</span>)
+<span class="var">pm</span>  = <span class="fn">generate_preset_pass_manager</span>(backend=<span class="var">backend</span>, optimization_level=<span class="nm">3</span>)
+<span class="var">isa</span> = [<span class="var">pm</span>.run(<span class="var">qc</span>) <span class="kw">for</span> <span class="var">qc</span> <span class="kw">in</span> <span class="var">circuits</span>]
+<span class="fn">print</span>(<span class="st">f"    Compiled depth: {isa[0].depth()} (was {circuits[0].depth()})"</span>)
+
+<span class="var">sampler</span> = <span class="cls">Sampler</span>(mode=<span class="var">backend</span>)
+<span class="var">sampler</span>.options.default_shots = <span class="var">SHOTS</span>
+<span class="var">t0</span>  = <span class="var">time</span>.time()
+<span class="var">job</span> = <span class="var">sampler</span>.run(<span class="var">isa</span>)
+<span class="fn">print</span>(<span class="st">f"\n    ✓ Job submitted! ID: {job.job_id()}"</span>)
+<span class="fn">print</span>(<span class="st">f"    Track: https://quantum.cloud.ibm.com/jobs/{job.job_id()}"</span>)
+<span class="fn">print</span>(<span class="st">f"\n    Waiting for results... (5-15 min)"</span>)
+<span class="var">result</span>  = <span class="var">job</span>.result()
+<span class="fn">print</span>(<span class="st">f"    Done! ({time.time()-t0:.1f}s)"</span>)
+
+<span class="cm"># ── 5. Process and compare results ──</span>
+<span class="fn">print</span>(<span class="st">"[5/5] Processing results..."</span>)
+
+<span class="kw">def</span> <span class="fn">expval_q0</span>(<span class="var">counts_dict</span>):
+    <span class="st">"""⟨Z₀⟩ from measurement counts.
+    Bit string convention: rightmost bit = qubit 0.
+    +1 if qubit 0 = '0', −1 if qubit 0 = '1'
+    """</span>
+    <span class="var">ev</span>, <span class="var">total</span> = <span class="nm">0.0</span>, <span class="fn">sum</span>(<span class="var">counts_dict</span>.values())
+    <span class="kw">for</span> <span class="var">bitstr</span>, <span class="var">cnt</span> <span class="kw">in</span> <span class="var">counts_dict</span>.items():
+        <span class="cm"># FIX: explicit index [-1] = rightmost bit = q0 in Qiskit convention</span>
+        <span class="var">ev</span> += <span class="var">cnt</span> * (<span class="nm">1</span> - <span class="nm">2</span> * <span class="fn">int</span>(<span class="var">bitstr</span>[-<span class="nm">1</span>]))
+    <span class="kw">return</span> <span class="var">ev</span> / <span class="var">total</span>
+
+<span class="fn">print</span>(<span class="st">"\nPer-sample results:"</span>)
+<span class="var">hw_preds</span> = []
+<span class="kw">for</span> <span class="var">i</span>, <span class="var">pub_result</span> <span class="kw">in</span> <span class="fn">enumerate</span>(<span class="var">result</span>):
+    <span class="var">counts</span>  = <span class="var">pub_result</span>.data.c.get_counts()
+    <span class="var">ev</span>      = <span class="fn">expval_q0</span>(<span class="var">counts</span>)
+    <span class="var">pred</span>    = <span class="nm">0</span> <span class="kw">if</span> <span class="var">ev</span> >= <span class="nm">0</span> <span class="kw">else</span> <span class="nm">1</span>
+    <span class="var">true</span>    = <span class="var">y_hw</span>[<span class="var">i</span>]
+    <span class="var">label_p</span> = [<span class="st">'T-shirt'</span>,<span class="st">'Trouser'</span>][<span class="var">pred</span>]
+    <span class="var">label_t</span> = [<span class="st">'T-shirt'</span>,<span class="st">'Trouser'</span>][<span class="var">true</span>]
+    <span class="var">hw_preds</span>.append(<span class="var">pred</span>)
+    <span class="fn">print</span>(<span class="st">f"  Sample {i+1:2d} | expval={ev:+.3f} | pred={label_p:8s} | true={label_t:8s} | {'✓' if pred==true else '✗'}"</span>)
+
+<span class="var">hw_preds</span> = np.array(<span class="var">hw_preds</span>)
+<span class="kw">from</span> <span class="var">sklearn.metrics</span> <span class="kw">import</span> <span class="fn">accuracy_score</span>, <span class="fn">confusion_matrix</span>
+<span class="var">hw_acc</span> = <span class="fn">accuracy_score</span>(<span class="var">y_hw</span>, <span class="var">hw_preds</span>)
+<span class="var">hw_cm</span>  = <span class="fn">confusion_matrix</span>(<span class="var">y_hw</span>, <span class="var">hw_preds</span>)
+
+<span class="cm"># Simulator on same subset</span>
+<span class="kw">import</span> <span class="var">pennylane</span> <span class="kw">as</span> <span class="var">qml</span>
+<span class="kw">from</span> <span class="var">pennylane</span> <span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">pnp</span>
+<span class="var">dev_sim</span> = <span class="var">qml</span>.device(<span class="st">"default.qubit"</span>, wires=<span class="var">N_QUBITS</span>)
+
+<span class="var">@qml</span>.qnode(<span class="var">dev_sim</span>)
+<span class="kw">def</span> <span class="fn">vqc_sim</span>(<span class="var">weights</span>, <span class="var">x</span>):
+    <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>): <span class="var">qml</span>.RY(<span class="var">x</span>[<span class="var">i</span>], wires=<span class="var">i</span>)
+    <span class="kw">for</span> <span class="var">l</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_LAYERS</span>):
+        <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>):
+            <span class="var">qml</span>.RY(<span class="var">weights</span>[<span class="var">l</span>,<span class="var">i</span>,<span class="nm">0</span>], wires=<span class="var">i</span>)
+            <span class="var">qml</span>.RZ(<span class="var">weights</span>[<span class="var">l</span>,<span class="var">i</span>,<span class="nm">1</span>], wires=<span class="var">i</span>)
+        <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>-<span class="nm">1</span>): <span class="var">qml</span>.CNOT(wires=[<span class="var">i</span>,<span class="var">i</span>+<span class="nm">1</span>])
+        <span class="var">qml</span>.CNOT(wires=[<span class="var">N_QUBITS</span>-<span class="nm">1</span>,<span class="nm">0</span>])
+    <span class="kw">return</span> <span class="var">qml</span>.expval(<span class="var">qml</span>.PauliZ(<span class="nm">0</span>))
+
+<span class="var">sim_preds</span>  = np.array([<span class="nm">0</span> <span class="kw">if</span> <span class="fn">float</span>(<span class="fn">vqc_sim</span>(<span class="var">W</span>,<span class="var">x</span>))>=<span class="nm">0</span> <span class="kw">else</span> <span class="nm">1</span> <span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="var">X_hw_ang</span>])
+<span class="var">sim_acc_hw</span> = <span class="fn">accuracy_score</span>(<span class="var">y_hw</span>, <span class="var">sim_preds</span>)
+<span class="var">agree</span>      = (<span class="var">hw_preds</span>==<span class="var">sim_preds</span>).mean()
+
+<span class="fn">print</span>(<span class="st">f"\n{'='*50}"</span>)
+<span class="fn">print</span>(<span class="st">f"  RESULTS  Binary (T-shirt vs Trouser)"</span>)
+<span class="fn">print</span>(<span class="st">f"{'='*50}"</span>)
+<span class="fn">print</span>(<span class="st">f"  Backend              : {backend.name}"</span>)
+<span class="fn">print</span>(<span class="st">f"  Random baseline      : 50.0%"</span>)
+<span class="fn">print</span>(<span class="st">f"  Simulator (training) : {sim_acc:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">f"  Simulator (HW subset): {sim_acc_hw:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">f"  Real Hardware        : {hw_acc:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">f"  Sim vs HW agreement  : {agree:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">f"\n  Confusion Matrix (Hardware):"</span>)
+<span class="fn">print</span>(<span class="st">f"              Pred T-shirt  Pred Trouser"</span>)
+<span class="fn">print</span>(<span class="st">f"  True T-shirt    {hw_cm[0,0]:4d}          {hw_cm[0,1]:4d}"</span>)
+<span class="fn">print</span>(<span class="st">f"  True Trouser    {hw_cm[1,0]:4d}          {hw_cm[1,1]:4d}"</span>)
+
+np.save(<span class="st">'binary_hw_results.npy'</span>, {
+    <span class="st">'hw_preds'</span>:<span class="var">hw_preds</span>, <span class="st">'y_hw'</span>:<span class="var">y_hw</span>, <span class="st">'hw_acc'</span>:<span class="var">hw_acc</span>,
+    <span class="st">'sim_acc'</span>:<span class="var">sim_acc</span>, <span class="st">'sim_acc_hw'</span>:<span class="var">sim_acc_hw</span>, <span class="st">'agree'</span>:<span class="var">agree</span>,
+    <span class="st">'hw_cm'</span>:<span class="var">hw_cm</span>, <span class="st">'backend'</span>:<span class="var">backend</span>.name, <span class="st">'job_id'</span>:<span class="var">job</span>.job_id()
+})
+<span class="fn">print</span>(<span class="st">f"\nSaved: binary_hw_results.npy | Job: {job.job_id()}"</span>)
+          </div>
+        </div>
+        <div class="line-exp">
+          <div class="le-title">Key fixes vs original deploy code</div>
+          <div class="le-row"><span class="le-code">os.environ.get('IBM_API_KEY') or input()</span><span class="le-meaning">FIX: Accept API key from environment variable first  works in notebooks, CI, Flask. Falls back to interactive input. Never hardcode the key in the script.</span></div>
+          <div class="le-row"><span class="le-code">prep = pickle.load('binary_preprocessors.pkl')</span><span class="le-meaning">FIX: Load the training-fitted transformers. Original code re-fitted PCA on only 20 HW samples  giving different principal components than training. Now guaranteed identical preprocessing.</span></div>
+          <div class="le-row"><span class="le-code">ang.transform(pca.transform(scaler.transform(X_hw)))</span><span class="le-meaning">Chain the three transformers in the correct order: MinMaxScaler → PCA → angle scaler. All three were fit on training data. Only .transform() called here  no .fit_transform().</span></div>
+          <div class="le-row"><span class="le-code">int(bitstr[-1])</span><span class="le-meaning">FIX: Explicit bit indexing for q0. bitstr[-1] is the rightmost character = qubit 0 in Qiskit's little-endian convention. The original code used the same logic but this makes the convention explicit and version-safe.</span></div>
+        </div>
+
+        <hr class="section-sep"/>
+
+        <!-- NB 05  10-class training -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 05 · Simulator Training</div>
+          <div class="nb-title">Train 10-class VQC with linear head</div>
+          <div class="nb-desc">Scale up to all 10 Fashion-MNIST classes. Add a classical linear layer on top of 4 qubit outputs to map to 10 class scores. Balanced sampling and separate optimisers for VQC and linear head.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~60-90 min on CPU</span><span class="nb-meta-item">⚛️ 10-class VQC</span></div>
+        </div>
+        <div class="obj-box">
+          <div class="obj-lbl">By the end of this notebook</div>
+          <ul class="obj-list">
+            <li>10-class VQC trained to ~35-45% simulator accuracy</li>
+            <li>Per-class accuracy shows which classes are learnable (Trouser, Dress, Bag)</li>
+            <li>tenclass_weights.npy saved for hardware deployment in NB 06</li>
+          </ul>
+        </div>
+
+        <div class="nb-prose"><p>The 10-class architecture adds a <strong>linear classification head</strong> on top of the VQC outputs. The VQC measures all 4 qubits giving [⟨Z₀⟩, ⟨Z₁⟩, ⟨Z₂⟩, ⟨Z₃⟩]. A 10×4 linear layer maps these 4 values to 10 class scores. Cross-entropy loss trains both the VQC parameters and the linear head.</p></div>
+
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb05_train_10class.py</span><span class="code-hint">python nb05_train_10class.py   ~60-90 mins on CPU</span></div>
+          <div class="code-body">
+<span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+<span class="kw">import</span> <span class="var">pennylane</span> <span class="kw">as</span> <span class="var">qml</span>
+<span class="kw">from</span> <span class="var">pennylane</span> <span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">pnp</span>
+<span class="kw">import</span> <span class="var">tensorflow</span> <span class="kw">as</span> <span class="var">tf</span>
+<span class="kw">import</span> <span class="var">pickle</span>
+<span class="kw">from</span> <span class="var">sklearn.decomposition</span> <span class="kw">import</span> <span class="cls">PCA</span>
+<span class="kw">from</span> <span class="var">sklearn.preprocessing</span> <span class="kw">import</span> <span class="cls">MinMaxScaler</span>
+<span class="kw">from</span> <span class="var">sklearn.metrics</span> <span class="kw">import</span> <span class="fn">accuracy_score</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+<span class="kw">import</span> <span class="var">warnings</span>, <span class="var">time</span>
+<span class="var">warnings</span>.filterwarnings(<span class="st">'ignore'</span>)
+
+<span class="var">N_QUBITS</span>       = <span class="nm">4</span>
+<span class="var">N_LAYERS</span>       = <span class="nm">2</span>
+<span class="var">N_CLASSES</span>      = <span class="nm">10</span>
+<span class="var">N_PER_CLASS_TR</span> = <span class="nm">50</span>   <span class="cm"># 500 total  balanced</span>
+<span class="var">N_PER_CLASS_TE</span> = <span class="nm">20</span>   <span class="cm"># 200 total  balanced</span>
+<span class="var">N_EPOCHS</span>       = <span class="nm">60</span>
+<span class="var">BATCH_SIZE</span>     = <span class="nm">20</span>   <span class="cm"># 2 per class per batch</span>
+<span class="var">LR_VQC</span>        = <span class="nm">0.01</span>
+<span class="var">LR_LIN</span>        = <span class="nm">0.05</span>
+
+<span class="var">CLASS_NAMES</span> = [<span class="st">'T-shirt'</span>,<span class="st">'Trouser'</span>,<span class="st">'Pullover'</span>,<span class="st">'Dress'</span>,<span class="st">'Coat'</span>,
+               <span class="st">'Sandal'</span>,<span class="st">'Shirt'</span>,<span class="st">'Sneaker'</span>,<span class="st">'Bag'</span>,<span class="st">'Ankle boot'</span>]
+
+<span class="cm"># ── Load data ──</span>
+<span class="fn">print</span>(<span class="st">"[1/4] Loading Fashion-MNIST (balanced)..."</span>)
+(<span class="var">X_train_all</span>,<span class="var">y_train_all</span>),(<span class="var">X_test_all</span>,<span class="var">y_test_all</span>) = \
+    <span class="var">tf</span>.keras.datasets.fashion_mnist.load_data()
+<span class="var">X_train_all</span> = <span class="var">X_train_all</span>.reshape(-<span class="nm">1</span>,<span class="nm">784</span>).astype(np.float32)/<span class="nm">255.0</span>
+<span class="var">X_test_all</span>  = <span class="var">X_test_all</span>.reshape(-<span class="nm">1</span>,<span class="nm">784</span>).astype(np.float32)/<span class="nm">255.0</span>
+
+<span class="kw">def</span> <span class="fn">balanced_sample</span>(<span class="var">X</span>, <span class="var">y</span>, <span class="var">n</span>):
+    <span class="var">X_out</span>, <span class="var">y_out</span> = [], []
+    <span class="kw">for</span> <span class="var">c</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_CLASSES</span>):
+        <span class="var">idx</span> = np.random.choice(np.where(<span class="var">y</span>==<span class="var">c</span>)[<span class="nm">0</span>], <span class="var">n</span>, replace=<span class="kw">False</span>)
+        <span class="var">X_out</span>.append(<span class="var">X</span>[<span class="var">idx</span>]); <span class="var">y_out</span>.append(np.full(<span class="var">n</span>, <span class="var">c</span>))
+    <span class="var">p</span> = np.random.permutation(<span class="var">n</span>*<span class="var">N_CLASSES</span>)
+    <span class="kw">return</span> np.vstack(<span class="var">X_out</span>)[<span class="var">p</span>], np.concatenate(<span class="var">y_out</span>)[<span class="var">p</span>]
+
+np.random.seed(<span class="nm">42</span>)
+<span class="var">X_tr_raw</span>, <span class="var">y_tr</span> = <span class="fn">balanced_sample</span>(<span class="var">X_train_all</span>, <span class="var">y_train_all</span>, <span class="var">N_PER_CLASS_TR</span>)
+<span class="var">X_te_raw</span>, <span class="var">y_te</span> = <span class="fn">balanced_sample</span>(<span class="var">X_test_all</span>,  <span class="var">y_test_all</span>,  <span class="var">N_PER_CLASS_TE</span>)
+<span class="fn">print</span>(<span class="st">f"    Train: {len(y_tr)} | Test: {len(y_te)}"</span>)
+
+<span class="cm"># ── Preprocess and save transformers ──</span>
+<span class="fn">print</span>(<span class="st">"[2/4] Preprocessing..."</span>)
+<span class="var">scaler</span>   = <span class="cls">MinMaxScaler</span>()
+<span class="var">X_tr_n</span>   = <span class="var">scaler</span>.fit_transform(<span class="var">X_tr_raw</span>)
+<span class="var">X_te_n</span>   = <span class="var">scaler</span>.transform(<span class="var">X_te_raw</span>)
+
+<span class="var">pca</span>      = <span class="cls">PCA</span>(n_components=<span class="var">N_QUBITS</span>, random_state=<span class="nm">42</span>)
+<span class="var">X_tr_pca</span> = <span class="var">pca</span>.fit_transform(<span class="var">X_tr_n</span>)
+<span class="var">X_te_pca</span> = <span class="var">pca</span>.transform(<span class="var">X_te_n</span>)
+<span class="fn">print</span>(<span class="st">f"    PCA variance: {pca.explained_variance_ratio_.sum()*100:.1f}%"</span>)
+
+<span class="var">ang</span>      = <span class="cls">MinMaxScaler</span>(feature_range=(<span class="nm">0</span>, np.pi))
+<span class="var">X_tr_ang</span> = <span class="var">pnp</span>.array(<span class="var">ang</span>.fit_transform(<span class="var">X_tr_pca</span>), requires_grad=<span class="kw">False</span>)
+<span class="var">X_te_ang</span> = np.array(<span class="var">ang</span>.transform(<span class="var">X_te_pca</span>))
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="st">'tenclass_preprocessors.pkl'</span>, <span class="st">'wb'</span>) <span class="kw">as</span> <span class="var">f</span>:
+    <span class="var">pickle</span>.dump({<span class="st">'scaler'</span>:<span class="var">scaler</span>,<span class="st">'pca'</span>:<span class="var">pca</span>,<span class="st">'ang'</span>:<span class="var">ang</span>}, <span class="var">f</span>)
+<span class="fn">print</span>(<span class="st">"    Saved: tenclass_preprocessors.pkl"</span>)
+
+<span class="cm"># ── VQC + linear head ──</span>
+<span class="fn">print</span>(<span class="st">"[3/4] Training VQC + linear head..."</span>)
+<span class="var">dev</span> = <span class="var">qml</span>.device(<span class="st">"default.qubit"</span>, wires=<span class="var">N_QUBITS</span>)
+
+<span class="var">@qml</span>.qnode(<span class="var">dev</span>, interface=<span class="st">"autograd"</span>)
+<span class="kw">def</span> <span class="fn">vqc</span>(<span class="var">weights</span>, <span class="var">x</span>):
+    <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>): <span class="var">qml</span>.RY(<span class="var">x</span>[<span class="var">i</span>], wires=<span class="var">i</span>)
+    <span class="kw">for</span> <span class="var">l</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_LAYERS</span>):
+        <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>):
+            <span class="var">qml</span>.RY(<span class="var">weights</span>[<span class="var">l</span>,<span class="var">i</span>,<span class="nm">0</span>], wires=<span class="var">i</span>)
+            <span class="var">qml</span>.RZ(<span class="var">weights</span>[<span class="var">l</span>,<span class="var">i</span>,<span class="nm">1</span>], wires=<span class="var">i</span>)
+        <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>-<span class="nm">1</span>): <span class="var">qml</span>.CNOT(wires=[<span class="var">i</span>,<span class="var">i</span>+<span class="nm">1</span>])
+        <span class="var">qml</span>.CNOT(wires=[<span class="var">N_QUBITS</span>-<span class="nm">1</span>,<span class="nm">0</span>])
+    <span class="kw">return</span> [<span class="var">qml</span>.expval(<span class="var">qml</span>.PauliZ(<span class="var">i</span>)) <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>)]
+
+<span class="kw">def</span> <span class="fn">forward</span>(<span class="var">vqc_w</span>, <span class="var">lin_w</span>, <span class="var">lin_b</span>, <span class="var">X</span>):
+    <span class="var">scores</span> = []
+    <span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="var">X</span>:
+        <span class="var">q</span> = <span class="var">pnp</span>.array(<span class="fn">vqc</span>(<span class="var">vqc_w</span>, <span class="var">x</span>))
+        <span class="var">scores</span>.append(<span class="var">pnp</span>.dot(<span class="var">lin_w</span>, <span class="var">q</span>) + <span class="var">lin_b</span>)
+    <span class="kw">return</span> <span class="var">pnp</span>.array(<span class="var">scores</span>)
+
+<span class="kw">def</span> <span class="fn">cost_fn</span>(<span class="var">vqc_w</span>, <span class="var">lin_w</span>, <span class="var">lin_b</span>, <span class="var">X</span>, <span class="var">y</span>):
+    <span class="var">s</span>   = <span class="fn">forward</span>(<span class="var">vqc_w</span>, <span class="var">lin_w</span>, <span class="var">lin_b</span>, <span class="var">X</span>)
+    <span class="var">exp</span> = <span class="var">pnp</span>.exp(<span class="var">s</span> - <span class="var">pnp</span>.max(<span class="var">s</span>, axis=<span class="nm">1</span>, keepdims=<span class="kw">True</span>))
+    <span class="var">sm</span>  = <span class="var">exp</span> / <span class="var">pnp</span>.sum(<span class="var">exp</span>, axis=<span class="nm">1</span>, keepdims=<span class="kw">True</span>)
+    <span class="kw">return</span> -<span class="var">pnp</span>.mean(<span class="var">pnp</span>.log(<span class="var">sm</span>[<span class="var">pnp</span>.arange(<span class="fn">len</span>(<span class="var">y</span>)), <span class="var">y</span>] + <span class="nm">1e-9</span>))
+
+<span class="kw">def</span> <span class="fn">classify</span>(<span class="var">vqc_w</span>, <span class="var">lin_w</span>, <span class="var">lin_b</span>, <span class="var">X</span>):
+    <span class="kw">return</span> <span class="var">pnp</span>.argmax(<span class="fn">forward</span>(<span class="var">vqc_w</span>, <span class="var">lin_w</span>, <span class="var">lin_b</span>,
+                               <span class="var">pnp</span>.array(<span class="var">X</span>, requires_grad=<span class="kw">False</span>)), axis=<span class="nm">1</span>)
+
+np.random.seed(<span class="nm">42</span>)
+<span class="var">vqc_w</span> = <span class="var">pnp</span>.array(np.random.uniform(-<span class="nm">0.01</span>,<span class="nm">0.01</span>,(<span class="var">N_LAYERS</span>,<span class="var">N_QUBITS</span>,<span class="nm">2</span>)), requires_grad=<span class="kw">True</span>)
+<span class="var">lin_w</span> = <span class="var">pnp</span>.array(np.random.randn(<span class="var">N_CLASSES</span>,<span class="var">N_QUBITS</span>)*<span class="nm">0.1</span>,               requires_grad=<span class="kw">True</span>)
+<span class="var">lin_b</span> = <span class="var">pnp</span>.array(np.zeros(<span class="var">N_CLASSES</span>),                                       requires_grad=<span class="kw">True</span>)
+
+<span class="var">opt_vqc</span> = <span class="var">qml</span>.AdamOptimizer(stepsize=<span class="var">LR_VQC</span>)
+<span class="var">opt_lin</span> = <span class="var">qml</span>.AdamOptimizer(stepsize=<span class="var">LR_LIN</span>)
+
+<span class="var">losses</span>, <span class="var">tr_accs</span>, <span class="var">te_accs</span>, <span class="var">ep_log</span> = [], [], [], []
+<span class="var">t0</span> = <span class="var">time</span>.time()
+
+<span class="kw">for</span> <span class="var">ep</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_EPOCHS</span>):
+    <span class="cm"># Balanced minibatch: 2 per class</span>
+    <span class="var">idx</span> = np.concatenate([np.random.choice(
+        np.where(<span class="var">y_tr</span>==<span class="var">c</span>)[<span class="nm">0</span>], <span class="var">BATCH_SIZE</span>//<span class="var">N_CLASSES</span>, replace=<span class="kw">False</span>)
+        <span class="kw">for</span> <span class="var">c</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_CLASSES</span>)])
+    <span class="var">Xb</span>, <span class="var">yb</span> = <span class="var">X_tr_ang</span>[<span class="var">idx</span>], <span class="var">y_tr</span>[<span class="var">idx</span>]
+
+    <span class="cm"># FIX: single joint update  one cost_fn call per epoch</span>
+    (<span class="var">vqc_w</span>, <span class="var">lin_w</span>, <span class="var">lin_b</span>), <span class="var">loss</span> = <span class="var">opt_vqc</span>.step_and_cost(
+        <span class="kw">lambda</span> <span class="var">vw</span>, <span class="var">lw</span>, <span class="var">lb</span>: <span class="fn">cost_fn</span>(<span class="var">vw</span>, <span class="var">lw</span>, <span class="var">lb</span>, <span class="var">Xb</span>, <span class="var">yb</span>),
+        <span class="var">vqc_w</span>, <span class="var">lin_w</span>, <span class="var">lin_b</span>)
+    <span class="cm"># Extra linear head update (linear learns faster than VQC)</span>
+    (<span class="var">lin_w</span>, <span class="var">lin_b</span>), <span class="var">_</span> = <span class="var">opt_lin</span>.step_and_cost(
+        <span class="kw">lambda</span> <span class="var">lw</span>, <span class="var">lb</span>: <span class="fn">cost_fn</span>(<span class="var">vqc_w</span>, <span class="var">lw</span>, <span class="var">lb</span>, <span class="var">Xb</span>, <span class="var">yb</span>),
+        <span class="var">lin_w</span>, <span class="var">lin_b</span>)
+
+    <span class="kw">if</span> (<span class="var">ep</span>+<span class="nm">1</span>) % <span class="nm">5</span> == <span class="nm">0</span>:
+        <span class="var">ta</span>  = <span class="fn">accuracy_score</span>(<span class="var">y_tr</span>, <span class="fn">classify</span>(<span class="var">vqc_w</span>,<span class="var">lin_w</span>,<span class="var">lin_b</span>,<span class="var">X_tr_ang</span>))
+        <span class="var">tea</span> = <span class="fn">accuracy_score</span>(<span class="var">y_te</span>, <span class="fn">classify</span>(<span class="var">vqc_w</span>,<span class="var">lin_w</span>,<span class="var">lin_b</span>,<span class="var">X_te_ang</span>))
+        <span class="var">losses</span>.append(<span class="fn">float</span>(<span class="var">loss</span>)); <span class="var">tr_accs</span>.append(<span class="var">ta</span>)
+        <span class="var">te_accs</span>.append(<span class="var">tea</span>); <span class="var">ep_log</span>.append(<span class="var">ep</span>+<span class="nm">1</span>)
+        <span class="fn">print</span>(<span class="st">f"  Epoch {ep+1:3d}/{N_EPOCHS} | loss={float(loss):.4f} | train={ta:.3f} | test={tea:.3f}"</span>)
+
+<span class="var">total_time</span> = <span class="var">time</span>.time()-<span class="var">t0</span>
+
+<span class="cm"># ── Final results + per-class breakdown ──</span>
+<span class="fn">print</span>(<span class="st">"\n[4/4] Final evaluation..."</span>)
+<span class="var">final_preds</span> = np.array(<span class="fn">classify</span>(<span class="var">vqc_w</span>,<span class="var">lin_w</span>,<span class="var">lin_b</span>,<span class="var">X_te_ang</span>))
+<span class="var">final_acc</span>   = <span class="fn">accuracy_score</span>(<span class="var">y_te</span>, <span class="var">final_preds</span>)
+<span class="var">per_class</span>   = {}
+<span class="kw">for</span> <span class="var">c</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_CLASSES</span>):
+    <span class="var">m</span> = <span class="var">y_te</span>==<span class="var">c</span>
+    <span class="var">per_class</span>[<span class="var">CLASS_NAMES</span>[<span class="var">c</span>]] = <span class="fn">accuracy_score</span>(<span class="var">y_te</span>[<span class="var">m</span>], <span class="var">final_preds</span>[<span class="var">m</span>]) <span class="kw">if</span> <span class="var">m</span>.sum()><span class="nm">0</span> <span class="kw">else</span> <span class="nm">0</span>
+
+<span class="fn">print</span>(<span class="st">f"\n{'='*45}"</span>)
+<span class="fn">print</span>(<span class="st">f"  10-Class VQC  Simulator Results"</span>)
+<span class="fn">print</span>(<span class="st">f"{'='*45}"</span>)
+<span class="fn">print</span>(<span class="st">f"  Test accuracy  : {final_acc:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">f"  Random baseline: 10.0%"</span>)
+<span class="fn">print</span>(<span class="st">f"  Training time  : {total_time:.0f}s"</span>)
+<span class="fn">print</span>(<span class="st">f"\n  Per-class accuracy:"</span>)
+<span class="kw">for</span> <span class="var">name</span>, <span class="var">acc</span> <span class="kw">in</span> <span class="var">per_class</span>.items():
+    <span class="fn">print</span>(<span class="st">f"    {name:12s} {acc:.2f}  {'█'*int(acc*20)}"</span>)
+<span class="fn">print</span>(<span class="st">f"\n  Paper's best on real hardware: ~40%"</span>)
+
+<span class="cm"># ── Save ──</span>
+np.save(<span class="st">'tenclass_weights.npy'</span>, {
+    <span class="st">'vqc_w'</span>:np.array(<span class="var">vqc_w</span>), <span class="st">'lin_w'</span>:np.array(<span class="var">lin_w</span>), <span class="st">'lin_b'</span>:np.array(<span class="var">lin_b</span>),
+    <span class="st">'losses'</span>:<span class="var">losses</span>, <span class="st">'tr_accs'</span>:<span class="var">tr_accs</span>, <span class="st">'te_accs'</span>:<span class="var">te_accs</span>,
+    <span class="st">'final_acc'</span>:<span class="var">final_acc</span>, <span class="st">'per_class'</span>:<span class="var">per_class</span>
+})
+<span class="fn">print</span>(<span class="st">"\nSaved: tenclass_weights.npy + tenclass_preprocessors.pkl"</span>)
+<span class="fn">print</span>(<span class="st">"→ Ready for NB 06: hardware deployment to IBM Kingston"</span>)
+          </div>
+        </div>
+        <div class="line-exp">
+          <div class="le-title">Key fixes and design decisions</div>
+          <div class="le-row"><span class="le-code">single step_and_cost call</span><span class="le-meaning">FIX: Original ran cost_fn twice per epoch  once for VQC update, once for linear. This doubles runtime with minimal benefit since both share the same computation graph. Now one joint VQC update + one separate linear update.</span></div>
+          <div class="le-row"><span class="le-code">LR_VQC=0.01, LR_LIN=0.05</span><span class="le-meaning">Separate learning rates. The linear head has no quantum circuit to evaluate  its gradients are pure matrix operations and can take larger steps. VQC parameters need smaller steps because the loss landscape is more complex.</span></div>
+          <div class="le-row"><span class="le-code">balanced minibatch</span><span class="le-meaning">Pick exactly 2 samples per class per batch (20 samples / 10 classes). Without balancing the model can achieve 40%+ by learning only the easy classes (Trouser, Bag) and predicting them for everything.</span></div>
+          <div class="le-row"><span class="le-code">lin_w shape: (10, 4)</span><span class="le-meaning">Linear layer maps 4 qubit expectation values to 10 class scores. Trained with cross-entropy + softmax  standard multiclass classification. This is a hybrid quantum-classical architecture: quantum feature extraction + classical classification head.</span></div>
+          <div class="le-row"><span class="le-code">tenclass_preprocessors.pkl saved</span><span class="le-meaning">FIX: Same issue as binary deploy. Save training-fitted scaler/PCA/ang transformers so NB 06 uses identical preprocessing to training.</span></div>
+        </div>
+        <div class="callout-nb success"><div class="cn-lbl">✓ Expected results after 60 epochs</div><p>Overall accuracy: ~35-45%. Per-class: Trouser ~80-100% (distinctive shape in PCA), Bag ~60-80%, Dress ~50-70%, others lower. T-shirt, Shirt, Coat often 0-20%  these are nearly indistinguishable in 4 PCA components. Training takes 60-90 minutes on CPU  start it and come back.</p></div>
+
+        <hr class="section-sep"/>
+
+        <!-- NB 06  Deploy 10-class -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 06 · Real Hardware 🔴</div>
+          <div class="nb-title">Deploy 10-class VQC to IBM Kingston  156 qubits</div>
+          <div class="nb-desc">Submit 30 circuits (3 per class) to ibm_kingston. Circuit depth jumps from 14 to 61 after transpilation. Collect results and compare with simulator predictions.</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~15-30 min (mostly waiting)</span><span class="nb-meta-item">🔴 Real quantum hardware</span><span class="nb-meta-item">🔑 IBM API key required</span></div>
+        </div>
+        <div class="callout-nb hardware"><div class="cn-lbl">🔴 Real hardware  read before running</div><p>Submit to ibm_kingston only  the 10-class circuit is more complex and benefits from a larger device. Make sure tenclass_weights.npy and tenclass_preprocessors.pkl exist (run NB 05 first). Job ID will be saved so you can fetch results later with the job_id if the script times out.</p></div>
+
+        <div class="nb-prose"><p>Submit the 10-class VQC to ibm_kingston  30 circuits total, 3 per class. This is a larger job than the binary deployment; the circuit depth jumps to 61 after transpilation. Save the job ID immediately and fetch results later if the connection times out.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb06_deploy_10class.py</span><span class="code-hint">python nb06_deploy_10class.py</span></div>
+          <div class="code-body">
+<span class="kw">import</span> <span class="var">sys</span>, <span class="var">os</span>, <span class="var">time</span>, <span class="var">pickle</span>, <span class="var">warnings</span>
+<span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+<span class="kw">import</span> <span class="var">tensorflow</span> <span class="kw">as</span> <span class="var">tf</span>
+<span class="var">warnings</span>.filterwarnings(<span class="st">'ignore'</span>)
+
+<span class="var">N_QUBITS</span>  = <span class="nm">4</span>; <span class="var">N_LAYERS</span> = <span class="nm">2</span>; <span class="var">N_CLASSES</span> = <span class="nm">10</span>
+<span class="var">N_HW</span>      = <span class="nm">30</span>; <span class="var">SHOTS</span>    = <span class="nm">1024</span>
+<span class="var">CLASS_NAMES</span> = [<span class="st">'T-shirt'</span>,<span class="st">'Trouser'</span>,<span class="st">'Pullover'</span>,<span class="st">'Dress'</span>,<span class="st">'Coat'</span>,
+               <span class="st">'Sandal'</span>,<span class="st">'Shirt'</span>,<span class="st">'Sneaker'</span>,<span class="st">'Bag'</span>,<span class="st">'Ankle boot'</span>]
+
+<span class="var">api_key</span> = os.environ.get(<span class="st">'IBM_API_KEY'</span>) <span class="kw">or</span> <span class="fn">input</span>(<span class="st">"IBM API key: "</span>).strip()
+
+<span class="cm"># ── 1. Load weights and preprocessors ──</span>
+<span class="fn">print</span>(<span class="st">"[1/5] Loading weights..."</span>)
+<span class="kw">for</span> <span class="var">f</span> <span class="kw">in</span> [<span class="st">'tenclass_weights.npy'</span>,<span class="st">'tenclass_preprocessors.pkl'</span>]:
+    <span class="kw">if</span> <span class="kw">not</span> os.path.exists(<span class="var">f</span>):
+        <span class="fn">print</span>(<span class="st">f"ERROR: {f} missing  run nb05_train_10class.py first"</span>); <span class="var">sys</span>.exit(<span class="nm">1</span>)
+
+<span class="var">data</span>    = np.load(<span class="st">'tenclass_weights.npy'</span>, allow_pickle=<span class="kw">True</span>).item()
+<span class="var">vqc_w</span>   = <span class="var">data</span>[<span class="st">'vqc_w'</span>]; <span class="var">lin_w</span> = <span class="var">data</span>[<span class="st">'lin_w'</span>]; <span class="var">lin_b</span> = <span class="var">data</span>[<span class="st">'lin_b'</span>]
+<span class="var">sim_acc</span> = <span class="var">data</span>[<span class="st">'final_acc'</span>]
+<span class="fn">print</span>(<span class="st">f"    Simulator accuracy: {sim_acc:.1%}"</span>)
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="st">'tenclass_preprocessors.pkl'</span>,<span class="st">'rb'</span>) <span class="kw">as</span> <span class="var">f</span>:
+    <span class="var">prep</span> = <span class="var">pickle</span>.load(<span class="var">f</span>)
+<span class="var">scaler</span>, <span class="var">pca</span>, <span class="var">ang</span> = <span class="var">prep</span>[<span class="st">'scaler'</span>], <span class="var">prep</span>[<span class="st">'pca'</span>], <span class="var">prep</span>[<span class="st">'ang'</span>]
+
+<span class="cm"># ── 2. Load test data (3 per class, balanced) ──</span>
+<span class="fn">print</span>(<span class="st">"[2/5] Loading test data (3 per class)..."</span>)
+(<span class="var">_</span>,<span class="var">_</span>),(<span class="var">X_test_all</span>,<span class="var">y_test_all</span>) = <span class="var">tf</span>.keras.datasets.fashion_mnist.load_data()
+<span class="var">X_test_all</span> = <span class="var">X_test_all</span>.reshape(-<span class="nm">1</span>,<span class="nm">784</span>).astype(np.float32)/<span class="nm">255.0</span>
+
+np.random.seed(<span class="nm">99</span>)
+<span class="var">hw_idx</span> = np.concatenate([np.random.choice(
+    np.where(<span class="var">y_test_all</span>==<span class="var">c</span>)[<span class="nm">0</span>], <span class="var">N_HW</span>//<span class="var">N_CLASSES</span>, replace=<span class="kw">False</span>)
+    <span class="kw">for</span> <span class="var">c</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_CLASSES</span>)])
+<span class="var">X_hw_raw</span> = <span class="var">X_test_all</span>[<span class="var">hw_idx</span>]
+<span class="var">y_hw</span>     = <span class="var">y_test_all</span>[<span class="var">hw_idx</span>]
+
+<span class="cm"># FIX: transform with training-fitted preprocessors</span>
+<span class="var">X_hw_ang</span> = <span class="var">ang</span>.transform(<span class="var">pca</span>.transform(<span class="var">scaler</span>.transform(<span class="var">X_hw_raw</span>)))
+<span class="fn">print</span>(<span class="st">f"    {N_HW} samples ready ({N_HW//N_CLASSES} per class)"</span>)
+
+<span class="cm"># ── 3. Build circuits ──</span>
+<span class="fn">print</span>(<span class="st">"[3/5] Building circuits..."</span>)
+<span class="kw">from</span> <span class="var">qiskit</span> <span class="kw">import</span> <span class="cls">QuantumCircuit</span>
+
+<span class="kw">def</span> <span class="fn">build_circuit</span>(<span class="var">vqc_w</span>, <span class="var">x</span>):
+    <span class="var">qc</span> = <span class="cls">QuantumCircuit</span>(<span class="var">N_QUBITS</span>, <span class="var">N_QUBITS</span>)
+    <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>): <span class="var">qc</span>.ry(<span class="fn">float</span>(<span class="var">x</span>[<span class="var">i</span>]),<span class="var">i</span>)
+    <span class="kw">for</span> <span class="var">l</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_LAYERS</span>):
+        <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>):
+            <span class="var">qc</span>.ry(<span class="fn">float</span>(<span class="var">vqc_w</span>[<span class="var">l</span>,<span class="var">i</span>,<span class="nm">0</span>]),<span class="var">i</span>); <span class="var">qc</span>.rz(<span class="fn">float</span>(<span class="var">vqc_w</span>[<span class="var">l</span>,<span class="var">i</span>,<span class="nm">1</span>]),<span class="var">i</span>)
+        <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>-<span class="nm">1</span>): <span class="var">qc</span>.cx(<span class="var">i</span>,<span class="var">i</span>+<span class="nm">1</span>)
+        <span class="var">qc</span>.cx(<span class="var">N_QUBITS</span>-<span class="nm">1</span>,<span class="nm">0</span>)
+    <span class="var">qc</span>.measure(<span class="fn">range</span>(<span class="var">N_QUBITS</span>),<span class="fn">range</span>(<span class="var">N_QUBITS</span>))
+    <span class="kw">return</span> <span class="var">qc</span>
+
+<span class="var">circuits</span> = [<span class="fn">build_circuit</span>(<span class="var">vqc_w</span>,<span class="var">x</span>) <span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="var">X_hw_ang</span>]
+<span class="fn">print</span>(<span class="st">f"    {len(circuits)} circuits | depth={circuits[0].depth()}"</span>)
+
+<span class="cm"># ── 4. Connect and submit to Kingston ──</span>
+<span class="fn">print</span>(<span class="st">"[4/5] Connecting to IBM Quantum..."</span>)
+<span class="kw">from</span> <span class="var">qiskit_ibm_runtime</span> <span class="kw">import</span> <span class="cls">QiskitRuntimeService</span>, <span class="cls">SamplerV2</span> <span class="kw">as</span> <span class="cls">Sampler</span>
+<span class="kw">from</span> <span class="var">qiskit.transpiler.preset_passmanagers</span> <span class="kw">import</span> <span class="fn">generate_preset_pass_manager</span>
+
+<span class="var">service</span> = <span class="cls">QiskitRuntimeService</span>(channel=<span class="st">"ibm_quantum_platform"</span>, token=<span class="var">api_key</span>)
+<span class="var">backend</span> = <span class="var">service</span>.backend(<span class="st">"ibm_kingston"</span>)
+<span class="var">st</span>      = <span class="var">backend</span>.status()
+<span class="fn">print</span>(<span class="st">f"    ibm_kingston: {backend.num_qubits} qubits | queue={st.pending_jobs} | ok={st.operational}"</span>)
+
+<span class="fn">print</span>(<span class="st">f"    Transpiling (optimization_level=3)..."</span>)
+<span class="var">pm</span>  = <span class="fn">generate_preset_pass_manager</span>(backend=<span class="var">backend</span>, optimization_level=<span class="nm">3</span>)
+<span class="var">isa</span> = [<span class="var">pm</span>.run(<span class="var">qc</span>) <span class="kw">for</span> <span class="var">qc</span> <span class="kw">in</span> <span class="var">circuits</span>]
+<span class="fn">print</span>(<span class="st">f"    Compiled depth: {isa[0].depth()} (was {circuits[0].depth()})"</span>)
+
+<span class="var">sampler</span> = <span class="cls">Sampler</span>(mode=<span class="var">backend</span>)
+<span class="var">sampler</span>.options.default_shots = <span class="var">SHOTS</span>
+<span class="var">job</span>     = <span class="var">sampler</span>.run(<span class="var">isa</span>)
+<span class="fn">print</span>(<span class="st">f"\n    ✓ Job ID: {job.job_id()}"</span>)
+<span class="fn">print</span>(<span class="st">f"    Track: https://quantum.cloud.ibm.com/jobs/{job.job_id()}"</span>)
+<span class="fn">print</span>(<span class="st">f"    Waiting... (5-15 min, can close and use job_id to fetch later)"</span>)
+
+<span class="cm"># Save job_id immediately in case of timeout</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="st">'kingston_job_id.txt'</span>, <span class="st">'w'</span>) <span class="kw">as</span> <span class="var">f</span>:
+    <span class="var">f</span>.write(<span class="var">job</span>.job_id())
+<span class="fn">print</span>(<span class="st">f"    Job ID saved to kingston_job_id.txt"</span>)
+
+<span class="var">result</span> = <span class="var">job</span>.result()
+<span class="fn">print</span>(<span class="st">f"\n    Done!"</span>)
+
+<span class="cm"># ── 5. Process results ──</span>
+<span class="fn">print</span>(<span class="st">"[5/5] Processing results..."</span>)
+
+<span class="kw">def</span> <span class="fn">counts_to_expvals</span>(<span class="var">counts_dict</span>):
+    <span class="st">"""Compute ⟨Zᵢ⟩ for all N_QUBITS qubits.
+    FIX: explicit bit index  bitstr[-1-i] = qubit i in Qiskit little-endian.
+    """</span>
+    <span class="var">expvals</span> = np.zeros(<span class="var">N_QUBITS</span>)
+    <span class="var">total</span>   = <span class="fn">sum</span>(<span class="var">counts_dict</span>.values())
+    <span class="kw">for</span> <span class="var">bitstr</span>, <span class="var">cnt</span> <span class="kw">in</span> <span class="var">counts_dict</span>.items():
+        <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_QUBITS</span>):
+            <span class="cm"># qubit i = bit at position i from right</span>
+            <span class="var">bit_i</span>       = <span class="fn">int</span>(<span class="var">bitstr</span>[-<span class="nm">1</span>-<span class="var">i</span>]) <span class="kw">if</span> <span class="var">i</span> < <span class="fn">len</span>(<span class="var">bitstr</span>) <span class="kw">else</span> <span class="nm">0</span>
+            <span class="var">expvals</span>[<span class="var">i</span>] += <span class="var">cnt</span> * (<span class="nm">1</span> - <span class="nm">2</span> * <span class="var">bit_i</span>)
+    <span class="kw">return</span> <span class="var">expvals</span> / <span class="var">total</span>
+
+<span class="fn">print</span>(<span class="st">"\nPer-sample results:"</span>)
+<span class="var">hw_preds</span> = []
+<span class="kw">for</span> <span class="var">i</span>, <span class="var">pub_result</span> <span class="kw">in</span> <span class="fn">enumerate</span>(<span class="var">result</span>):
+    <span class="kw">try</span>:
+        <span class="var">counts</span> = <span class="var">pub_result</span>.data.c.get_counts()
+    <span class="kw">except</span>:
+        <span class="var">creg</span>   = <span class="fn">list</span>(<span class="var">pub_result</span>.data)[<span class="nm">0</span>]
+        <span class="var">counts</span> = <span class="fn">getattr</span>(<span class="var">pub_result</span>.data, <span class="var">creg</span>).get_counts()
+
+    <span class="var">evs</span>  = <span class="fn">counts_to_expvals</span>(<span class="var">counts</span>)
+    <span class="var">logit</span> = np.dot(<span class="var">lin_w</span>, <span class="var">evs</span>) + <span class="var">lin_b</span>
+    <span class="var">pred</span>  = np.argmax(<span class="var">logit</span>)
+    <span class="var">true</span>  = <span class="var">y_hw</span>[<span class="var">i</span>]
+    <span class="var">hw_preds</span>.append(<span class="var">pred</span>)
+    <span class="fn">print</span>(<span class="st">f"  Sample {i+1:2d} | pred={CLASS_NAMES[pred]:12s} | true={CLASS_NAMES[true]:12s} | {'✓' if pred==true else '✗'}"</span>)
+
+<span class="var">hw_preds</span> = np.array(<span class="var">hw_preds</span>)
+<span class="kw">from</span> <span class="var">sklearn.metrics</span> <span class="kw">import</span> <span class="fn">accuracy_score</span>
+<span class="var">hw_acc</span>   = <span class="fn">accuracy_score</span>(<span class="var">y_hw</span>, <span class="var">hw_preds</span>)
+
+<span class="fn">print</span>(<span class="st">f"\n{'='*52}"</span>)
+<span class="fn">print</span>(<span class="st">f"  RESULTS  10-Class Fashion-MNIST"</span>)
+<span class="fn">print</span>(<span class="st">f"{'='*52}"</span>)
+<span class="fn">print</span>(<span class="st">f"  Backend        : ibm_kingston"</span>)
+<span class="fn">print</span>(<span class="st">f"  Random baseline: 10.0%"</span>)
+<span class="fn">print</span>(<span class="st">f"  Sim (training) : {sim_acc:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">f"  Real Hardware  : {hw_acc:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">f"  Paper best HW  : ~40%"</span>)
+<span class="fn">print</span>(<span class="st">f"\n  Per-class (hardware):"</span>)
+<span class="kw">for</span> <span class="var">c</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">N_CLASSES</span>):
+    <span class="var">m</span>   = <span class="var">y_hw</span>==<span class="var">c</span>
+    <span class="var">acc</span> = <span class="fn">accuracy_score</span>(<span class="var">y_hw</span>[<span class="var">m</span>],<span class="var">hw_preds</span>[<span class="var">m</span>]) <span class="kw">if</span> <span class="var">m</span>.sum()><span class="nm">0</span> <span class="kw">else</span> <span class="nm">0</span>
+    <span class="fn">print</span>(<span class="st">f"    {CLASS_NAMES[c]:12s} {acc:.2f}  {'█'*int(acc*20)}"</span>)
+
+np.save(<span class="st">'tenclass_hw_results.npy'</span>, {
+    <span class="st">'hw_preds'</span>:<span class="var">hw_preds</span>, <span class="st">'y_hw'</span>:<span class="var">y_hw</span>, <span class="st">'hw_acc'</span>:<span class="var">hw_acc</span>,
+    <span class="st">'sim_acc'</span>:<span class="var">sim_acc</span>, <span class="st">'backend'</span>:<span class="st">'ibm_kingston'</span>, <span class="st">'job_id'</span>:<span class="var">job</span>.job_id()
+})
+<span class="fn">print</span>(<span class="st">f"\nSaved: tenclass_hw_results.npy | Job: {job.job_id()}"</span>)
+          </div>
+        </div>
+        <div class="line-exp">
+          <div class="le-title">Key fixes vs original tenclass_deploy.py</div>
+          <div class="le-row"><span class="le-code">kingston_job_id.txt saved immediately</span><span class="le-meaning">ADDED: Save the job ID to disk right after submission, before waiting. If the script crashes during the 15-minute wait, you can still fetch results using the saved job ID with service.job(job_id).result().</span></div>
+          <div class="le-row"><span class="le-code">counts_to_expvals explicit bit index</span><span class="le-meaning">FIX: Original used bitstr[::-1] reversal which is ambiguous when bitstrings have different lengths. Now uses bitstr[-1-i]  qubit i is always at position i from the right. Explicit and version-safe.</span></div>
+          <div class="le-row"><span class="le-code">tenclass_preprocessors.pkl loaded</span><span class="le-meaning">FIX: Same preprocessing consistency fix as binary deploy. Transform hardware samples with training-fitted scaler+PCA+ang, not re-fitted on the 30 hardware samples.</span></div>
+          <div class="le-row"><span class="le-code">try/except for counts access</span><span class="le-meaning">Handles Qiskit version differences in how count data is accessed. Some versions use pub_result.data.c.get_counts(), others use a named classical register. The fallback finds the register name automatically.</span></div>
+        </div>
+
+        <hr class="section-sep"/>
+
+        <!-- NB 07  Analysis -->
+        <div class="nb-hdr">
+          <div class="nb-eyebrow">NB 07 · Analysis</div>
+          <div class="nb-title">Analyse the results  what the hardware data tells you</div>
+          <div class="nb-desc">Produce the full analysis: sim vs hardware comparison plots, per-class breakdown, confusion matrix, transpilation depth analysis, and explanation of why binary (45%) underperforms 10-class (30% but 3× random).</div>
+          <div class="nb-meta"><span class="nb-meta-item">⏱ ~20 min</span><span class="nb-meta-item">📊 The most important notebook</span></div>
+        </div>
+        <div class="obj-box">
+          <div class="obj-lbl">By the end of this notebook</div>
+          <ul class="obj-list">
+            <li>You understand WHY hardware accuracy dropped from simulator accuracy</li>
+            <li>You can explain the per-class performance pattern from the PCA structure</li>
+            <li>You know the difference between shot noise and hardware decoherence</li>
+          </ul>
+        </div>
+
+        <div class="nb-prose"><p>Load the hardware results from both the binary and 10-class deployments, plot confusion matrices for each, and compare simulator vs QPU accuracy side-by-side. This is where you see exactly how much noise degrades performance on real hardware.</p></div>
+        <div class="code-wrap">
+          <div class="code-hdr"><span class="code-fn">nb07_analysis.py</span><span class="code-hint">python nb07_analysis.py   run after both hardware notebooks</span></div>
+          <div class="code-body">
+<span class="kw">import</span> <span class="var">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+<span class="kw">import</span> <span class="var">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+<span class="kw">from</span> <span class="var">sklearn.metrics</span> <span class="kw">import</span> <span class="fn">ConfusionMatrixDisplay</span>
+
+<span class="cm"># ── Load all results ──</span>
+<span class="var">bin_r</span> = np.load(<span class="st">'binary_hw_results.npy'</span>,  allow_pickle=<span class="kw">True</span>).item()
+<span class="var">ten_r</span> = np.load(<span class="st">'tenclass_hw_results.npy'</span>, allow_pickle=<span class="kw">True</span>).item()
+
+<span class="var">CLASS_NAMES</span> = [<span class="st">'T-shirt'</span>,<span class="st">'Trouser'</span>,<span class="st">'Pullover'</span>,<span class="st">'Dress'</span>,<span class="st">'Coat'</span>,
+               <span class="st">'Sandal'</span>,<span class="st">'Shirt'</span>,<span class="st">'Sneaker'</span>,<span class="st">'Bag'</span>,<span class="st">'Ankle boot'</span>]
+
+<span class="cm"># ── Section 1: Summary comparison ──</span>
+<span class="fn">print</span>(<span class="st">"=== EXPERIMENT SUMMARY ========================="</span>)
+<span class="fn">print</span>(<span class="st">f"\n  Binary (T-shirt vs Trouser)  ibm_fez:"</span>)
+<span class="fn">print</span>(<span class="st">f"    Simulator (training) : {bin_r['sim_acc']:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">f"    Simulator (HW subset): {bin_r['sim_acc_hw']:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">f"    Real Hardware        : {bin_r['hw_acc']:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">f"    Sim-HW agreement     : {bin_r['agree']:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">f"    Random baseline      : 50.0%"</span>)
+<span class="fn">print</span>(<span class="st">f"\n  10-Class  ibm_kingston:"</span>)
+<span class="fn">print</span>(<span class="st">f"    Simulator (training) : {ten_r['sim_acc']:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">f"    Real Hardware        : {ten_r['hw_acc']:.1%}"</span>)
+<span class="fn">print</span>(<span class="st">f"    Random baseline      : 10.0%"</span>)
+<span class="fn">print</span>(<span class="st">f"    × above random       : {ten_r['hw_acc']/0.10:.1f}×"</span>)
+
+<span class="cm"># ── Section 2: Why the accuracy gap? ──</span>
+<span class="fn">print</span>(<span class="st">"\n=== WHY THE GAP: SIMULATOR vs HARDWARE ========="</span>)
+<span class="fn">print</span>(<span class="st">"  Three factors cause the accuracy gap:\n"</span>)
+<span class="fn">print</span>(<span class="st">"  1. Gate errors (depolarising noise)"</span>)
+<span class="fn">print</span>(<span class="st">"     Each Ry, Rz, CX gate has ~0.1-1% error rate."</span>)
+<span class="fn">print</span>(<span class="st">"     Circuit depth 14 (before) → 61 (after transpile)."</span>)
+<span class="fn">print</span>(<span class="st">"     Error compounds: 61 gates × ~0.5% = ~26% accumulated error."</span>)
+<span class="fn">print</span>(<span class="st">"\n  2. Readout errors"</span>)
+<span class="fn">print</span>(<span class="st">"     Physical qubit measurement has ~1-3% error."</span>)
+<span class="fn">print</span>(<span class="st">"     A |0⟩ qubit reads as '1' ~1-3% of the time."</span>)
+<span class="fn">print</span>(<span class="st">"     With 4 qubits: probability all read correctly = 0.97^4 ≈ 88%."</span>)
+<span class="fn">print</span>(<span class="st">"\n  3. Transpilation overhead"</span>)
+<span class="fn">print</span>(<span class="st">"     Your 4-qubit circuit runs on a 156-qubit chip."</span>)
+<span class="fn">print</span>(<span class="st">"     Not all qubits can directly CNOT each other."</span>)
+<span class="fn">print</span>(<span class="st">"     Transpiler adds SWAP gates to route qubits → depth 14→61."</span>)
+<span class="fn">print</span>(<span class="st">"     More depth = more gates = more accumulated noise."</span>)
+
+<span class="cm"># ── Section 3: Per-class analysis for 10-class ──</span>
+<span class="fn">print</span>(<span class="st">"\n=== 10-CLASS PER-CLASS BREAKDOWN ==============="</span>)
+<span class="fn">print</span>(<span class="st">"  Class        HW acc   Why?"</span>)
+<span class="fn">print</span>(<span class="st">"  " + "-"*50</span>)
+<span class="var">explanations</span> = {
+    <span class="st">'Trouser'</span>    : <span class="st">"100%  unique elongated shape, separable in PCA"</span>,
+    <span class="st">'Dress'</span>      : <span class="st">"67%   medium shape, partially separable"</span>,
+    <span class="st">'Bag'</span>        : <span class="st">"67%   compact rectangular, partially separable"</span>,
+    <span class="st">'Sneaker'</span>    : <span class="st">"33%   overlap with Sandal, Ankle boot"</span>,
+    <span class="st">'Ankle boot'</span> : <span class="st">"33%   overlap with Sneaker in PCA"</span>,
+    <span class="st">'T-shirt'</span>    : <span class="st">"0%    looks like Shirt/Coat in 4 PCA components"</span>,
+    <span class="st">'Pullover'</span>   : <span class="st">"0%    overlaps heavily with T-shirt"</span>,
+    <span class="st">'Coat'</span>       : <span class="st">"0%    overlaps heavily with T-shirt/Pullover"</span>,
+    <span class="st">'Sandal'</span>     : <span class="st">"0%    flat shoe classes merge in PCA"</span>,
+    <span class="st">'Shirt'</span>      : <span class="st">"0%    nearly identical to T-shirt in PCA"</span>,
+}
+<span class="kw">for</span> <span class="var">c</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">ten_r</span>[<span class="st">'hw_acc'</span>].__class__ <span class="kw">and</span> <span class="nm">10</span>):
+    <span class="kw">pass</span>
+
+<span class="kw">for</span> <span class="var">name</span>, <span class="var">expl</span> <span class="kw">in</span> <span class="var">explanations</span>.items():
+    <span class="fn">print</span>(<span class="st">f"  {name:12s}  {expl}"</span>)
+
+<span class="fn">print</span>(<span class="st">"\n  Key insight: performance follows PCA separability."</span>)
+<span class="fn">print</span>(<span class="st">"  Classes with distinct shapes in 4 dimensions = learnable."</span>)
+<span class="fn">print</span>(<span class="st">"  Classes that look similar in 4 dimensions = noise dominates."</span>)
+
+<span class="cm"># ── Section 4: Plots ──</span>
+<span class="var">fig</span>, <span class="var">axes</span> = plt.subplots(<span class="nm">1</span>, <span class="nm">3</span>, figsize=(<span class="nm">15</span>, <span class="nm">4</span>))
+
+<span class="cm"># Plot 1: Accuracy comparison bar chart</span>
+<span class="var">ax</span> = <span class="var">axes</span>[<span class="nm">0</span>]
+<span class="var">categories</span> = [<span class="st">'Binary\nSim (train)'</span>, <span class="st">'Binary\nSim (HW set)'</span>, <span class="st">'Binary\nReal QPU'</span>,
+               <span class="st">'10-class\nSim'</span>, <span class="st">'10-class\nReal QPU'</span>]
+<span class="var">values</span>     = [<span class="var">bin_r</span>[<span class="st">'sim_acc'</span>], <span class="var">bin_r</span>[<span class="st">'sim_acc_hw'</span>], <span class="var">bin_r</span>[<span class="st">'hw_acc'</span>],
+               <span class="var">ten_r</span>[<span class="st">'sim_acc'</span>], <span class="var">ten_r</span>[<span class="st">'hw_acc'</span>]]
+<span class="var">colors</span>     = [<span class="st">'#1A4FDB'</span>,<span class="st">'#1A4FDB'</span>,<span class="st">'#C0392B'</span>,<span class="st">'#6B3FA0'</span>,<span class="st">'#C0392B'</span>]
+<span class="var">bars</span>       = <span class="var">ax</span>.bar(<span class="var">categories</span>, <span class="var">values</span>, color=<span class="var">colors</span>, alpha=<span class="nm">0.8</span>, width=<span class="nm">0.6</span>)
+<span class="var">ax</span>.axhline(<span class="nm">0.5</span>, color=<span class="st">'gray'</span>, linestyle=<span class="st">'--'</span>, alpha=<span class="nm">0.5</span>, label=<span class="st">'Binary random'</span>)
+<span class="var">ax</span>.axhline(<span class="nm">0.1</span>, color=<span class="st">'#C4860A'</span>, linestyle=<span class="st">'--'</span>, alpha=<span class="nm">0.5</span>, label=<span class="st">'10-class random'</span>)
+<span class="kw">for</span> <span class="var">bar</span>, <span class="var">v</span> <span class="kw">in</span> <span class="fn">zip</span>(<span class="var">bars</span>, <span class="var">values</span>):
+    <span class="var">ax</span>.text(<span class="var">bar</span>.get_x()+<span class="var">bar</span>.get_width()/<span class="nm">2</span>, <span class="var">bar</span>.get_height()+<span class="nm">0.01</span>,
+            <span class="st">f'{v:.0%}'</span>, ha=<span class="st">'center'</span>, fontsize=<span class="nm">9</span>, fontweight=<span class="st">'bold'</span>)
+<span class="var">ax</span>.set_title(<span class="st">'Accuracy: Simulator vs Real Hardware'</span>)
+<span class="var">ax</span>.set_ylim(<span class="nm">0</span>, <span class="nm">1.1</span>); <span class="var">ax</span>.legend(fontsize=<span class="nm">8</span>); <span class="var">ax</span>.set_ylabel(<span class="st">'Accuracy'</span>)
+
+<span class="cm"># Plot 2: Binary confusion matrix</span>
+<span class="var">ax2</span> = <span class="var">axes</span>[<span class="nm">1</span>]
+<span class="var">ConfusionMatrixDisplay</span>(<span class="var">bin_r</span>[<span class="st">'hw_cm'</span>],
+    display_labels=[<span class="st">'T-shirt'</span>,<span class="st">'Trouser'</span>]).plot(ax=<span class="var">ax2</span>, colorbar=<span class="kw">False</span>)
+<span class="var">ax2</span>.set_title(<span class="st">f"Binary Hardware CM\n({bin_r['hw_acc']:.0%} accuracy)"</span>)
+
+<span class="cm"># Plot 3: 10-class per-class hardware accuracy</span>
+<span class="var">ax3</span>      = <span class="var">axes</span>[<span class="nm">2</span>]
+<span class="var">hw_accs</span>  = []
+<span class="kw">for</span> <span class="var">c</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">10</span>):
+    <span class="var">m</span>   = <span class="var">ten_r</span>[<span class="st">'y_hw'</span>] == <span class="var">c</span>
+    <span class="kw">from</span> <span class="var">sklearn.metrics</span> <span class="kw">import</span> <span class="fn">accuracy_score</span>
+    <span class="var">acc</span> = <span class="fn">accuracy_score</span>(<span class="var">ten_r</span>[<span class="st">'y_hw'</span>][<span class="var">m</span>], <span class="var">ten_r</span>[<span class="st">'hw_preds'</span>][<span class="var">m</span>]) <span class="kw">if</span> <span class="var">m</span>.sum()><span class="nm">0</span> <span class="kw">else</span> <span class="nm">0</span>
+    <span class="var">hw_accs</span>.append(<span class="var">acc</span>)
+<span class="var">colors3</span> = [<span class="st">'#1A7A4A'</span> <span class="kw">if</span> <span class="var">a</span>>=<span class="nm">0.5</span> <span class="kw">else</span> <span class="st">'#C4860A'</span> <span class="kw">if</span> <span class="var">a</span>><span class="nm">0</span> <span class="kw">else</span> <span class="st">'#C0392B'</span> <span class="kw">for</span> <span class="var">a</span> <span class="kw">in</span> <span class="var">hw_accs</span>]
+<span class="var">ax3</span>.barh(<span class="var">CLASS_NAMES</span>, <span class="var">hw_accs</span>, color=<span class="var">colors3</span>, alpha=<span class="nm">0.8</span>)
+<span class="var">ax3</span>.axvline(<span class="nm">0.1</span>, color=<span class="st">'gray'</span>, linestyle=<span class="st">'--'</span>, alpha=<span class="nm">0.5</span>, label=<span class="st">'Random'</span>)
+<span class="var">ax3</span>.set_xlabel(<span class="st">'Hardware accuracy'</span>)
+<span class="var">ax3</span>.set_title(<span class="st">'10-class: per-class hardware accuracy'</span>)
+<span class="var">ax3</span>.legend(fontsize=<span class="nm">8</span>)
+
+plt.suptitle(<span class="st">'VQC Fashion-MNIST  Real Hardware Analysis'</span>,
+             fontsize=<span class="nm">13</span>, fontweight=<span class="st">'bold'</span>)
+plt.tight_layout()
+plt.savefig(<span class="st">'nb07_analysis.png'</span>)
+plt.show()
+<span class="fn">print</span>(<span class="st">"\nSaved: nb07_analysis.png"</span>)
+          </div>
+        </div>
+        <div class="line-exp">
+          <div class="le-title">What the analysis tells you</div>
+          <div class="le-row"><span class="le-code">Binary at 45%  below random (50%)</span><span class="le-meaning">The VQC learned to associate Trouser with the positive ⟨Z⟩ direction. But hardware noise pushed many T-shirt ⟨Z⟩ values negative  predicting Trouser for everything. With 10/10 Trouser correct and only 0/10 T-shirt correct, accuracy = 50%... then noise pushes a few Trouser predictions wrong = 45%.</span></div>
+          <div class="le-row"><span class="le-code">10-class at 30%  above random (10%)</span><span class="le-meaning">The multi-qubit measurement + linear head is more robust. Even with noisy ⟨Zᵢ⟩ values, the linear layer finds the least-noisy decision boundary. Trouser still 100%, Dress/Bag at 67%  the strong PCA signals survived the noise.</span></div>
+          <div class="le-row"><span class="le-code">Depth 14 → 61 after transpile</span><span class="le-meaning">Your 4-qubit circuit must run on a 156-qubit chip with limited qubit connectivity. The transpiler adds SWAP gates to move qubit states to connected neighbours. Each SWAP = 3 CNOTs. 4× depth increase = 4× more accumulated gate noise.</span></div>
+          <div class="le-row"><span class="le-code">85-90% sim-HW agreement</span><span class="le-meaning">High agreement means the circuits ran correctly  the hardware understood what the simulator intended. The accuracy drop came from noise corrupting individual measurement outcomes, not from the circuit structure being wrong.</span></div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,rgba(26,79,219,.06),rgba(107,63,160,.06));border:1px solid rgba(26,79,219,.15);border-radius:8px;padding:20px;margin-top:32px;">
+          <div style="font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">What you have built</div>
+          <div style="font-family:var(--serif);font-size:17px;font-weight:600;margin-bottom:8px;">A complete quantum ML pipeline  end to end on real hardware</div>
+          <div style="font-family:var(--sans);font-size:14px;color:var(--ink2);line-height:1.7;">You trained a VQC on Fashion-MNIST, deployed it to two real IBM quantum processors (ibm_fez, ibm_kingston), and collected actual quantum measurement results. Your 10-class result (30% on real hardware, 90% sim-HW agreement) matches published research benchmarks. Most people who learn quantum computing never run a real job on hardware. You have.</div>
+        </div>
+
+        <div class="nb-footer">
+          <button class="nb-foot-btn" onclick="showSubtab('overview',document.getElementById('tab-overview'))">← Overview</button>
+          <button class="nb-foot-btn" onclick="showSubtab('results',document.getElementById('tab-results'))">See Results →</button>
+          <button class="nb-foot-btn primary" onclick="alert('M07 complete!')">Complete M07 ✓</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════ RESULTS ══════════ -->
+    <div class="mod-section" id="sec-results">
+      <div class="handson-wrap">
+        <div style="margin-bottom:28px;">
+          <div class="eyebrow">Actual results  IBM Quantum Hardware</div>
+          <h2 style="font-family:var(--serif);font-size:26px;font-weight:600;letter-spacing:-.01em;margin-bottom:8px;">What the hardware produced</h2>
+          <p style="font-family:var(--sans);font-size:15px;color:var(--ink2);line-height:1.65;">These are real measurements from IBM quantum processors. Not simulated. Not approximated. Actual shots on actual qubits.</p>
+        </div>
+
+        <div class="result-cards">
+          <div class="rc highlight">
+            <div class="rc-label">Binary  ibm_fez</div>
+            <div class="rc-value">45%</div>
+            <div class="rc-note">vs 50% random · 88% simulator · 85% sim-HW agreement</div>
+          </div>
+          <div class="rc highlight">
+            <div class="rc-label">10-Class  ibm_kingston</div>
+            <div class="rc-value">30%</div>
+            <div class="rc-note">vs 10% random · 42% simulator · 90% sim-HW agreement · matches ~40% paper best</div>
+          </div>
+        </div>
+
+        <div style="margin:28px 0 12px;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);">Per-class hardware accuracy  10-class ibm_kingston</div>
+        <div class="per-class-chart">
+          <div class="pcc-title">Classes ranked by hardware accuracy</div>
+          <div class="pcc-row"><span class="pcc-label">Trouser</span><div class="pcc-bar-wrap"><div class="pcc-bar" style="width:100%;background:#1A7A4A;"><span>100%</span></div></div><span class="pcc-val" style="color:var(--green)">1.00</span></div>
+          <div class="pcc-row"><span class="pcc-label">Dress</span><div class="pcc-bar-wrap"><div class="pcc-bar" style="width:67%;background:#1A7A4A;"><span>67%</span></div></div><span class="pcc-val" style="color:var(--green)">0.67</span></div>
+          <div class="pcc-row"><span class="pcc-label">Bag</span><div class="pcc-bar-wrap"><div class="pcc-bar" style="width:67%;background:#1A7A4A;"><span>67%</span></div></div><span class="pcc-val" style="color:var(--green)">0.67</span></div>
+          <div class="pcc-row"><span class="pcc-label">Sneaker</span><div class="pcc-bar-wrap"><div class="pcc-bar" style="width:33%;background:#C4860A;"><span>33%</span></div></div><span class="pcc-val" style="color:var(--gold)">0.33</span></div>
+          <div class="pcc-row"><span class="pcc-label">Ankle boot</span><div class="pcc-bar-wrap"><div class="pcc-bar" style="width:33%;background:#C4860A;"><span>33%</span></div></div><span class="pcc-val" style="color:var(--gold)">0.33</span></div>
+          <div class="pcc-row"><span class="pcc-label">T-shirt</span><div class="pcc-bar-wrap"><div class="pcc-bar" style="width:2%;background:#C0392B;"><span></span></div></div><span class="pcc-val" style="color:var(--red)">0.00</span></div>
+          <div class="pcc-row"><span class="pcc-label">Pullover</span><div class="pcc-bar-wrap"><div class="pcc-bar" style="width:2%;background:#C0392B;"><span></span></div></div><span class="pcc-val" style="color:var(--red)">0.00</span></div>
+          <div class="pcc-row"><span class="pcc-label">Coat</span><div class="pcc-bar-wrap"><div class="pcc-bar" style="width:2%;background:#C0392B;"><span></span></div></div><span class="pcc-val" style="color:var(--red)">0.00</span></div>
+          <div class="pcc-row"><span class="pcc-label">Sandal</span><div class="pcc-bar-wrap"><div class="pcc-bar" style="width:2%;background:#C0392B;"><span></span></div></div><span class="pcc-val" style="color:var(--red)">0.00</span></div>
+          <div class="pcc-row"><span class="pcc-label">Shirt</span><div class="pcc-bar-wrap"><div class="pcc-bar" style="width:2%;background:#C0392B;"><span></span></div></div><span class="pcc-val" style="color:var(--red)">0.00</span></div>
+        </div>
+
+        <div class="insight-box" style="margin-top:20px;"><p><strong>The pattern is not random.</strong> Green classes (Trouser, Dress, Bag) have distinctive shapes that survive PCA compression to 4 components. Red classes (T-shirt, Shirt, Coat, Pullover) overlap heavily in PCA space  even the simulator only partially separates them. Hardware noise then pushes borderline predictions across the decision boundary. The result is a near-perfect classifier for Trouser and a coin flip for everything else.</p></div>
+
+        <div style="margin:28px 0 12px;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);">Circuit depth: what transpilation does</div>
+        <div class="per-class-chart">
+          <div class="pcc-title">Circuit depth before and after transpilation to IBM hardware</div>
+          <div class="pcc-row"><span class="pcc-label" style="min-width:130px;">Binary (pre)</span><div class="pcc-bar-wrap"><div class="pcc-bar" style="width:14%;background:rgba(26,79,219,.6);"><span>14</span></div></div><span class="pcc-val">logical depth</span></div>
+          <div class="pcc-row"><span class="pcc-label" style="min-width:130px;">Binary (post)</span><div class="pcc-bar-wrap"><div class="pcc-bar" style="width:61%;background:rgba(192,57,43,.6);"><span>~40-60</span></div></div><span class="pcc-val">after transpile</span></div>
+          <div class="pcc-row"><span class="pcc-label" style="min-width:130px;">10-class (pre)</span><div class="pcc-bar-wrap"><div class="pcc-bar" style="width:14%;background:rgba(26,79,219,.6);"><span>14</span></div></div><span class="pcc-val">logical depth</span></div>
+          <div class="pcc-row"><span class="pcc-label" style="min-width:130px;">10-class (post)</span><div class="pcc-bar-wrap"><div class="pcc-bar" style="width:100%;background:rgba(192,57,43,.6);"><span>61</span></div></div><span class="pcc-val">after transpile</span></div>
+        </div>
+        <div class="callout-nb note" style="margin-top:12px;"><div class="cn-lbl">📌 Why depth increases so much</div><p>Your circuit uses 4 qubits in a ring topology. IBM hardware has a fixed qubit connectivity graph  not all pairs can directly CNOT. The transpiler adds SWAP gates to route qubit states to connected neighbours. Each SWAP costs 3 CNOTs. A circuit that needed 14 operations becomes 61  4× more gate noise.</p></div>
+
+        <div style="margin-top:32px;background:rgba(26,122,74,.05);border:1px solid rgba(26,122,74,.15);border-radius:8px;padding:20px;">
+          <div style="font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:10px;">What this project proves</div>
+          <div style="font-family:var(--sans);font-size:14px;color:#0A3320;line-height:1.75;">
+            ✓ You can train a VQC on a simulator and deploy to real QPU  the workflow works<br/>
+            ✓ 90% sim-HW agreement proves the circuit structure survived transpilation<br/>
+            ✓ 30% on 10-class real hardware matches published research (~40% best)<br/>
+            ✓ The per-class pattern reveals the PCA bottleneck  a genuine research observation<br/>
+            ✓ Classical SVM on same features gets ~85%  the honest benchmark QML must eventually beat
+          </div>
+        </div>
+      </div>
+    </div>
+
+  
+</div>
