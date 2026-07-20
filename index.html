@@ -2,11 +2,284 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0;url=modules/module-00.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quantum Course</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#F7F5F0;--bg2:#EFEDE7;--bg3:#E8E4DC;
+      --ink:#1A1814;--ink2:#4A4640;--ink3:#8A8480;
+      --rule:rgba(26,24,20,0.1);--rule2:rgba(26,24,20,0.06);
+      --accent:#1A4FDB;--accent2:#0E35A8;
+      --green:#1A7A4A;--red:#C0392B;--gold:#C4860A;
+      --serif:'Lora',Georgia,serif;
+      --sans:'DM Sans',sans-serif;
+      --mono:'JetBrains Mono',monospace;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.7;}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(26,79,219,.4);display:inline-block;animation:blink 2.4s ease-in-out infinite;}
+    .shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+    .sidebar{background:var(--bg2);border-right:1px solid var(--rule);position:sticky;top:0;height:100vh;overflow-y:auto;padding:20px 0;display:flex;flex-direction:column;}
+    .sidebar::-webkit-scrollbar{width:2px;}
+    .s-brand{padding:0 20px 18px;border-bottom:1px solid var(--rule);margin-bottom:14px;}
+    .s-brand-name{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--ink);display:flex;align-items:center;gap:8px;}
+    .s-brand-sub{font-size:11px;color:var(--ink3);margin-top:3px;}
+    .s-section{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);padding:10px 20px 4px;}
+    .s-item{display:flex;align-items:flex-start;gap:10px;padding:8px 20px;cursor:pointer;border-left:2px solid transparent;transition:all .12s;}
+    .s-item:hover{background:rgba(26,24,20,.04);}
+    .s-item.active{background:rgba(26,79,219,.05);border-left-color:var(--accent);}
+    .s-item.done .s-check{background:var(--green);border-color:var(--green);}
+    .s-check{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--rule);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:3px;}
+    .s-num{font-size:10px;font-family:var(--mono);color:var(--ink3);}
+    .s-name{font-size:13px;font-weight:500;color:var(--ink2);line-height:1.3;margin-top:1px;}
+    .s-item.active .s-name{color:var(--ink);}
+    .s-dur{font-size:10px;font-family:var(--mono);color:var(--ink3);margin-top:1px;}
+    .s-footer{margin-top:auto;padding:14px 20px 0;border-top:1px solid var(--rule);}
+    .prog-lbl{font-size:11px;color:var(--ink3);margin-bottom:5px;}
+    .prog-bar{height:3px;background:var(--rule);border-radius:999px;overflow:hidden;}
+    .prog-fill{height:3px;background:var(--accent);border-radius:999px;transition:width .4s;}
+    .main-content{overflow-y:auto;background:var(--bg);}    
+    .placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;text-align:center;padding:40px;}
+    .placeholder-title{font-family:var(--serif);font-size:28px;font-weight:600;color:var(--ink);}
+    .placeholder-sub{font-size:15px;color:var(--ink3);max-width:400px;line-height:1.65;}
+    .loading{display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:var(--mono);font-size:13px;color:var(--ink3);}
+    .subtab-shell{width:100%;}
+    .subtabs{display:flex;padding:0 52px;border-bottom:1px solid var(--rule2);background:var(--bg);position:sticky;top:0;z-index:10;}
+    .subtab{font-size:12px;font-family:var(--mono);padding:10px 16px;cursor:pointer;letter-spacing:.02em;background:none;border-top:none;border-left:none;border-right:none;outline:none;}
+    .subtab.active{color:var(--ink);border-bottom:2px solid var(--accent);}    
+    @media(max-width:800px){.shell{grid-template-columns:1fr;}.sidebar{display:none;}}
+  </style>
 </head>
 <body>
-  <p>Redirecting to the Quantum Course…</p>
-  <p>If you are not redirected automatically, <a href="modules/module-00.html">click here to open the course</a>.</p>
+  <div class="shell">
+    <div class="sidebar">
+      <div class="s-brand">
+        <div class="s-brand-name"><span class="dot"></span>QuantumLab</div>
+        <div class="s-brand-sub">Quantum Computing Course</div>
+      </div>
+      <div id="moduleList"></div>
+      <div class="s-footer">
+        <div class="prog-lbl" id="progLbl">0 of 11 modules complete</div>
+        <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="main-content" id="mainContent">
+      <div class="placeholder">
+        <span class="dot" style="width:14px;height:14px;"></span>
+        <div class="placeholder-title">Welcome to QuantumLab Course</div>
+        <div class="placeholder-sub">Select a module from the sidebar to begin. Start with M00 if you are new to quantum computing.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MODULES = [
+      {num:'M00', title:'Why Quantum Computing?', duration:'~45 min · No code', track:'Foundation', file:'module-00.html'},
+      {num:'M01', title:'Qubits & Superposition', duration:'~2 hrs · First code', track:'Foundation', file:'module-01-theory.html', handsonFile:'module-01-handson.html'},
+      {num:'M02', title:'Quantum Gates & Circuits', duration:'~2.5 hrs', track:'Foundation', file:'module-02.html'},
+      {num:'M03', title:'Entanglement & Bell States', duration:'~2 hrs', track:'Foundation', file:'module-03.html'},
+      {num:'M04', title:"Grover's Algorithm", duration:'~3 hrs', track:'Algorithms', file:'module-04.html'},
+      {num:'M05', title:'Introduction to Optimisation', duration:'~1.5 hrs', track:'Optimization', file:'module-05.html'},
+      {num:'M06', title:'Classical ML → Quantum ML', duration:'~2 hrs', track:'Quantum ML', file:'module-06.html'},
+      {num:'M07', title:'VQC Project: Fashion-MNIST on IBM QPU', duration:'~3 hrs · Real QPU', track:'Quantum ML', file:'module-07.html'},
+      {num:'M08', title:'QAOA – Quantum Approximate Optimization', duration:'~4 hrs', track:'Optimization', file:'module-08.html'},
+      {num:'M09', title:'Quantum Annealing & QUBO', duration:'~4 hrs', track:'Optimization', file:'module-09.html'},
+      {num:'M10', title:'Hybrid Quantum-Classical Workflows', duration:'~3 hrs', track:'Applied', file:'module-10.html'},
+    ];
+
+    let activeIdx = -1;
+    const completed = new Set(JSON.parse(localStorage.getItem('ql-completed') || '[]'));
+
+    function saveProgress() {
+      localStorage.setItem('ql-completed', JSON.stringify([...completed]));
+    }
+
+    function buildSidebar() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = '';
+      let lastTrack = '';
+      MODULES.forEach((m, idx) => {
+        if (m.track !== lastTrack) {
+          const sec = document.createElement('div');
+          sec.className = 's-section';
+          sec.textContent = m.track;
+          list.appendChild(sec);
+          lastTrack = m.track;
+        }
+        const item = document.createElement('div');
+        const isDone = completed.has(idx);
+        const isActive = idx === activeIdx;
+        item.className = 's-item' + (isActive ? ' active' : '') + (isDone ? ' done' : '');
+        item.innerHTML = `
+          <div class="s-check">${isDone ? '<svg width="8" height="8" viewBox="0 0 8 8"><polyline points="1,4 3,6 7,2" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>' : ''}</div>
+          <div>
+            <div class="s-num">${m.num}</div>
+            <div class="s-name">${m.title}</div>
+            <div class="s-dur">${m.duration}</div>
+          </div>`;
+        item.addEventListener('click', () => loadModule(idx));
+        list.appendChild(item);
+      });
+      const pct = MODULES.length === 0 ? 0 : completed.size / MODULES.length * 100;
+      document.getElementById('progFill').style.width = pct + '%';
+      document.getElementById('progLbl').textContent = `${completed.size} of ${MODULES.length} modules complete`;
+    }
+
+    function injectHtml(html) {
+      const main = document.getElementById('mainContent');
+      main.innerHTML = html;
+      main.querySelectorAll('script').forEach(old => {
+        const s = document.createElement('script');
+        s.textContent = old.textContent;
+        document.head.appendChild(s);
+        document.head.removeChild(s);
+      });
+      main.scrollTop = 0;
+    }
+
+    function switchSubtab(btn, panelId) {
+      const wrap = btn.closest('.subtab-shell');
+      if (!wrap) return;
+      wrap.querySelectorAll('.subtab').forEach(b => {
+        b.classList.remove('active');
+        b.style.borderBottom = '2px solid transparent';
+        b.style.color = 'var(--ink3)';
+      });
+      btn.classList.add('active');
+      btn.style.borderBottom = '2px solid var(--accent)';
+      btn.style.color = 'var(--ink)';
+      wrap.querySelectorAll('.subtab-panel').forEach(p => p.style.display = 'none');
+      const target = wrap.querySelector('#' + panelId);
+      if (target) target.style.display = '';
+    }
+
+    function showSubtab(id, btn) {
+      const panelId = 'subtab-' + id;
+      const wrap = btn.closest('.ql-adapted') || btn.closest('.subtab-shell') || document;
+      const tabParent = btn.closest('.subtab-shell') || btn.closest('.subtabs') || wrap;
+      const tabs = tabParent.querySelectorAll('.subtab');
+      if (tabs.length) {
+        tabs.forEach(b => {
+          b.classList.remove('active');
+          b.style.borderBottom = '2px solid transparent';
+          b.style.color = 'var(--ink3)';
+        });
+        btn.classList.add('active');
+        btn.style.borderBottom = '2px solid var(--accent)';
+        btn.style.color = 'var(--ink)';
+      }
+      if (wrap !== document) {
+        wrap.querySelectorAll('.subtab-panel').forEach(p => p.style.display = 'none');
+        wrap.querySelectorAll('.mod-section').forEach(section => {
+          section.classList.remove('active');
+          section.style.display = 'none';
+        });
+      }
+      let target = document.getElementById(panelId);
+      if (!target) target = document.getElementById(id);
+      if (!target) target = document.getElementById('sec-' + id);
+      if (!target) return;
+      if (target.classList.contains('mod-section')) {
+        target.classList.add('active');
+      }
+      target.style.display = '';
+    }
+
+    function checkAnswer(el, verdict, fbId) {
+      const parent = el.parentElement;
+      if (!parent) return;
+      parent.querySelectorAll('.check-opt').forEach(opt => {
+        opt.classList.remove('correct', 'wrong');
+      });
+      if (verdict === 'correct') {
+        el.classList.add('correct');
+      } else {
+        el.classList.add('wrong');
+      }
+      const fb = document.getElementById(fbId);
+      if (fb) fb.classList.add('show');
+    }
+
+    function checkQ(el, verdict, fbId) {
+      const parent = el.parentElement;
+      if (!parent) return;
+      parent.querySelectorAll('.quiz-opt').forEach(opt => {
+        opt.classList.remove('correct', 'wrong');
+      });
+      if (verdict === 'correct') {
+        el.classList.add('correct');
+      } else {
+        el.classList.add('wrong');
+      }
+      const fb = document.getElementById(fbId);
+      if (fb) fb.classList.add('show');
+    }
+
+    function completeAndNext(idx) {
+      completed.add(idx);
+      saveProgress();
+      buildSidebar();
+      const next = idx + 1;
+      if (next < MODULES.length) {
+        loadModule(next);
+      } else {
+        alert('You have completed all available modules!');
+      }
+    }
+
+    async function loadModule(idx) {
+      if (idx === activeIdx) return;
+      activeIdx = idx;
+      buildSidebar();
+      const m = MODULES[idx];
+      const main = document.getElementById('mainContent');
+      main.innerHTML = '<div class="loading">Loading…</div>';
+      try {
+        if (m.handsonFile) {
+          const [theoryResp, handsonResp] = await Promise.all([
+            fetch(`modules/${m.file}`),
+            fetch(`modules/${m.handsonFile}`)
+          ]);
+          if (!theoryResp.ok) throw new Error(`HTTP ${theoryResp.status}`);
+          if (!handsonResp.ok) throw new Error(`HTTP ${handsonResp.status}`);
+          const [theoryHtml, handsonHtml] = await Promise.all([theoryResp.text(), handsonResp.text()]);
+          injectHtml(`
+            <div class="subtab-shell">
+              <div class="subtabs">
+                <button class="subtab active" onclick="switchSubtab(this,'subtab-theory')">Theory</button>
+                <button class="subtab" onclick="switchSubtab(this,'subtab-handson')">Hands-On</button>
+              </div>
+              <div class="subtab-panel" id="subtab-theory">${theoryHtml}</div>
+              <div class="subtab-panel" id="subtab-handson" style="display:none">${handsonHtml}</div>
+            </div>
+          `);
+        } else {
+          const resp = await fetch(`modules/${m.file}`);
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+          const html = await resp.text();
+          injectHtml(html);
+        }
+        history.replaceState(null, '', `?m=${idx}`);
+        if (!completed.has(idx)) {
+          completed.add(idx);
+          saveProgress();
+          buildSidebar();
+        }
+      } catch (e) {
+        main.innerHTML = `<div style="padding:48px;color:var(--red);font-family:var(--mono);font-size:13px;">Failed to load module: ${e.message}</div>`;
+      }
+    }
+
+    buildSidebar();
+    const urlM = new URLSearchParams(location.search).get('m');
+    if (urlM !== null && !isNaN(parseInt(urlM))) {
+      loadModule(parseInt(urlM));
+    }
+  </script>
 </body>
 </html>
